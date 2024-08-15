@@ -1,24 +1,28 @@
-// pages/index.js
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#f1f1f8]">
-      <nav className="bg-[#0d4a8d] p-4 fixed w-full z-10">
-        <div className="container mx-auto flex justify-between items-center">
+      <nav className="bg-[#0d4a8d] p-4 fixed w-full top-0 z-10 flex items-center justify-between">
+        <div className="container mx-auto flex items-center justify-between">
           <h1 className="text-white text-lg">RESOLAB</h1>
           <div className="flex-1 flex justify-center">
             <div className="flex space-x-10">
-              <a href="#home" className="text-white px-4 py-2 rounded hover:bg-[#0d4a8d] transition duration-300">Home</a>
-              <a href="#about" className="text-white px-4 py-2 rounded hover:bg-[#0d4a8d] transition duration-300">About</a>
-              <a href="#events" className="text-white px-4 py-2 rounded hover:bg-[#0d4a8d] transition duration-300">Events</a>
-              <a href="#contact" className="text-white px-4 py-2 rounded hover:bg-[#0d4a8d] transition duration-300">Contact</a>
-              <a href="#services" className="text-white px-4 py-2 rounded hover:bg-[#0d4a8d] transition duration-300">Services</a>
-              <div className="relative group">
-                <button className="text-white px-4 py-2 rounded hover:bg-[#0d4a8d] transition duration-300 focus:outline-none">Profile</button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block">
-                  <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">View Profile</a>
-                  <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Settings</a>
-                  <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</a>
-                </div>
+              <a href="../" className="text-white px-4 py-2 rounded hover:bg-[#5394cf] transition duration-300">Home</a>
+              <a href="/services" className="text-white px-4 py-2 rounded hover:bg-[#5394cf] transition duration-300">Services</a>
+              <a href="/contact" className="text-white px-4 py-2 rounded hover:bg-[#5394cf] transition duration-300">Contact</a>
+            </div>
+          </div>
+          <div className="flex items-center space-x-4">
+            <img src="path/to/profile-picture.jpg" alt="Profile" className="w-10 h-10 rounded-full" />
+            <div className="relative group">
+              <button className="text-white px-4 py-2 rounded hover:bg-blue-500 transition duration-300 focus:outline-none">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+              </button>
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden group-hover:block">
+                <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">View Profile</a>
+                <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Settings</a>
+                <a href="#" className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</a>
               </div>
             </div>
           </div>
@@ -31,29 +35,41 @@ export default function Home() {
           <h2 className="text-7xl mb-6 font-extrabold text-orange-300">ELEVATE</h2>
           <p className="text-lg mb-7">Turn your Imagination into Reality with the FabLab!</p>
           <p className="text-lg mb-8">The PSHS-EVC fab lab is a small-scale workshop offering digital fabrication. A fab lab is typically equipped with an array of flexible computer-controlled tools that cover several different length scales and various materials with the aim to make “almost anything”.</p>
-          <button className="bg-[#145da0] text-white text-lg py-2 px-6 rounded-full hover:bg-[#0d4a8d] transition duration-300">AVAIL SERVICES</button>
+          <a href="/services" className="bg-[#145da0] text-white text-lg py-2 px-6 rounded-full hover:bg-[#0d4a8d] transition duration-300">
+            AVAIL SERVICES
+          </a>
         </div>
       </section>
 
+      <section id="events" className="h-screen p-10 pt-24 pl-20 pr-20 bg-white">
+        <h2 className="text-4xl font-bold mb-4">Upcoming Events</h2>
+        <p className="text-lg mb-8">Stay tuned for our upcoming events. We regularly host workshops, fairs, and other exciting activities. Check back often for the latest updates and event details!</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-[#f8f9fa] p-6 rounded-lg shadow-lg">
+            <h3 className="text-2xl font-semibold mb-2">Event Title 1</h3>
+            <p className="text-gray-600 mb-4">Date: MM/DD/YYYY</p>
+            <p className="text-gray-700 mb-4">Brief description of the event goes here. Provide some details about what participants can expect.</p>
+            <a href="#" className="text-[#145da0] hover:underline">Learn More</a>
+          </div>
+          <div className="bg-[#f8f9fa] p-6 rounded-lg shadow-lg">
+            <h3 className="text-2xl font-semibold mb-2">Event Title 2</h3>
+            <p className="text-gray-600 mb-4">Date: MM/DD/YYYY</p>
+            <p className="text-gray-700 mb-4">Brief description of the event goes here. Provide some details about what participants can expect.</p>
+            <a href="#" className="text-[#145da0] hover:underline">Learn More</a>
+          </div>
+          <div className="bg-[#f8f9fa] p-6 rounded-lg shadow-lg">
+            <h3 className="text-2xl font-semibold mb-2">Event Title 3</h3>
+            <p className="text-gray-600 mb-4">Date: MM/DD/YYYY</p>
+            <p className="text-gray-700 mb-4">Brief description of the event goes here. Provide some details about what participants can expect.</p>
+            <a href="#" className="text-[#145da0] hover:underline">Learn More</a>
+          </div>
+        </div>
+      </section>
 
-      <section id="about" className="h-screen p-10 pt-24 pl-20 pr-20 bg-white">
+      <section id="about" className="h-screen p-10 pt-24 pl-20 pr-20 bg-[#f1f1f8]">
         <h2 className="text-4xl font-bold mb-4">About Us</h2>
-        <p className="text-lg mb-8">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam porta mollis sem, vitae blandit tortor porta in. Integer pharetra varius convallis. Morbi lacinia vel purus at varius.</p>
-      </section>
-
-      <section id="events" className="h-screen p-10 pt-24 pl-20 pr-20 bg-gray-200">
-        <h2 className="text-4xl font-bold mb-4">Events</h2>
-        <p className="text-lg mb-8">Check out our upcoming events and workshops.</p>
-      </section>
-
-      <section id="contact" className="h-screen p-10 pt-24 pl-20 pr-20 bg-white">
-        <h2 className="text-4xl font-bold mb-4">Contact Us</h2>
-        <p className="text-lg mb-8">Get in touch with us for more information.</p>
-      </section>
-
-      <section id="services" className="h-screen p-10 pt-24 pl-20 pr-20 bg-gray-200">
-        <h2 className="text-4xl font-bold mb-4">Our Services</h2>
-        <p className="text-lg mb-8">Explore the range of services we offer.</p>
+        <p className="text-lg mb-8">Learn more about our organization and mission. We are dedicated to fostering innovation and creativity through our cutting-edge facilities and collaborative environment. Our team is passionate about helping individuals and organizations achieve their goals through advanced technology and hands-on learning.</p>
+        <p className="text-lg mb-8">Our FabLab is equipped with state-of-the-art tools and resources to support a wide range of projects and initiatives. Whether you are an entrepreneur, student, or hobbyist, we provide the support and expertise to bring your ideas to life.</p>
       </section>
     </main>
   );
