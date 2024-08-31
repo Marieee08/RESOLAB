@@ -14,9 +14,9 @@ datasource db {
 }
 
 model ClientInfo {
-  UserID String @id @default(cuid())
-  Name String
-  Email String
-  ContactNum String
-  Address String
+  UserID     Int    @id @unique @default(autoincrement())
+  Name       String
+  Email      String @unique
+  ContactNum String @unique
+  Address    String
 }
