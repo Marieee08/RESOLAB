@@ -1,16 +1,23 @@
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#f1f1f8]">
-      <nav className="bg-[#0d4a8d] p-4 fixed w-full top-0 z-10 flex items-center justify-between">
-        <div className="container mx-auto flex items-center justify-between">
-          <h1 className="text-white text-lg">RESOLAB</h1>
-          <div className="flex-1 flex justify-center">
+      
+      <nav className="bg-[#0d4a8d] p-4 fixed w-full top-0 z-10">
+        <div className="container mx-auto flex items-center justify-between relative">
+          <div className="flex items-center space-x-4">
+            <img src="/images" alt="DOST Logo" className="w-10 h-10" />
+            <img src="SSF-logo.png" alt="SSF Logo" className="w-10 h-10" />
+            <a href="/.." className="text-white text-lg">RESOLAB</a>
+          </div>
+
+          <div className="absolute left-1/2 transform -translate-x-1/2">
             <div className="flex space-x-10">
-              <a href="../" className="text-white px-4 py-2 rounded hover:bg-[#5394cf] transition duration-300">Home</a>
+              <a href="/dashboard" className="text-white px-4 py-2 rounded hover:bg-[#5394cf] transition duration-300">Dashboard</a>
               <a href="/services" className="text-white px-4 py-2 rounded hover:bg-[#5394cf] transition duration-300">Services</a>
               <a href="/contact" className="text-white px-4 py-2 rounded hover:bg-[#5394cf] transition duration-300">Contact</a>
             </div>
           </div>
+
           <div className="flex items-center space-x-4">
             <img src="path/to/profile-picture.jpg" alt="Profile" className="w-10 h-10 rounded-full" />
             <div className="relative group">
