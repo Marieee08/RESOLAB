@@ -14,9 +14,27 @@ datasource db {
 }
 
 model ClientInfo {
-  UserID     Int    @id @unique @default(autoincrement())
-  Name       String
-  Email      String @unique
-  ContactNum String @unique
-  Address    String
+  id              Int           @id @unique @default(autoincrement())
+  Name            String
+  Email           String        @unique
+  ContactNum      String        @unique
+  Address         String
+  JobandPayment   JobandPayment @relation(fields: [jobandPaymentId], references: [id])
+  jobandPaymentId Int
+}
+
+model JobandPayment {
+  id             Int          @id @unique @default(autoincrement())
+  UserID         Int
+  No             Int?
+  Date           DateTime
+  ClientProfile  String?
+  ProjDesc       String?
+  Services       String?
+  Minutes        Int?
+  Costpermin     Decimal?
+  TotalCost      Decimal?
+  TotalAmntDue   Decimal?
+  CompletionDate DateTime?    @default(now())
+  ClientInfo     ClientInfo[]
 }
