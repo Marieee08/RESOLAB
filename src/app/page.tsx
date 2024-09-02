@@ -1,7 +1,9 @@
+import Image from 'next/image';
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#f1f1f8]">
-      <nav className="bg-[#0d4a8d] p-4 fixed w-full top-0 z-10 flex items-center justify-between">
+      <nav className="bg-[#0d4a8d] p-4 fixed w-full top-0 z-30 flex items-center justify-between">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="text-white text-lg">RESOLAB</h1>
           <div className="flex-1 flex justify-center">
@@ -29,14 +31,26 @@ export default function Home() {
         </div>
       </nav>
 
-      <section id="home" className="flex items-center justify-end h-screen p-10 pt-24 pr-20">
-        <div className="text-right max-w-lg mr-20">
-          <h1 className="text-7xl mb-4 font-bold">Innovate to</h1>
-          <h2 className="text-7xl mb-6 font-extrabold text-orange-300">ELEVATE</h2>
-          <p className="text-lg mb-7">Turn your Imagination into Reality with the FabLab!</p>
-          <p className="text-lg mb-8">The PSHS-EVC fab lab is a small-scale workshop offering digital fabrication. A fab lab is typically equipped with an array of flexible computer-controlled tools that cover several different length scales and various materials with the aim to make “almost anything”.</p>
-          <a href="/services" className="bg-[#145da0] text-white text-lg py-2 px-6 rounded-full hover:bg-[#0d4a8d] transition duration-300">
-            AVAIL SERVICES
+      <section id="home" className="grid grid-cols-1 md:grid-cols-2 items-center h-auto pt-0 pb-5">
+
+        <div style={{ width: '110%' }} className="flex items-center justify-center order-2 md:order-1 mb-6 md:mb-0">
+          <img src="images/elements/fablablanding.png" alt="Fabrication Laboratory of PSHS-EVC" className="relative inset-0 z-20 w-5/6 h-auto mb-5 mr-auto mt-32 pl-0" />
+          <img src="images/elements/settingsrotate.png" alt="Rotating Background" className="absolute inset-0 z-0 flex items-center justify-left overflow-hidden container mx-auto w-2/6 h-auto pl-20 ml-96 mt-96 rotate-fixed" />
+          <img src="images/elements/squiggly.png" alt="Rotating Background" className="absolute inset-0 z-0 flex items-center justify-left overflow-hidden container mx-auto w-1/3 h-auto ml-96 mt-5" />
+        </div>
+
+        <div className="relative z-1 flex flex-col justify-center text-right space-y-4 order-1 md:order-2 px-20 p-10 z-2 pt-32">
+          <h1 className="text-7xl font-extrabold">Innovate to</h1>
+          <h2 className="block text-7xl font-extrabold text-[#f5a237]">ELEVATE</h2>
+          <p className="text-lg">
+            Turn your Imagination into Reality with the FabLab!
+          </p>
+          <p className="text-lg">
+            The PSHS-EVC fab lab is a small-scale workshop offering digital fabrication. A fab lab is typically equipped with an array of flexible
+            computer-controlled tools that cover several different length scales and various materials with the aim to make “almost anything”.
+          </p>
+          <a href="/services" className="bg-[#0e4579] text-white font-bold text-lg py-2 px-6 rounded-full hover:bg-[#0d4a8d] transition duration-300 max-w-xs ml-auto">
+            Avail Services
           </a>
         </div>
       </section>

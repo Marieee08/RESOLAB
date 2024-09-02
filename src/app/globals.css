@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 
 @layer base {
@@ -58,6 +58,22 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.rotate-fixed {
+  animation: rotate 10s linear infinite;
+  transform-origin: center; /* Change this to your desired fixed point */
+  position: absolute; /* Ensures the element is positioned properly */
+  transform: rotate(0deg, 360deg); /* Adjust initial transform if needed */
 }
 
 @layer base {

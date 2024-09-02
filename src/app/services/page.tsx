@@ -1,18 +1,20 @@
+import Image from 'next/image';
+
 export default function Services() {
     const machines = [
       {
         name: '3D Printer',
-        image: 'path/to/3d-printer-image.jpg',
+        image: 'images/machines/3D N1.jpg',
         description: 'Create precise and intricate 3D models with our advanced 3D printers.',
       },
       {
         name: 'Laser Cutter',
-        image: 'path/to/laser-cutter-image.jpg',
+        image: 'images/machines/laser_cutter.jpg',
         description: 'Cut and engrave materials with high precision using our laser cutters.',
       },
       {
         name: 'CNC Machine',
-        image: 'path/to/cnc-machine-image.jpg',
+        image: 'images/machines/CNC mill.jpg',
         description: 'Produce complex parts with our computer-controlled CNC machines.',
       },
       {
