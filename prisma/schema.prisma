@@ -14,15 +14,17 @@ datasource db {
 }
 
 model ClientInfo {
-  id              Int           @id @unique @default(autoincrement())
-  Name            String
-  Email           String        @unique
-  ContactNum      String        @unique
-  Address         String
-  JobandPayment   JobandPayment @relation(fields: [jobandPaymentId], references: [id])
-  BusinessInfo    BusinessInfo? @relation(fields: [businessInfoId], references: [id])
-  jobandPaymentId Int
-  businessInfoId  Int?
+  id                   Int                 @id @unique @default(autoincrement())
+  Name                 String
+  Email                String              @unique
+  ContactNum           String              @unique
+  Address              String
+  JobandPayment        JobandPayment       @relation(fields: [jobandPaymentId], references: [id])
+  BusinessInfo         BusinessInfo?       @relation(fields: [businessInfoId], references: [id])
+  UtilizationRequest   UtilizationRequest? @relation(fields: [utilizationRequestId], references: [id])
+  jobandPaymentId      Int
+  businessInfoId       Int?
+  utilizationRequestId String?
 }
 
 model JobandPayment {
@@ -56,4 +58,24 @@ model BusinessInfo {
   Zipcode           Int?
   PhoneNum          Int?
   ClientInfo        ClientInfo[]
+}
+
+model UtilizationRequest {
+  id                   String       @id @unique @default(cuid())
+  ProductsManufactured String
+  BulkofCommodity      String
+  Facility             String?
+  FacilityQty          Int?
+  FacilityHrs          Int?
+  Equipment            String?
+  EquipmentQty         Int?
+  EquipmentHrs         Int?
+  Tools                String?
+  ToolsQty             Int?
+  ToolsHrs             Int?
+  RequestDate          DateTime?    @default(now())
+  EndDate              DateTime?
+  DateofProcessing     DateTime?
+  Processedby          String?
+  ClientInfo           ClientInfo[]
 }
