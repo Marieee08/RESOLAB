@@ -14,21 +14,19 @@ datasource db {
 }
 
 model ClientInfo {
-  id                   Int                 @id @unique @default(autoincrement())
-  Name                 String
-  Email                String              @unique
-  ContactNum           String              @unique
-  Address              String
-  JobandPayment        JobandPayment       @relation(fields: [jobandPaymentId], references: [id])
-  BusinessInfo         BusinessInfo?       @relation(fields: [businessInfoId], references: [id])
-  UtilizationRequest   UtilizationRequest? @relation(fields: [utilizationRequestId], references: [id])
-  jobandPaymentId      Int
-  businessInfoId       Int?
-  utilizationRequestId String?
+  id                  Int                  @id @default(autoincrement())
+  Name                String
+  Email               String               @unique
+  ContactNum          String               @unique
+  Address             String
+  JobandPayments      JobandPayment[]      @relation(name: "ClientJobandPayments") // One-to-many relationship
+  BusinessInfos       BusinessInfo[]       @relation(name: "ClientBusinessInfos")  // One-to-many relationship
+  UtilizationRequests UtilizationRequest[] @relation(name: "ClientUtilizationRequests") // One-to-many relationship
+  MachineUtilizations MachineUtilization[] @relation(name: "ClientMachineUtilizations") // One-to-many relationship
 }
 
 model JobandPayment {
-  id             Int          @id @unique @default(autoincrement())
+  id             Int        @id @default(autoincrement())
   No             Int?
   Date           DateTime
   ClientProfile  String?
@@ -38,12 +36,13 @@ model JobandPayment {
   Costpermin     Decimal?
   TotalCost      Decimal?
   TotalAmntDue   Decimal?
-  CompletionDate DateTime?    @default(now())
-  ClientInfo     ClientInfo[]
+  CompletionDate DateTime?  @default(now())
+  clientInfoId   Int
+  ClientInfo     ClientInfo @relation(name: "ClientJobandPayments", fields: [clientInfoId], references: [id]) // Many-to-one relationship
 }
 
 model BusinessInfo {
-  id                Int          @id @unique @default(autoincrement())
+  id                Int        @id @default(autoincrement())
   CompanyName       String?
   BusinessOwner     String?
   CompanyIDNum      String?
@@ -57,11 +56,12 @@ model BusinessInfo {
   Province          String?
   Zipcode           Int?
   PhoneNum          Int?
-  ClientInfo        ClientInfo[]
+  clientInfoId      Int
+  ClientInfo        ClientInfo @relation(name: "ClientBusinessInfos", fields: [clientInfoId], references: [id]) // Many-to-one relationship
 }
 
 model UtilizationRequest {
-  id                   String       @id @unique @default(cuid())
+  id                   String     @id @default(cuid())
   ProductsManufactured String
   BulkofCommodity      String
   Facility             String?
@@ -73,9 +73,34 @@ model UtilizationRequest {
   Tools                String?
   ToolsQty             Int?
   ToolsHrs             Int?
-  RequestDate          DateTime?    @default(now())
+  RequestDate          DateTime?  @default(now())
   EndDate              DateTime?
   DateofProcessing     DateTime?
   Processedby          String?
-  ClientInfo           ClientInfo[]
+  clientInfoId         Int
+  ClientInfo           ClientInfo @relation(name: "ClientUtilizationRequests", fields: [clientInfoId], references: [id]) // Many-to-one relationship
+}
+
+model MachineUtilization {
+  id               Int        @id @default(autoincrement())
+  OTDate           DateTime
+  OTTypeofProducts String
+  StartTime        DateTime
+  EndTime          DateTime
+  OTMachineOp      String
+  DTDate           DateTime
+  DTTypeofProducts String
+  DTTime           Int
+  Cause            String
+  DTMachineOp      String
+  RepairDate       DateTime
+  Service          String
+  Duration         Int
+  RepairReason     String
+  PartsReplaced    String
+  RPPersonnel      String
+  ReviwedBy        String
+  DateReviewed     DateTime
+  clientInfoId     Int
+  ClientInfo       ClientInfo @relation(name: "ClientMachineUtilizations", fields: [clientInfoId], references: [id]) //Many-to-one relationship
 }
