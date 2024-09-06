@@ -65,6 +65,16 @@ export default function Dashboard() {
         </div>
         <nav className="mt-10">
           <ul className="space-y-4">
+            
+            <li>
+              <a href="/dashboard" className="text-white px-4 py-2 flex items-center bg-[#145da0] rounded transition duration-300">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 8.5a3 3 0 013-3h10a3 3 0 013 3v7a3 3 0 01-3 3H5a3 3 0 01-3-3v-7zm3-1a1 1 0 00-1 1v7a1 1 0 001 1h10a1 1 0 001-1v-7a1 1 0 00-1-1H5z" />
+                </svg>
+                Orders
+              </a>
+            </li>
+            
             <li>
               <Link href="/dashboard/settings" className="text-white px-4 py-2 flex items-center hover:bg-[#145da0] rounded transition duration-300">
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -73,14 +83,7 @@ export default function Dashboard() {
                 Settings
               </Link>
             </li>
-            <li>
-              <a href="/dashboard/orders" className="text-white px-4 py-2 flex items-center hover:bg-[#145da0] rounded transition duration-300">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M2 8.5a3 3 0 013-3h10a3 3 0 013 3v7a3 3 0 01-3 3H5a3 3 0 01-3-3v-7zm3-1a1 1 0 00-1 1v7a1 1 0 001 1h10a1 1 0 001-1v-7a1 1 0 00-1-1H5z" />
-                </svg>
-                Orders
-              </a>
-            </li>
+
             <li>
               <Link href="/dashboard/information" className="text-white px-4 py-2 flex items-center hover:bg-[#145da0] rounded transition duration-300">
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -103,11 +106,17 @@ export default function Dashboard() {
 
       {/* Main Content */}
       <section className="flex-1 ml-64 p-8">
-        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-6">Your Orders</h1>
         <div className="bg-white p-6 rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold mb-4">Welcome to your Dashboard</h2>
-          <p className="text-gray-700">Here you can manage your settings, orders, and more. Use the sidebar to navigate through different sections.</p>
+          <h2 className="text-2xl font-bold mb-4">Pending</h2>
+          <p className="text-gray-700">You have no pending orders.</p>
         </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold mb-4">History</h2>
+          <p className="text-gray-700">You have no past orders.</p>
+        </div>
+
       </section>
     </main>
   );
