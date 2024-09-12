@@ -14,6 +14,7 @@ datasource db {
 }
 
 // For Primary Account Creation (For All)
+
 model AccInfo {
   id         Int    @id @default(autoincrement())
   Name       String
@@ -23,15 +24,17 @@ model AccInfo {
 }
 
 // For Acc Registration (For External Clients)
+
 model ClientInfo {
-  id       Int    @id @default(autoincrement())
-  Address  String
-  City     String
-  Province String
-  Zipcode  Int
+  id       Int     @id @default(autoincrement())
+  Address  String?
+  City     String?
+  Province String?
+  Zipcode  Int?
 }
 
 // For Acc Registration (For ext clients with business)
+
 model BusinessInfo {
   id                  Int     @id @default(autoincrement())
   CompanyName         String?
@@ -53,16 +56,12 @@ model BusinessInfo {
   CompanyIDNum        String?
 }
 
-// For Acc Registration (EVC Accounts)
-model EVCAccInfo {
-  id Int @id @default(autoincrement())
-}
+// For Reservations (For external clients)
 
-// For Reservations
 model UtilizationRequest {
   id                   String    @id @default(cuid())
-  ProductsManufactured String
-  BulkofCommodity      String
+  ProductsManufactured String?
+  BulkofCommodity      String?
   Facility             String?
   FacilityQty          Int?
   FacilityHrs          Int?
@@ -78,33 +77,85 @@ model UtilizationRequest {
   Processedby          String?
 }
 
-// To be filled by Admin per request
-model MachineUtilization {
-  id               Int      @id @default(autoincrement())
-  OTDate           DateTime
-  OTTypeofProducts String
-  StartTime        DateTime
-  EndTime          DateTime
-  OTMachineOp      String
-  DTDate           DateTime
-  DTTypeofProducts String
-  DTTime           Int
-  Cause            String
-  DTMachineOp      String
-  RepairDate       DateTime
-  Service          String
-  Duration         Int
-  RepairReason     String
-  PartsReplaced    String
-  RPPersonnel      String
-  ReviwedBy        String
-  DateReviewed     DateTime
+// For Reservations (EVC Accounts)
+
+model EVCReservations {
+  id            Int       @id @default(autoincrement())
+  ControlNo     Int?
+  LvlSec        String?
+  NoofStudents  Int?
+  Subject       String?
+  Topic         String?
+  Teacher       String?
+  EVCLabDate    DateTime?
+  EVCTimeofUse  DateTime?
+  DateRequested DateTime?
+  Students      String?
+  EVCApproval   String?
 }
+
+// To be filled by Admin per request
+
+model MachineUtilization {
+  id               Int       @id @default(autoincrement())
+  OTDate           DateTime?
+  OTTypeofProducts String?
+  StartTime        DateTime?
+  EndTime          DateTime?
+  OTMachineOp      String?
+  DTDate           DateTime?
+  DTTypeofProducts String?
+  DTTime           Int?
+  Cause            String?
+  DTMachineOp      String?
+  RepairDate       DateTime?
+  Service          String?
+  Duration         Int?
+  RepairReason     String?
+  PartsReplaced    String?
+  RPPersonnel      String?
+  ReviwedBy        String?
+  DateReviewed     DateTime?
+}
+
+// Only for external clients
+
+model CustomerFeedback {
+  id           Int       @id @default(autoincrement())
+  FeedbackDate DateTime?
+  Q1           Int?
+  Q2           Int?
+  Q3           Int?
+  Q4           Int?
+  Q5           Int?
+  Q6           Int?
+  Q7           Int?
+}
+
+// Only for external clients pt 2 ^^
+
+model EmployeeEvaluation {
+  id Int @id @default(autoincrement())
+  EvalDate DateTime?
+  E1       Int?
+  E2       Int?
+  E3       Int?
+  E4       Int?
+  E5       Int?
+  E6       Int?
+  E7       Int?
+  E8       Int?
+  E9       Int?
+  E10      Int?
+  E11      Int?
+}
+
+// For after jobs (To be printed)
 
 model JobandPayment {
   id             Int       @id @default(autoincrement())
   No             Int?
-  Date           DateTime
+  Date           DateTime?
   ClientProfile  String?
   ProjDesc       String?
   Services       String?
