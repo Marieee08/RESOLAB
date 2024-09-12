@@ -16,19 +16,15 @@ datasource db {
 // For Primary Account Creation (For All)
 
 model AccInfo {
-  id                  Int                  @id @default(autoincrement())
-  Name                String
-  Email               String               @unique
-  ContactNum          String
-  Role                String
-  ClientInfo          ClientInfo?          @relation(name: "AccInfoToClientInfo") //One-to-one
-  BusinessInfo        BusinessInfo?        @relation(name: "AccInfoToBusinessInfo") //One-to-one
-  UtilizationRequests UtilizationRequest[] @relation(name: "AccInfoToUtilizationRequest") //One-to-many
-  EVCReservations     EVCReservations[]    @relation(name: "AccInfoToEVCReservations") //One-to-many
-  MachineUtilizations MachineUtilization[] @relation(name: "AccInfoToMachineUtilization") //One-to-many
-  CustomerFeedbacks   CustomerFeedback[]   @relation(name: "AccInfoToCustomerFeedback") //One-to-many
-  EmployeeEvaluations EmployeeEvaluation[] @relation(name: "AccInfoToEmployeeEvaluation") //One-to-many
-  JobandPayments      JobandPayment[]      @relation(name: "AccInfoToJobandPayment") //One-to-many
+  id              Int              @id @default(autoincrement())
+  Name            String
+  Email           String           @unique
+  ContactNum      String
+  Role            String           @default("USER")
+  ClientInfo      ClientInfo?      @relation(name: "AccInfoToClientInfo") //One-to-one
+  BusinessInfo    BusinessInfo?    @relation(name: "AccInfoToBusinessInfo") //One-to-one
+  UtilReqs        UtilReq[]        @relation(name: "AccInfoToUtilReq") //One-to-many
+  EVCReservations EVCReservation[] @relation(name: "AccInfoToEVCReservation") //One-to-many
 }
 
 // For Acc Registration (For External Clients)
@@ -49,6 +45,7 @@ model BusinessInfo {
   id                  Int     @id @default(autoincrement())
   CompanyName         String?
   BusinessOwner       String?
+  CompanyIDNum        String?
   TINNum              String?
   BusinessPermitNum   String?
   CompanyEmail        String?
@@ -63,37 +60,40 @@ model BusinessInfo {
   Manufactured        String?
   ProductionFrequency String?
   Bulk                String?
-  CompanyIDNum        String?
   accInfoId           Int     @unique //Foreign key for one-to-one relationship
   accInfo             AccInfo @relation(name: "AccInfoToBusinessInfo", fields: [accInfoId], references: [id])
 }
 
 // For Reservations (For external clients)
 
-model UtilizationRequest {
-  id                    Int       @id @default(autoincrement())
-  ProductsManufactured  String?
-  BulkofCommodity       String?
-  Facility              String?
-  FacilityQty           Int?
-  FacilityHrs           Int?
-  Equipment             String?
-  EquipmentQty          Int?
-  EquipmentHrs          Int?
-  Tools                 String?
-  ToolsQty              Int?
-  ToolsHrs              Int?
-  RequestDate           DateTime? @default(now())
-  EndDate               DateTime?
-  DateofProcessing      DateTime?
-  Processedby           String?
-  accInfo               AccInfo   @relation(name: "AccInfoToUtilizationRequest", fields: [UtilizationRequestsId], references: [id])
-  UtilizationRequestsId Int
+model UtilReq {
+  id                   Int                  @id @default(autoincrement())
+  ProductsManufactured String?
+  BulkofCommodity      String?
+  Facility             String?
+  FacilityQty          Int?
+  FacilityHrs          Int?
+  Equipment            String?
+  EquipmentQty         Int?
+  EquipmentHrs         Int?
+  Tools                String?
+  ToolsQty             Int?
+  ToolsHrs             Int?
+  RequestDate          DateTime?            @default(now())
+  EndDate              DateTime?
+  DateofProcessing     DateTime?
+  Processedby          String?
+  MachineUtilizations  MachineUtilization[] @relation(name: "UtilReqToMachineUtilization") //One-to-many
+  CustomerFeedback     CustomerFeedback?    @relation(name: "UtilReqToCustomerFeedback") //One-to-one
+  EmployeeEvaluation   EmployeeEvaluation?  @relation(name: "UtilReqToEmployeeEvaluation") //One-to-one
+  JobandPayment        JobandPayment?       @relation(name: "UtilReqToJobandPayment") //One-to-one
+  accInfoId            Int? //Foreign key for one-to-many relationship
+  accInfo              AccInfo?             @relation(name: "AccInfoToUtilReq", fields: [accInfoId], references: [id])
 }
 
 // For Reservations (EVC Accounts)
 
-model EVCReservations {
+model EVCReservation {
   id            Int       @id @default(autoincrement())
   ControlNo     Int?
   LvlSec        String?
@@ -107,7 +107,7 @@ model EVCReservations {
   Students      String?
   EVCApproval   String?
   accInfoId     Int? //Foreign key for one-to-many relationship
-  accInfo       AccInfo?  @relation(name: "AccInfoToEVCReservations", fields: [accInfoId], references: [id])
+  accInfo       AccInfo?  @relation(name: "AccInfoToEVCReservation", fields: [accInfoId], references: [id])
 }
 
 // To be filled by Admin per request
@@ -132,8 +132,8 @@ model MachineUtilization {
   RPPersonnel      String?
   ReviwedBy        String?
   DateReviewed     DateTime?
-  accInfoId        Int? //Foreign key for one-to-many relationship
-  accInfo          AccInfo?  @relation(name: "AccInfoToMachineUtilization", fields: [accInfoId], references: [id])
+  utilReqId        Int? //Foreign key for one-to-many relationship
+  utilReq          UtilReq?  @relation(name: "UtilReqToMachineUtilization", fields: [utilReqId], references: [id])
 }
 
 // Only for external clients
@@ -148,8 +148,8 @@ model CustomerFeedback {
   Q5           Int?
   Q6           Int?
   Q7           Int?
-  accInfoId    Int? //Foreign key for one-to-many relationship
-  accInfo      AccInfo?  @relation(name: "AccInfoToCustomerFeedback", fields: [accInfoId], references: [id])
+  utilReqId    Int       @unique //Foreign key for one-to-one relationship
+  utilReq      UtilReq   @relation(name: "UtilReqToCustomerFeedback", fields: [utilReqId], references: [id])
 }
 
 // Only for external clients pt 2 ^^
@@ -168,8 +168,8 @@ model EmployeeEvaluation {
   E9        Int?
   E10       Int?
   E11       Int?
-  accInfoId Int? //Foreign key for one-to-many relationship
-  accInfo   AccInfo?  @relation(name: "AccInfoToEmployeeEvaluation", fields: [accInfoId], references: [id])
+  utilReqId Int       @unique //Foreign key for one-to-one relationship
+  utilReq   UtilReq?  @relation(name: "UtilReqToEmployeeEvaluation", fields: [utilReqId], references: [id])
 }
 
 // For after jobs (To be printed)
@@ -186,6 +186,6 @@ model JobandPayment {
   TotalCost      Decimal?
   TotalAmntDue   Decimal?
   CompletionDate DateTime? @default(now())
-  accInfoId      Int? //Foreign key for one-to-many relationship
-  accInfo        AccInfo?  @relation(name: "AccInfoToJobandPayment", fields: [accInfoId], references: [id])
+  utilReqId      Int?      @unique //Foreign key for one-to-one relationship
+  utilReq        UtilReq?  @relation(name: "UtilReqToJobandPayment", fields: [utilReqId], references: [id])
 }
