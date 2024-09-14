@@ -16,6 +16,7 @@ datasource db {
 // For Primary Account Creation (For All)
 
 model AccInfo {
+<<<<<<< Updated upstream
   id              Int              @id @default(autoincrement())
   Name            String
   Email           String           @unique
@@ -25,6 +26,16 @@ model AccInfo {
   BusinessInfo    BusinessInfo?    @relation(name: "AccInfoToBusinessInfo") //One-to-one
   UtilReqs        UtilReq[]        @relation(name: "AccInfoToUtilReq") //One-to-many
   EVCReservations EVCReservation[] @relation(name: "AccInfoToEVCReservation") //One-to-many
+=======
+  id                  Int                  @id @default(autoincrement())
+  Name                String
+  Email               String               @unique
+  ContactNum          String
+  ClientInfo          ClientInfo?          @relation(name: "AccInfoToClientInfo") //One-to-one
+  BusinessInfo        BusinessInfo?        @relation(name: "AccInfoToBusinessInfo") //One-to-one
+  UtilReqs UtilReq[] @relation(name: "AccInfoToUtilReq") //One-to-many
+  EVCReservations     EVCReservations[]    @relation(name: "AccInfoToEVCReservations") //One-to-many
+>>>>>>> Stashed changes
 }
 
 // For Acc Registration (For External Clients)
@@ -67,6 +78,7 @@ model BusinessInfo {
 // For Reservations (For external clients)
 
 model UtilReq {
+<<<<<<< Updated upstream
   id                   Int                  @id @default(autoincrement())
   ProductsManufactured String?
   BulkofCommodity      String?
@@ -89,6 +101,30 @@ model UtilReq {
   JobandPayment        JobandPayment?       @relation(name: "UtilReqToJobandPayment") //One-to-one
   accInfoId            Int? //Foreign key for one-to-many relationship
   accInfo              AccInfo?             @relation(name: "AccInfoToUtilReq", fields: [accInfoId], references: [id])
+=======
+  id                    Int       @id @default(autoincrement())
+  ProductsManufactured  String?
+  BulkofCommodity       String?
+  Facility              String?
+  FacilityQty           Int?
+  FacilityHrs           Int?
+  Equipment             String?
+  EquipmentQty          Int?
+  EquipmentHrs          Int?
+  Tools                 String?
+  ToolsQty              Int?
+  ToolsHrs              Int?
+  RequestDate           DateTime? @default(now())
+  EndDate               DateTime?
+  DateofProcessing      DateTime?
+  Processedby           String?
+  MachineUtilizations   MachineUtilization[] @relation(name: "UtilReqToMachineUtilization") //One-to-many
+  CustomerFeedback      CustomerFeedback?   @relation(name: "UtilReqToCustomerFeedback") //One-to-one
+  EmployeeEvaluation    EmployeeEvaluation? @relation(name: "UtilReqToEmployeeEvaluation") //One-to-one
+  JobandPayment         JobandPayment?      @relation(name: "UtilReqToJobandPayment") //One-to-one
+  accInfoId             Int? //Foreign key for one-to-many relationship
+  accInfo               AccInfo?   @relation(name: "AccInfoToUtilReq", fields: [accInfoId], references: [id])
+>>>>>>> Stashed changes
 }
 
 // For Reservations (EVC Accounts)
@@ -148,8 +184,13 @@ model CustomerFeedback {
   Q5           Int?
   Q6           Int?
   Q7           Int?
+<<<<<<< Updated upstream
   utilReqId    Int       @unique //Foreign key for one-to-one relationship
   utilReq      UtilReq   @relation(name: "UtilReqToCustomerFeedback", fields: [utilReqId], references: [id])
+=======
+  utilReqId    Int   @unique    //Foreign key for one-to-one relationship
+  utilReq      UtilReq  @relation(name: "UtilReqToCustomerFeedback", fields: [utilReqId], references: [id])
+>>>>>>> Stashed changes
 }
 
 // Only for external clients pt 2 ^^
@@ -168,7 +209,11 @@ model EmployeeEvaluation {
   E9        Int?
   E10       Int?
   E11       Int?
+<<<<<<< Updated upstream
   utilReqId Int       @unique //Foreign key for one-to-one relationship
+=======
+  utilReqId Int  @unique    //Foreign key for one-to-one relationship
+>>>>>>> Stashed changes
   utilReq   UtilReq?  @relation(name: "UtilReqToEmployeeEvaluation", fields: [utilReqId], references: [id])
 }
 
@@ -188,4 +233,8 @@ model JobandPayment {
   CompletionDate DateTime? @default(now())
   utilReqId      Int?      @unique //Foreign key for one-to-one relationship
   utilReq        UtilReq?  @relation(name: "UtilReqToJobandPayment", fields: [utilReqId], references: [id])
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes
