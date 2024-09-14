@@ -76,11 +76,88 @@
   transform: rotate(0deg, 360deg); /* Adjust initial transform if needed */
 }
 
-@layer base {
-  * {
+@layer utilities {
+  .animate-slide {
+    display: flex;
+    gap: 0;
+    animation: slide 2s linear infinite;
+  }
+  .hover\:animate-slide-pause:hover {
+    animation-play-state: paused;
+  }
+}
+
+
+/*FONT IMPORTS BELOW -ASHKI*/
+@font-face {
+  font-family: 'POPPINS1';
+  src: url('/fonts/poppins/POPPINSREG.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'POPPINS2';
+  src: url('/fonts/poppins/Poppins-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'POPPINS3';
+  src: url('/fonts/poppins/Poppins-Extrabold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'OPENSANS1';
+  src: url('/fonts/opensans/OpenSans-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'OPENSANS2';
+  src: url('/fonts/opensans/OpenSans-ExtraBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'FIGTREE1';
+  src: url('/fonts/figtree/Figtree-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'FIGTREE2';
+  src: url('/fonts/figtree/Figtree-Medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'FIGTREE3';
+  src: url('/fonts/figtree/Figtree-SemiBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'FIGTREE4';
+  src: url('/fonts/figtree/Figtree-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'FIGTREE5';
+  src: url('/fonts/figtree/Figtree-ExtraBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'PATRICK';
+  src: url('/fonts/patrickhand/PatrickHand-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'QANELAS1';
+  src: url('/fonts/qanelas/QanelasMedium.otf') format('opentype');
+}
+@font-face {
+  font-family: 'QANELAS2';
+  src: url('/fonts/qanelas/QanelasSemiBold.otf') format('opentype');
+}
+@font-face {
+  font-family: 'QANELAS3';
+  src: url('/fonts/qanelas/QanelasBold.otf') format('opentype');
+}
+@font-face {
+  font-family: 'QANELAS4';
+  src: url('/fonts/qanelas/QanelasExtraBold.otf') format('opentype');
+}
+@font-face {
+  font-family: 'LUXORA1';
+  src: url('/fonts/luxora/LuxoraGrotesk-Book.ttf') format('opentype');
+}
+/* @layer base {
+  {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
   }
-}
+}*/
