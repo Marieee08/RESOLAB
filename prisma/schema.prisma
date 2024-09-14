@@ -16,7 +16,6 @@ datasource db {
 // For Primary Account Creation (For All)
 
 model AccInfo {
-<<<<<<< Updated upstream
   id              Int              @id @default(autoincrement())
   Name            String
   Email           String           @unique
@@ -26,16 +25,6 @@ model AccInfo {
   BusinessInfo    BusinessInfo?    @relation(name: "AccInfoToBusinessInfo") //One-to-one
   UtilReqs        UtilReq[]        @relation(name: "AccInfoToUtilReq") //One-to-many
   EVCReservations EVCReservation[] @relation(name: "AccInfoToEVCReservation") //One-to-many
-=======
-  id                  Int                  @id @default(autoincrement())
-  Name                String
-  Email               String               @unique
-  ContactNum          String
-  ClientInfo          ClientInfo?          @relation(name: "AccInfoToClientInfo") //One-to-one
-  BusinessInfo        BusinessInfo?        @relation(name: "AccInfoToBusinessInfo") //One-to-one
-  UtilReqs UtilReq[] @relation(name: "AccInfoToUtilReq") //One-to-many
-  EVCReservations     EVCReservations[]    @relation(name: "AccInfoToEVCReservations") //One-to-many
->>>>>>> Stashed changes
 }
 
 // For Acc Registration (For External Clients)
@@ -78,7 +67,6 @@ model BusinessInfo {
 // For Reservations (For external clients)
 
 model UtilReq {
-<<<<<<< Updated upstream
   id                   Int                  @id @default(autoincrement())
   ProductsManufactured String?
   BulkofCommodity      String?
@@ -99,32 +87,10 @@ model UtilReq {
   CustomerFeedback     CustomerFeedback?    @relation(name: "UtilReqToCustomerFeedback") //One-to-one
   EmployeeEvaluation   EmployeeEvaluation?  @relation(name: "UtilReqToEmployeeEvaluation") //One-to-one
   JobandPayment        JobandPayment?       @relation(name: "UtilReqToJobandPayment") //One-to-one
+  ClientSatisfaction   ClientSatisfaction?  @relation(name: "UtilReqToClientSatisfaction") //One-to-one
+  CitizenSatisfaction  CitizenSatisfaction? @relation(name: "UtilReqToCitizenSatisfaction") //One-to-one
   accInfoId            Int? //Foreign key for one-to-many relationship
   accInfo              AccInfo?             @relation(name: "AccInfoToUtilReq", fields: [accInfoId], references: [id])
-=======
-  id                    Int       @id @default(autoincrement())
-  ProductsManufactured  String?
-  BulkofCommodity       String?
-  Facility              String?
-  FacilityQty           Int?
-  FacilityHrs           Int?
-  Equipment             String?
-  EquipmentQty          Int?
-  EquipmentHrs          Int?
-  Tools                 String?
-  ToolsQty              Int?
-  ToolsHrs              Int?
-  RequestDate           DateTime? @default(now())
-  EndDate               DateTime?
-  DateofProcessing      DateTime?
-  Processedby           String?
-  MachineUtilizations   MachineUtilization[] @relation(name: "UtilReqToMachineUtilization") //One-to-many
-  CustomerFeedback      CustomerFeedback?   @relation(name: "UtilReqToCustomerFeedback") //One-to-one
-  EmployeeEvaluation    EmployeeEvaluation? @relation(name: "UtilReqToEmployeeEvaluation") //One-to-one
-  JobandPayment         JobandPayment?      @relation(name: "UtilReqToJobandPayment") //One-to-one
-  accInfoId             Int? //Foreign key for one-to-many relationship
-  accInfo               AccInfo?   @relation(name: "AccInfoToUtilReq", fields: [accInfoId], references: [id])
->>>>>>> Stashed changes
 }
 
 // For Reservations (EVC Accounts)
@@ -146,7 +112,7 @@ model EVCReservation {
   accInfo       AccInfo?  @relation(name: "AccInfoToEVCReservation", fields: [accInfoId], references: [id])
 }
 
-// To be filled by Admin per request
+// To be filled by Admin per machine used
 
 model MachineUtilization {
   id               Int       @id @default(autoincrement())
@@ -184,13 +150,8 @@ model CustomerFeedback {
   Q5           Int?
   Q6           Int?
   Q7           Int?
-<<<<<<< Updated upstream
   utilReqId    Int       @unique //Foreign key for one-to-one relationship
   utilReq      UtilReq   @relation(name: "UtilReqToCustomerFeedback", fields: [utilReqId], references: [id])
-=======
-  utilReqId    Int   @unique    //Foreign key for one-to-one relationship
-  utilReq      UtilReq  @relation(name: "UtilReqToCustomerFeedback", fields: [utilReqId], references: [id])
->>>>>>> Stashed changes
 }
 
 // Only for external clients pt 2 ^^
@@ -209,12 +170,49 @@ model EmployeeEvaluation {
   E9        Int?
   E10       Int?
   E11       Int?
-<<<<<<< Updated upstream
   utilReqId Int       @unique //Foreign key for one-to-one relationship
-=======
-  utilReqId Int  @unique    //Foreign key for one-to-one relationship
->>>>>>> Stashed changes
   utilReq   UtilReq?  @relation(name: "UtilReqToEmployeeEvaluation", fields: [utilReqId], references: [id])
+}
+
+// Only for internal clients
+
+model ClientSatisfaction {
+  id              Int     @id @default(autoincrement())
+  C1              Int?
+  C2              Int?
+  C3              Int?
+  C4              Int?
+  C5              Int?
+  C6              Int?
+  C7              Int?
+  C8              Int?
+  utilReqId       Int       @unique //Foreign key for one-to-one relationship
+  utilReq         UtilReq?  @relation(name: "UtilReqToClientSatisfaction", fields: [utilReqId], references: [id])
+}
+
+// For all clients
+
+model CitizenSatisfaction {
+  id Int @id @default(autoincrement())
+  Sex   String?
+  Age   Int?
+  CC1   Int?
+  CC2   Int?
+  CC3   Int?
+  CC4   Int?
+  CC5   Int?
+  SQD0  Int?
+  SQD1  Int?
+  SQD2  Int?
+  SQD3  Int?
+  SQD4  Int?
+  SQD5  Int?
+  SQD6  Int?
+  SQD7  Int?
+  SQD8  Int?
+  Suggestions   String?
+  utilReqId       Int       @unique //Foreign key for one-to-one relationship
+  utilReq         UtilReq?  @relation(name: "UtilReqToCitizenSatisfaction", fields: [utilReqId], references: [id])
 }
 
 // For after jobs (To be printed)
@@ -233,8 +231,4 @@ model JobandPayment {
   CompletionDate DateTime? @default(now())
   utilReqId      Int?      @unique //Foreign key for one-to-one relationship
   utilReq        UtilReq?  @relation(name: "UtilReqToJobandPayment", fields: [utilReqId], references: [id])
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes
