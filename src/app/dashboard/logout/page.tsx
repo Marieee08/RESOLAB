@@ -5,14 +5,14 @@ import { useState, ChangeEvent, FormEvent } from 'react';
 interface FormData {
   email: string;
   name: string;
-  password: string;
+  contactNum: string; // Update field name
 }
 
-export default function Logout() {
+export default function Register() {
   const [formData, setFormData] = useState<FormData>({
     email: '',
     name: '',
-    password: '',
+    contactNum: '', // Update field name
   });
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -37,6 +37,8 @@ export default function Logout() {
       console.log('Account created successfully!');
     } else {
       console.error('Failed to create account');
+      const error = await res.json();
+      console.error('Error details:', error);
     }
   };
 
@@ -66,13 +68,12 @@ export default function Logout() {
         </label>
         <br />
         <label>
-          Password:
+          Contact Number:
           <input
-            type="password"
-            name="password"
-            value={formData.password}
+            type="tel"
+            name="contactNum" // Update field name
+            value={formData.contactNum} // Update field name
             onChange={handleChange}
-            required
           />
         </label>
         <br />
