@@ -6,10 +6,9 @@ import Image from 'next/image';
 const Navbar = () => {
   const [bgColor, setBgColor] = useState('transparent'); // Initial background color is transparent
 
-  // Effect to handle the scroll event
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) { // Change the threshold to your preference
+      if (window.scrollY > 50) {
         setBgColor('white');
       } else {
         setBgColor('transparent');
