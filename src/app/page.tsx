@@ -11,7 +11,7 @@ export default function Home() {
     <main className="w-full min-h-screen bg-[#f1f1f8]">
     <Navbar />
 
-      <section id="home" className="grid grid-cols-1 md:grid-cols-2 items-center h-auto pt-0 pb-5">
+      <section id="home" className="grid grid-cols-1 md:grid-cols-2 items-center h-auto pt-0 pb-5 ">
 
         <div style={{ width: '110%' }} className="flex items-center justify-center order-2 md:order-1 mb-6 md:mb-0 mt-20">
           <img src="images/elements/fablablanding.png" alt="Fabrication Laboratory of PSHS-EVC" className="relative inset-0 z-20 w-5/6 h-auto mb-5 mr-auto pl-0" />
@@ -25,44 +25,48 @@ export default function Home() {
           <h2 className="block text-7xl font-qanelas4 text-[#f5a237] mb-5">ELEVATE</h2>
           <p className="text-md font-poppins1 mb-5">
             The PSHS-EVC fab lab is a small-scale workshop offering digital fabrication. A fab lab is typically equipped with an array of flexible
-            computer-controlled tools that cover several different length scales and various materials with the aim to make “almost anything”.
+            computer-controlled tools that cover several different length scales and various materials with the aim to <span className="font-poppins2" >make “almost anything”.</span>
           </p>
-          <a href="/services" className="bg-[#00417a] hover:bg-[#1c62b5] text-white font-qanelas2 text-lg py-2 px-6 rounded-full hover:bg-[#0d4a8d] transition duration-300 max-w-xs ml-auto">
+          <a href="/services" className="bg-[#00417a] hover:bg-[#1c62b5] text-white font-qanelas1 text-lg py-1 px-6 rounded-full hover:bg-[#0d4a8d] transition duration-300 max-w-xs ml-auto">
             Get Started
           </a>
         </div>
       </section>
 
-      <section id="events" className=" p-10 pl-20 pr-20 bg-white">
-        <h2 className="text-4xl font-qanelas3 mb-4">Lorem Ipsum</h2>
-        <p className="text-lg mb-8 font-poppins1">Stay tuned for our upcoming events. We regularly host workshops, fairs, and other exciting activities. Check back often for the latest updates and event details!</p>
+      <section id="events" className=" p-10 pl-20 pr-20 bg-white py-20">
+      <div className="px-20">
+        <h2 className="text-4xl font-qanelas4 mb-5 text-center">Let us help you <span className="text-[#f5a237]">create!<span/></span></h2>
+        <p className="text-lg mb-8 font-poppins1 text-center">Stay tuned for our upcoming events. We regularly host workshops, fairs, and other exciting activities. Check back often for the latest updates and event details!</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           <div className="bg-[#f8f9fa] rounded-2xl shadow-lg">
             <div className="p-10">
-              <h3 className="text-2xl font-semibold mb-2 font-qanelas3">Who can avail?</h3>
-              <p className="text-gray-700 mb-4 font-poppins1">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-</p>
+              <img src="images/elements/who.png" alt="who" className="size-14"/>
+              <h3 className="text-xl font-semibold mb-2 font-qanelas2 font-md pt-5">Who can avail?</h3>
+              <p className="text-gray-700 mb-4 font-poppins1">Fab labs are available as a community resource, offering open access for individuals as well as scheduled access for programs.
+              </p>
               <a href="#" className="text-[#145da0] hover:underline">Learn More</a>
             </div>
           </div>
 
           <div className="bg-[#f8f9fa] rounded-2xl shadow-lg">
             <div className="p-10">
-              <h3 className="text-2xl font-semibold mb-2 font-qanelas3">Why was the FabLab established?</h3>
-              <p className="text-gray-700 mb-4 font-poppins1">Brief description of the event goes here. Provide some details about what participants can expect.</p>
+            <img src="images/elements/why.png" alt="why" className="size-14"/>
+              <h3 className="text-xl mb-2 font-qanelas2 pt-5">Why was the FabLab established?</h3>
+              <p className="text-gray-700 mb-4 font-poppins1">Fab lab Eastern Visayas is set up to inspire people and MSMEs of the region to turn their ideas into new products and prototypes by giving them access to a range of digital manufacturing technology.</p>
               <a href="#" className="text-[#145da0] hover:underline">Learn More</a>
             </div>
           </div>
 
           <div className="bg-[#f8f9fa] rounded-2xl shadow-lg">
             <div className="p-10">
-              <h3 className="text-2xl font-semibold mb-2 font-qanelas3">Where is the FabLab located?</h3>
-              <p className="text-gray-700 mb-4 font-poppins1">Brief description of the event goes here. Provide some details about what participants can expect.</p>
+            <img src="images/elements/where.png" alt="where" className="size-14"/>
+              <h3 className="text-xl font-semibold mb-2 font-qanelas2 font-md pt-5">Where is the FabLab located?</h3>
+              <p className="text-gray-700 mb-4 font-poppins1">Fab lab Eastern Visayas is located at PSHS-EVC, Ground Floor, Lab Tech Building, Pawing, Palo, Leyte.</p>
               <a href="#" className="text-[#145da0] hover:underline">Learn More</a>
             </div>
           </div>
         </div>
+      </div>
       </section>
 
       <section id="minifair2" className="w-full p-10 bg-[#0e4579]">
@@ -161,8 +165,8 @@ export default function Home() {
       */}
       </section>
 
-      <section id="machines" className="p-10 pt-10 pl-20 pr-20 pb-auto bg-[#f1f1f8]">
-        <p className="text-xl font-patrick text-left text-[#0e4579]">Here's what we can offer!</p>
+      <section id="machines" className="p-10 pt-20 pl-20 pr-20 pb-auto bg-[#f1f1f8]">
+        <p className="text-XL font-figtree4 text-left text-[#0e4579]">OFFERS</p>
         <h2 className="text-4xl font-bold mb-4 text-left font-qanelas3">Machines and Services</h2>
         <p className="text-lg mb-8 text-left font-poppins1 text-[#605e63]">Our FabLab is equipped with state-of-the-art tools and resources to support a wide range of projects and initiatives.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-auto ">

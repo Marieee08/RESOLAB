@@ -1,10 +1,33 @@
-import React from 'react';
+"use client";
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 const Navbar = () => {
+  const [bgColor, setBgColor] = useState('transparent'); // Initial background color is transparent
+
+  // Effect to handle the scroll event
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) { // Change the threshold to your preference
+        setBgColor('white');
+      } else {
+        setBgColor('transparent');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll); // Clean up the event listener
+    };
+  }, []);
+
   return (
-    <nav className="py-4 fixed w-full top-0 z-50 bg-[#f1f1f6] backdrop-blur opacity-95">
+    <nav
+      className={`py-4 fixed w-full top-0 z-50 transition duration-300 ease-in-out`}
+      style={{ backgroundColor: bgColor }}
+    >
       <div className="flex justify-between items-center px-10">
         <div className="flex items-center space-x-4">
           <Image src="/images/logos/SSF-logo.png" alt="SSF Logo" width={40} height={40} />
@@ -12,6 +35,9 @@ const Navbar = () => {
         </div>
         <div className="absolute left-1/2 transform -translate-x-1/2">
           <div className="flex space-x-10">
+            <Link href="/" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+              Home
+            </Link>
             <Link href="/dashboard" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Dashboard
             </Link>
@@ -20,6 +46,9 @@ const Navbar = () => {
             </Link>
             <Link href="/contact" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Contact
+            </Link>
+            <Link href="/dashboard" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+              About Us
             </Link>
           </div>
         </div>
