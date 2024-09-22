@@ -1,23 +1,314 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// For Primary Account Creation (For All)
+
+model AccInfo {
+  id              Int              @id @default(autoincrement())
+  Profile         String
+  Name            String
+  Email           String           @unique
+  Role            String           @default("USER")
+  ClientInfo      ClientInfo?      @relation(name: "AccInfoToClientInfo") //One-to-one
+  BusinessInfo    BusinessInfo?    @relation(name: "AccInfoToBusinessInfo") //One-to-one
+  UtilReqs        UtilReq[]        @relation(name: "AccInfoToUtilReq") //One-to-many
+  EVCReservations EVCReservation[] @relation(name: "AccInfoToEVCReservation") //One-to-many
 }
 
-enum Role {
-  USER
-  ADMIN
+// For Acc Registration (For External Clients)
+
+model ClientInfo {
+  id         Int     @id @default(autoincrement())
+  ContactNum String
+  Address    String?
+  City       String?
+  Province   String?
+  Zipcode    Int?
+  accInfoId  Int     @unique //Foreign key for one-to-one relationship
+  accInfo    AccInfo @relation(name: "AccInfoToClientInfo", fields: [accInfoId], references: [id])
+}
+
+// For Acc Registration (For ext clients with business)
+
+model BusinessInfo {
+  id                  Int     @id @default(autoincrement())
+  CompanyName         String?
+  BusinessOwner       String?
+  BusinessPermitNum   String?
+  TINNum              String?
+  CompanyIDNum        String?
+  CompanyEmail        String?
+  ContactPerson       String?
+  Designation         String?
+  CompanyAddress      String?
+  CompanyCity         String?
+  CompanyProvince     String?
+  CompanyZipcode      Int?
+  CompanyPhoneNum     String?
+  CompanyMobileNum    String?
+  Manufactured        String? //THIS ONE
+  ProductionFrequency String? //THIS ONE
+  Bulk                String? //THIS ONE
+  accInfoId           Int     @unique //Foreign key for one-to-one relationship
+  accInfo             AccInfo @relation(name: "AccInfoToBusinessInfo", fields: [accInfoId], references: [id])
+}
+
+// For Reservations (For external clients)
+
+model UtilReq {
+  id                   Int                  @id @default(autoincrement())
+  ProductsManufactured String? //THIS ONE
+  BulkofCommodity      String? //THIS ONE
+  ProcessInfos         ProcessInfo[]        @relation(name: "UtilReqToProcessInfo") //One-to-many
+  RequestDate          DateTime?            @default(now())
+  UtilTimes            UtilTime[]           @relation(name: "UtilReqToUtilTime") //One-to-many
+  EndDate              DateTime?
+  DateofProcessing     DateTime?
+  Processedby          String?
+  UtilReqApproval      Boolean?
+  MachineUtilizations  MachineUtilization[] @relation(name: "UtilReqToMachineUtilization") //One-to-many
+  CustomerFeedback     CustomerFeedback?    @relation(name: "UtilReqToCustomerFeedback") //One-to-one
+  EmployeeEvaluation   EmployeeEvaluation?  @relation(name: "UtilReqToEmployeeEvaluation") //One-to-one
+  JobandPayment        JobandPayment?       @relation(name: "UtilReqToJobandPayment") //One-to-one
+  ClientSatisfaction   ClientSatisfaction?  @relation(name: "UtilReqToClientSatisfaction") //One-to-one
+  CitizenSatisfaction  CitizenSatisfaction? @relation(name: "UtilReqToCitizenSatisfaction") //One-to-one
+  accInfoId            Int? //Foreign key for one-to-many relationship
+  accInfo              AccInfo?             @relation(name: "AccInfoToUtilReq", fields: [accInfoId], references: [id])
+}
+
+// Part of Utilization Request
+
+model ProcessInfo {
+  id           Int      @id @default(autoincrement())
+  Facility     String?
+  FacilityQty  Int?
+  FacilityHrs  Int?
+  Equipment    String?
+  EquipmentQty Int?
+  EquipmentHrs Int?
+  Tools        String?
+  ToolsQty     Int?
+  ToolsHrs     Int?
+  utilReqId    Int? //Foreign key for one-to-many relationship
+  utilReq      UtilReq? @relation(name: "UtilReqToProcessInfo", fields: [utilReqId], references: [id])
+}
+
+// Also parrt of Utilization Request
+
+model UtilTime {
+  id        Int       @id @default(autoincrement())
+  DayNum    Int?
+  StartTime DateTime?
+  EndTime   DateTime?
+  utilReqId Int? //Foreign key for one-to-many relationship
+  utilReq   UtilReq?  @relation(name: "UtilReqToUtilTime", fields: [utilReqId], references: [id])
+}
+
+// For Reservations (EVC Accounts)
+
+model EVCReservation {
+  id              Int              @id @default(autoincrement())
+  ControlNo       Int?
+  LvlSec          String?
+  NoofStudents    Int?
+  Subject         String?
+  Topic           String?
+  Teacher         String?
+  EVCLabDate      DateTime?
+  EVCTimeofUse    DateTime?
+  NeededMaterials NeededMaterial[] @relation(name: "EVCReservationtoNeededMaterial") //One-to-many
+  ReceivedBy      String?
+  ReceivedDate    DateTime?
+  EVCStudents     EVCStudent[]     @relation(name: "EVCReservationtoEVCStudent") //One-to-many
+  InspectedBy     String?
+  InspectedDate   DateTime?
+  StudentSig      Bytes?
+  DateRequested   DateTime?
+  TeacherSig      Bytes?
+  EVCApproval     Boolean?
+  accInfoId       Int? //Foreign key for one-to-many relationship
+  accInfo         AccInfo?         @relation(name: "AccInfoToEVCReservation", fields: [accInfoId], references: [id])
+}
+
+// Part of EVC Reservation
+
+model NeededMaterial {
+  id          Int             @id @default(autoincrement())
+  Item        String?
+  ItemQty     Int?
+  Description String?
+  Issued      String? //CHECK
+  Returned    String? //CHECK
+  evcId       Int? //Foreign key for one-to-many relationship
+  evc         EVCReservation? @relation(name: "EVCReservationtoNeededMaterial", fields: [evcId], references: [id])
+}
+
+// Also part of EVC Reservation
+
+model EVCStudent {
+  id       Int             @id @default(autoincrement())
+  Students String?
+  evcId    Int? //Foreign key for one-to-many relationship
+  evc      EVCReservation? @relation(name: "EVCReservationtoEVCStudent", fields: [evcId], references: [id])
+}
+
+// To be filled by Admin per machine used
+
+model MachineUtilization {
+  id              Int             @id @default(autoincrement())
+  OperatingTimes  OperatingTime[] @relation(name: "MachineUtilizationtoOperatingTime") //One-to-many
+  DownTimes       DownTime[]      @relation(name: "MachineUtilizationtoDownTime") //One-to-many
+  RepairChecks    RepairCheck[]      @relation(name: "MachineUtilizationtoRepairCheck") //One-to-many
+  ReviwedBy       String?
+  MachineApproval Boolean?
+  DateReviewed    DateTime?
+  utilReqId       Int? //Foreign key for one-to-many relationship
+  utilReq         UtilReq?        @relation(name: "UtilReqToMachineUtilization", fields: [utilReqId], references: [id])
+}
+
+// Part of Machine Utilization
+
+model OperatingTime {
+  id               Int                 @id @default(autoincrement())
+  OTDate           DateTime?
+  OTTypeofProducts String?
+  OTStartTime      DateTime?
+  OTEndTime        DateTime?
+  OTMachineOp      String?
+  machineUtilId    Int? //Foreign key for one-to-many relationship
+  machineUtil      MachineUtilization? @relation(name: "MachineUtilizationtoOperatingTime", fields: [machineUtilId], references: [id])
+}
+
+// Also part of Machine Utilization
+
+model DownTime {
+  id               Int                 @id @default(autoincrement())
+  DTDate           DateTime?
+  DTTypeofProducts String?
+  DTTime           Int?
+  Cause            String?
+  DTMachineOp      String?
+  machineUtilId    Int? //Foreign key for one-to-many relationship
+  machineUtil      MachineUtilization? @relation(name: "MachineUtilizationtoDownTime", fields: [machineUtilId], references: [id])
+}
+
+// Also part of Machine Utilization
+
+model RepairCheck {
+  id            Int       @id @default(autoincrement())
+  RepairDate    DateTime?
+  Service       String?
+  Duration      Int?
+  RepairReason  String?
+  PartsReplaced String?
+  RPPersonnel   String?
+  machineUtilId    Int? //Foreign key for one-to-many relationship
+  machineUtil      MachineUtilization? @relation(name: "MachineUtilizationtoRepairCheck", fields: [machineUtilId], references: [id])
+}
+
+// Only for external clients
+
+model CustomerFeedback {
+  id           Int       @id @default(autoincrement())
+  FeedbackDate DateTime?
+  Q1           Int?
+  Q2           Int?
+  Q3           Int?
+  Q4           Int?
+  Q5           Int?
+  Q6           Int?
+  Q7           Int?
+  utilReqId    Int       @unique //Foreign key for one-to-one relationship
+  utilReq      UtilReq   @relation(name: "UtilReqToCustomerFeedback", fields: [utilReqId], references: [id])
+}
+
+// Only for external clients pt 2 ^^
+
+model EmployeeEvaluation {
+  id        Int       @id @default(autoincrement())
+  EvalDate  DateTime?
+  EvalSig   Boolean?
+  E1        Int?
+  E2        Int?
+  E3        Int?
+  E4        Int?
+  E5        Int?
+  E6        Int?
+  E7        Int?
+  E8        Int?
+  E9        Int?
+  E10       Int?
+  E11       Int?
+  utilReqId Int       @unique //Foreign key for one-to-one relationship
+  utilReq   UtilReq?  @relation(name: "UtilReqToEmployeeEvaluation", fields: [utilReqId], references: [id])
+}
+
+// Only for internal clients
+
+model ClientSatisfaction {
+  id        Int      @id @default(autoincrement())
+  C1        Int?
+  C2        Int?
+  C3        Int?
+  C4        Int?
+  C5        Int?
+  C6        Int?
+  C7        Int?
+  C8        Int?
+  utilReqId Int      @unique //Foreign key for one-to-one relationship
+  utilReq   UtilReq? @relation(name: "UtilReqToClientSatisfaction", fields: [utilReqId], references: [id])
+}
+
+// For all clients
+
+model CitizenSatisfaction {
+  id          Int      @id @default(autoincrement())
+  Sex         String?
+  Age         Int?
+  CC1         Int?
+  CC2         Int?
+  CC3         Int?
+  CC4         Int?
+  CC5         Int?
+  SQD0        Int?
+  SQD1        Int?
+  SQD2        Int?
+  SQD3        Int?
+  SQD4        Int?
+  SQD5        Int?
+  SQD6        Int?
+  SQD7        Int?
+  SQD8        Int?
+  Suggestions String?
+  utilReqId   Int      @unique //Foreign key for one-to-one relationship
+  utilReq     UtilReq? @relation(name: "UtilReqToCitizenSatisfaction", fields: [utilReqId], references: [id])
+}
+
+// For after jobs (To be printed)
+
+model JobandPayment {
+  id             Int       @id @default(autoincrement())
+  Date           DateTime?
+  ClientProfile  String?
+  ProjDesc       String?
+  Services       String?
+  Minutes        Decimal?
+  Costpermin     Decimal?
+  TotalCost      Decimal?
+  TotalAmntDue   Decimal?
+  CompletionDate DateTime? @default(now())
+  utilReqId      Int?      @unique //Foreign key for one-to-one relationship
+  utilReq        UtilReq?  @relation(name: "UtilReqToJobandPayment", fields: [utilReqId], references: [id])
 }
