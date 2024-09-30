@@ -1,113 +1,236 @@
-import Image from "next/image";
+import { Calendar } from '@/components/ui/calendar';
+import { Carousel } from '@/components/ui/carousel';
+import { Slider } from '@/components/ui/slider';
+import { Menubar } from '@/components/ui/menubar';
+import Navbar from '@/components/custom/navbar';
+import Link from "next/link";
+import Image from 'next/image';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
+    <main className="w-full min-h-screen bg-[#f1f1f8]">
+    <Navbar />
+
+      <section id="home" className="grid grid-cols-1 md:grid-cols-2 items-center h-auto pt-0 pb-5 ">
+
+        <div style={{ width: '110%' }} className="flex items-center justify-center order-2 md:order-1 mb-6 md:mb-0 mt-20">
+          <img src="images/elements/fablablanding.png" alt="Fabrication Laboratory of PSHS-EVC" className="relative inset-0 z-20 w-5/6 h-auto mb-5 mr-auto pl-0" />
+          <img src="images/elements/settingsrotate.png" alt="Rotating Background" className="absolute inset-0 z-0 flex items-center justify-left overflow-hidden container mx-auto w-2/6 h-auto pl-20 ml-96 mt-80 rotate-fixed" />
+          <img src="images/elements/squiggly.png" alt="Rotating Background" className="absolute inset-0 z-0 flex items-center justify-left overflow-hidden container w-1/3 h-auto ml-96 mt-0" />
+        </div>
+
+        <div className="relative z-1 flex flex-col justify-center text-right order-1 md:order-2 px-20 p-10 z-2 pl-28">
+        <p className="text-xl font-qanelas2">Turn your Imagination into <span className="text-[#f5a237]">Reality</span></p>
+          <h1 className="text-7xl font-qanelas4">Innovate to</h1>
+          <h2 className="block text-7xl font-qanelas4 text-[#f5a237] mb-5">ELEVATE</h2>
+          <p className="text-md font-poppins1 mb-5">
+            The PSHS-EVC fab lab is a small-scale workshop offering digital fabrication. A fab lab is typically equipped with an array of flexible
+            computer-controlled tools that cover several different length scales and various materials with the aim to <span className="font-poppins2" >make “almost anything”.</span>
+          </p>
+          <a href="/services" className="bg-[#00417a] hover:bg-[#1c62b5] text-white font-qanelas1 text-lg py-1 px-6 rounded-full hover:bg-[#0d4a8d] transition duration-300 max-w-xs ml-auto">
+            Get Started
           </a>
         </div>
+      </section>
+
+      <section id="events" className=" p-10 pl-20 pr-20 bg-white py-20">
+      <div className="px-20">
+        <h2 className="text-4xl font-qanelas4 mb-5 text-center">Let us help you <span className="text-[#f5a237]">create!<span/></span></h2>
+        <p className="text-lg mb-8 font-poppins1 text-center">Stay tuned for our upcoming events. We regularly host workshops, fairs, and other exciting activities. Check back often for the latest updates and event details!</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          <div className="bg-[#f8f9fa] rounded-2xl shadow-lg">
+            <div className="p-10">
+              <img src="images/elements/who.png" alt="who" className="size-14"/>
+              <h3 className="text-xl font-semibold mb-2 font-qanelas2 font-md pt-5">Who can avail?</h3>
+              <p className="text-gray-700 mb-4 font-poppins1">Fab labs are available as a community resource, offering open access for individuals as well as scheduled access for programs.
+              </p>
+              <a href="#" className="text-[#145da0] hover:underline">Learn More</a>
+            </div>
+          </div>
+
+          <div className="bg-[#f8f9fa] rounded-2xl shadow-lg">
+            <div className="p-10">
+            <img src="images/elements/why.png" alt="why" className="size-14"/>
+              <h3 className="text-xl mb-2 font-qanelas2 pt-5">Why was the FabLab established?</h3>
+              <p className="text-gray-700 mb-4 font-poppins1">Fab lab Eastern Visayas is set up to inspire people and MSMEs of the region to turn their ideas into new products and prototypes by giving them access to a range of digital manufacturing technology.</p>
+              <a href="#" className="text-[#145da0] hover:underline">Learn More</a>
+            </div>
+          </div>
+
+          <div className="bg-[#f8f9fa] rounded-2xl shadow-lg">
+            <div className="p-10">
+            <img src="images/elements/where.png" alt="where" className="size-14"/>
+              <h3 className="text-xl font-semibold mb-2 font-qanelas2 font-md pt-5">Where is the FabLab located?</h3>
+              <p className="text-gray-700 mb-4 font-poppins1">Fab lab Eastern Visayas is located at PSHS-EVC, Ground Floor, Lab Tech Building, Pawing, Palo, Leyte.</p>
+              <a href="#" className="text-[#145da0] hover:underline">Learn More</a>
+            </div>
+          </div>
+        </div>
       </div>
+      </section>
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <section id="minifair2" className="w-full p-10 bg-[#0e4579]">
+        {/* Two Columns of Text */}
+        <div className="grid grid-cols-2 gap-10 mb-10 px-10">
+          {/* Left Column */}
+          <div className="text-left">
+            <p className="text-xl text-white font-patrick">
+             Hmmm... what to look out for?
+            </p>
+            <h1 className="text-4xl text-white font-qanelas3">FabLab mini fair</h1>
+            <p className="text-white mb-4 font-poppins1">Stay tuned for our upcoming events.</p>
+            <p className="font-poppins1 text-white mb-4">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+              enim ad minim veniam, quis nostrud exercitation ullamco laboris
+              nisi ut aliquip ex ea commodo consequat.
+            </p>
+          </div>
+          {/* Right Column */}
+          <div className="text-right">
+              <p className="mt-5 text-left text-xl font-patrick text-white">What to expect?</p>
+              <p className="mt-5 text-left text-xl text-white">•</p>
+              <p className="text-left text-xl text-white">•</p>
+              <p className="text-left text-xl text-white">•</p>
+              <p className="text-left text-xl text-white">•</p>
+          </div>
+        </div>
+{/*
+    <div className="w-full h-min inline-flex flex-nowrap overflow-hidden">
+            <ul x-ref="slides" className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-infinite-scroll">
+                <li>
+                    <img src="/images/slider/1.jpg"/>
+                </li>
+                <li>
+                    <img src="/images/slider/2.jpg"/>
+                </li>
+                <li>
+                    <img src="/images/slider/3.jpg"/>
+                </li>
+                <li>
+                    <img src="/images/slider/4.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/5.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/6.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/7.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/8.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/9.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/10.jpg" />
+                </li>
+            </ul>
+            <ul x-ref="logos" className="flex items-center justify-center md:justify-start [&_li]:mx-8 [&_img]:max-w-none animate-infinite-scroll">
+                <li>
+                    <img src="/images/slider/1.jpg"/>
+                </li>
+                <li>
+                    <img src="/images/slider/2.jpg"/>
+                </li>
+                <li>
+                    <img src="/images/slider/3.jpg"/>
+                </li>
+                <li>
+                    <img src="/images/slider/4.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/5.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/6.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/7.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/8.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/9.jpg" />
+                </li>
+                <li>
+                    <img src="/images/slider/10.jpg" />
+                </li>
+            </ul>                
+        </div>
+      */}
+      </section>
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+      <section id="machines" className="p-10 pt-20 pl-20 pr-20 pb-auto bg-[#f1f1f8]">
+        <p className="text-XL font-figtree4 text-left text-[#0e4579]">OFFERS</p>
+        <h2 className="text-4xl font-bold mb-4 text-left font-qanelas3">Machines and Services</h2>
+        <p className="text-lg mb-8 text-left font-poppins1 text-[#605e63]">Our FabLab is equipped with state-of-the-art tools and resources to support a wide range of projects and initiatives.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-auto ">
+          
+          <div className="bg-[#f8f9fa] bg-white border md:border-0 rounded-3xl overflow-hidden shadow-lg">
+            <div className="p-8">
+              <div className="flex space-x-2 mb-2 font-figtree3">
+                <p className="text-ms py-1 px-3 rounded bg-[#0e4579] text-white">Etch Patterns</p>
+                <p className="text-ms py-1 px-3 rounded bg-[#f5a237] text-white">Cut Materials</p>
+              </div>
+              <h3 className="text-2xl font-qanelas3">Laser Cutter</h3>
+            <a href="/services" className="text-[#145da0] hover:underline mb-2">Learn More</a>
+            </div>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+            <div className="relative h-[318px]">
+                  <img src="images/machines/trylaser2.png" alt="machine" className="absolute bottom-0" />
+            </div>
+          </div>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
+          <div className="bg-[#f8f9fa] bg-white border md:border-0 rounded-3xl overflow-hidden shadow-lg">
+            <div className="p-8">
+              <div className="flex space-x-2 mb-2 font-figtree3">
+                <p className="text-ms py-1 px-3 rounded bg-[#0e4579] text-white">Prototyping</p>
+                <p className="text-ms py-1 px-3 rounded bg-[#f5a237] text-white">Create 3D Models</p>
+              </div>
+              <h3 className="text-2xl font-qanelas3">3D Printer</h3>
+            <a href="/services" className="text-[#145da0] hover:underline mb-2">Learn More</a>
+            </div>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+            <div className="relative h-[318px]">
+                  <img src="images/machines/try3dprint.png" alt="machine" className="absolute bottom-0" />
+            </div>
+          </div>
+
+          <div className="bg-[#f8f9fa] bg-white border md:border-0 rounded-3xl overflow-hidden shadow-lg">
+            <div className="p-8">
+              <div className="flex space-x-2 mb-2 font-figtree3">
+                <p className="text-ms py-1 px-3 rounded bg-[#0e4579] text-white">Multi-purpose</p>
+                <p className="text-ms py-1 px-3 rounded bg-[#f5a237] text-white">Carve Structures</p>
+              </div>
+              <h3 className="text-2xl font-qanelas3">CNC Mill</h3>
+            <a href="/services#" className="text-[#145da0] hover:underline mb-2">Learn More</a>
+            </div>
+
+            <div className="relative h-[318px]">
+                  <img src="images/machines/trycncmill.png" alt="machine" className="absolute bottom-0" />
+            </div>
+          </div>
+
+          <div className=" p-6 rounded-lg text-center align-middle pt-28">
+            <p className="text-xl font-patrick">Don't worry, there's more!</p>
+            <h3 className="text-3xl font-qanelas3 mb-1 text-[#0e4579]">Lorem Ipsum</h3>
+            <p className="text-lg mb-4 font-figtree4">Visit our Machines and Services Page</p>
+            <p className="text-md mb-10 font-poppins1 px-10">Our FabLab is equipped with state-of-the-art tools and resources to support a wide range of projects and initiatives. Whether you are an entrepreneur, student, or hobbyist, we provide the support and expertise to bring your ideas to life.</p>
+            <a href="/services#" className="text-white text-xl bg-[#0e4579] py-3 px-10 rounded-full hover:underline font-qanelas2">Services</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="about" className="min-h-screen p-10 pt-24 pl-20 pr-20 bg-white">
+        <h2 className="text-4xl font-bold mb-4">About Us</h2>
+        <p className="text-lg mb-8">Learn more about our organization and mission. We are dedicated to fostering innovation and creativity through our cutting-edge facilities and collaborative environment. Our team is passionate about helping individuals and organizations achieve their goals through advanced technology and hands-on learning.</p>
+        <p className="text-lg mb-8 ">Our FabLab is equipped with state-of-the-art tools and resources to support a wide range of projects and initiatives. Whether you are an entrepreneur, student, or hobbyist, we provide the support and expertise to bring your ideas to life.</p>
+      </section>
     </main>
   );
 }
