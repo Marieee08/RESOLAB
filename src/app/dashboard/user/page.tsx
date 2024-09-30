@@ -1,3 +1,5 @@
+'use client';
+
 import Link from "next/link";
 import Navbar from '@/components/custom/navbar';
 import Sidebar from '@/components/custom/sidebar-user';

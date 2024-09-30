@@ -8,10 +8,12 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); // Added loading state
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true); // Start loading
 
     const res = await fetch('/api/auth/register', {
       method: 'POST',
@@ -27,6 +29,7 @@ export default function RegisterPage() {
       const data = await res.json();
       setError(data.error || 'Something went wrong');
     }
+    setLoading(false); // Stop loading
   };
 
   return (
@@ -55,7 +58,9 @@ export default function RegisterPage() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Register</button>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Registering...' : 'Register'}
+        </button>
       </form>
     </div>
   );

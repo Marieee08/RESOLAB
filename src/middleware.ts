@@ -4,14 +4,22 @@ import { verify } from 'jsonwebtoken';
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
+  const { pathname } = request.nextUrl;
 
+  // Allow access to dashboard and services routes without authentication
+  const publicPaths = ['/dashboard', '/services'];
+
+  if (publicPaths.some(path => pathname.startsWith(path))) {
+    return NextResponse.next();  // Allow access without checking token
+  }
+
+  // If not accessing public paths, check for authentication token
   if (!token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
   try {
     const decoded = verify(token, process.env.JWT_SECRET!) as { role: string };
-    const { pathname } = request.nextUrl;
 
     // Check for admin routes
     if (pathname.startsWith('/dashboard/admin') || pathname.startsWith('/services/admin')) {

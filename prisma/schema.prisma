@@ -17,7 +17,7 @@ datasource db {
 
 model AccInfo {
   id              Int              @id @default(autoincrement())
-  Profile         String
+  Password         String
   Name            String
   Email           String           @unique
   Role            String           @default("USER")

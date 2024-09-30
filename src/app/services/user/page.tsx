@@ -74,7 +74,7 @@ export default function Services() {
         <div className="container mx-auto text-center">
           <h2 className="text-4xl font-bold mb-8 text-center">Avail a service now!</h2>
           <p className="text-gray-700 mb-6">Check out the latest updates on machine availability and maintenance.</p>
-          <Link href="/services/schedule" className="bg-[#145da0] text-white py-2 px-4 rounded-full hover:bg-[#0d4a8d] transition duration-300">
+          <Link href="/services/user/schedule" className="bg-[#145da0] text-white py-2 px-4 rounded-full hover:bg-[#0d4a8d] transition duration-300">
             Schedule Service
           </Link>
         </div>
