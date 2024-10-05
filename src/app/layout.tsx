@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RESOLAB",
-  description: "Reservation though online services for the PSHS-EVC fabrication laboratory.",
+  title: "FabLABS",
+  description: "Fabrication Laboratory Availment and Booking System.",
 };
 
 export default function RootLayout({

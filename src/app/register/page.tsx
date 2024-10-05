@@ -71,7 +71,7 @@ export default function Register() {
             />
           </div>
           <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-            Agree & Join
+            Sing in
           </button>
         </form>
         <div className="mt-4 text-center">

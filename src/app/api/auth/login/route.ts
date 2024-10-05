@@ -21,7 +21,17 @@ export async function POST(request: { json: () => PromiseLike<{ email: any; pass
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
 
-    return NextResponse.json({user: { id: user.id, name: user.Name, email: user.Email, role: user.Role } });
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined in the environment variables');
+    }
+    
+    const token = jwt.sign(
+      { userId: user.id, role: user.Role },
+      process.env.JWT_SECRET as string,
+      { expiresIn: '1h' }
+    );
+
+    return NextResponse.json({ token, user: { id: user.id, name: user.Name, email: user.Email, role: user.Role } });
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
