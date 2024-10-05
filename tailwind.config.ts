@@ -9,6 +9,10 @@ module.exports = {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
 	],
+  rules: {
+    // ... other rules
+    "react/prop-types": "off" // This disables prop-types checking by ESLint
+  },
   
   prefix: "",
   theme: {
