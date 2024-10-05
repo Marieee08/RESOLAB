@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -37,7 +38,7 @@ export default function Login() {
     <div className="flex min-h-screen bg-gray-100 justify-center items-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold mb-4">Sign in</h2>
-        <p className="text-gray-600 mb-6">Stay updated on your professional world</p>
+        <p className="text-gray-600 mb-6">Avail our equipment now and let your imagine run wild!</p>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

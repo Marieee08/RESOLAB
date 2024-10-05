@@ -36,7 +36,7 @@ export default function Register() {
     <div className="flex min-h-screen bg-gray-100 justify-center items-center">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-bold mb-4">Join FabLABS</h2>
-        <p className="text-gray-600 mb-6">Make the most of your professional life</p>
+        <p className="text-gray-600 mb-6">Step into a world of creativity and innovation!</p>
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
