@@ -1,17 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 
 interface SidebarProps {
   username: string;
   role: string;
   profilePicture: string;
+  activePath: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ username, role, profilePicture }) => {
-  const router = useRouter();
-
-  const isActive = (path: string) => router.pathname === path;
+const Sidebar: React.FC<SidebarProps> = ({ username, role, profilePicture, activePath }) => {
+  const isActive = (path: string) => activePath === path;
 
   const navItems = [
     { name: 'Orders', path: '/dashboard/user', icon: 'M2 8.5a3 3 0 013-3h10a3 3 0 013 3v7a3 3 0 01-3 3H5a3 3 0 01-3-3v-7zm3-1a1 1 0 00-1 1v7a1 1 0 001 1h10a1 1 0 001-1v-7a1 1 0 00-1-1H5z' },

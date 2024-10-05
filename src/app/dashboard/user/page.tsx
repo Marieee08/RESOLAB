@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Navbar from '@/components/custom/navbar';
-import Sidebar from '@/components/custom/sidebar-user';
+import DynamicSidebar from '@/components/custom/DynamicSidebar';
+
 
 export default function Dashboard() {
   return (
@@ -10,10 +11,12 @@ export default function Dashboard() {
     <main className="min-h-screen bg-[#f1f1f8] pt-24 flex">
       
     <Navbar />
-    <Sidebar 
+    <DynamicSidebar  
     username="John Doe"
     role="User"
-    profilePicture="/path/to/profile-picture.jpg"/>
+    profilePicture="/path/to/profile-picture.jpg"
+    activePath="/dashboard/user"
+    />
   
 
       <section className="flex-1 ml-64 p-8">
