@@ -4,19 +4,57 @@ import React from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import TimePicker from '@/components/custom/time-picker';
 import ProgressBar from '@/components/custom/progress-bar';
-import { DateRange } from 'react-day-picker';
-import Navbar from '@/components/custom/navbar'
+import Navbar from '@/components/custom/navbar';
+import PersonalInformation from '@/components/forms/Utilization';
+import ProcessInformation from '@/components/forms/ProcessInfo';
+import BusinessInformation from '@/components/forms/BusinessInfo';
 
-<Navbar />
 
 interface FormData {
-    startDate: Date | null;
-    endDate: Date | null;
-    startTime: string | null;
-    endTime: string | null;
-    // ... other fields
-  }
-type UpdateFormData = (field: keyof FormData, value: FormData[keyof FormData]) => void;
+  startDate: Date | null;
+  endDate: Date | null;
+  startTime: string | null;
+  endTime: string | null;
+
+  // ClientInfo fields
+  contactNum: string;
+  address: string;
+  city: string;
+  province: string;
+  zipcode: string;
+
+  // ProcessInfo fields
+  Facility: string;
+  FacilityQty: number;
+  FacilityHrs: number;
+  Equipment: string;
+  EquipmentQty: number;
+  EquipmentHrs: number;
+  Tools: string;
+  ToolsQty: number;
+  ToolsHrs: number;
+
+  // Add BusinessInfo fields
+  CompanyName: string;
+  BusinessOwner: string;
+  BusinessPermitNum: string;
+  TINNum: string;
+  CompanyIDNum: string;
+  CompanyEmail: string;
+  ContactPerson: string;
+  Designation: string;
+  CompanyAddress: string;
+  CompanyCity: string;
+  CompanyProvince: string;
+  CompanyZipcode: number | '';
+  CompanyPhoneNum: string;
+  CompanyMobileNum: string;
+  Manufactured: string;
+  ProductionFrequency: string;
+  Bulk: string;
+}
+
+type UpdateFormData = (field: keyof FormData, value: FormData[keyof FormData] | number) => void;
 
 export default function Schedule() {
   const [step, setStep] = React.useState(1);
@@ -25,7 +63,41 @@ export default function Schedule() {
     endDate: null,
     startTime: null,
     endTime: null,
-    // Add other form fields here
+    contactNum: '',
+    address: '',
+    city: '',
+    province: '',
+    zipcode: '',
+
+    // Initialize ProcessInfo fields
+    Facility: '',
+    FacilityQty: 0,
+    FacilityHrs: 0,
+    Equipment: '',
+    EquipmentQty: 0,
+    EquipmentHrs: 0,
+    Tools: '',
+    ToolsQty: 0,
+    ToolsHrs: 0,
+
+    // Initialize BusinessInfo fields
+    CompanyName: '',
+    BusinessOwner: '',
+    BusinessPermitNum: '',
+    TINNum: '',
+    CompanyIDNum: '',
+    CompanyEmail: '',
+    ContactPerson: '',
+    Designation: '',
+    CompanyAddress: '',
+    CompanyCity: '',
+    CompanyProvince: '',
+    CompanyZipcode: '',
+    CompanyPhoneNum: '',
+    CompanyMobileNum: '',
+    Manufactured: '',
+    ProductionFrequency: '',
+    Bulk: '',
   });
 
   const updateFormData: UpdateFormData = (field, value) => {
@@ -44,10 +116,8 @@ export default function Schedule() {
       case 3:
         return <BusinessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
       case 4:
-        return <UtilizationRequest formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 5:
         return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 6:
+      case 5:
         return <ReviewSubmit formData={formData} prevStep={prevStep} />;
       default:
         return <DateTimeSelection formData={formData} updateFormData={updateFormData} nextStep={nextStep} />;
@@ -55,11 +125,14 @@ export default function Schedule() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Schedule a Service</h1>
-      <ProgressBar currentStep={step} totalSteps={6} />
-      {renderStep()}
-    </div>
+    <>
+      <Navbar />
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Schedule a Service</h1>
+        <ProgressBar currentStep={step} totalSteps={6} />
+        {renderStep()}
+      </div>
+    </>
   );
 }
 
@@ -116,61 +189,6 @@ interface DateTimeSelectionProps {
     );
   }
 
-// Add proper interfaces for these components
-interface StepProps {
-  formData: FormData;
-  updateFormData: UpdateFormData;
-  nextStep: () => void;
-  prevStep: () => void;
-}
-
-function PersonalInformation({ formData, updateFormData, nextStep, prevStep }: StepProps) {
-  // Implement form for personal information (ClientInfo model)
-  return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
-      {/* Add form fields for ClientInfo */}
-      <button onClick={prevStep} className="mr-2 bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
-      <button onClick={nextStep} className="bg-blue-500 text-white px-4 py-2 rounded">Next</button>
-    </div>
-  );
-}
-
-function BusinessInformation({ formData, updateFormData, nextStep, prevStep }: StepProps) {
-  // Implement form for business information (BusinessInfo model)
-  return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Business Information</h2>
-      {/* Add form fields for BusinessInfo */}
-      <button onClick={prevStep} className="mr-2 bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
-      <button onClick={nextStep} className="bg-blue-500 text-white px-4 py-2 rounded">Next</button>
-    </div>
-  );
-}
-
-function UtilizationRequest({ formData, updateFormData, nextStep, prevStep }: StepProps) {
-  // Implement form for utilization request (UtilReq model)
-  return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Utilization Request</h2>
-      {/* Add form fields for UtilReq */}
-      <button onClick={prevStep} className="mr-2 bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
-      <button onClick={nextStep} className="bg-blue-500 text-white px-4 py-2 rounded">Next</button>
-    </div>
-  );
-}
-
-function ProcessInformation({ formData, updateFormData, nextStep, prevStep }: StepProps) {
-  // Implement form for process information (ProcessInfo model)
-  return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Process Information</h2>
-      {/* Add form fields for ProcessInfo */}
-      <button onClick={prevStep} className="mr-2 bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
-      <button onClick={nextStep} className="bg-blue-500 text-white px-4 py-2 rounded">Next</button>
-    </div>
-  );
-}
 
 interface ReviewSubmitProps {
   formData: FormData;
