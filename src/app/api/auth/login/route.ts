@@ -31,7 +31,20 @@ export async function POST(request: { json: () => PromiseLike<{ email: any; pass
       { expiresIn: '1h' }
     );
 
-    return NextResponse.json({ token, user: { id: user.id, name: user.Name, email: user.Email, role: user.Role } });
+    const response = NextResponse.json({ 
+      user: { id: user.id, name: user.Name, email: user.Email, role: user.Role } 
+    });
+
+    // Set the token as an HTTP-only cookie
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== 'development',
+      sameSite: 'strict',
+      maxAge: 3600, // 1 hour
+      path: '/',
+    });
+
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

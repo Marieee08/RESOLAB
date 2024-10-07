@@ -51,7 +51,7 @@ const Navbar = () => {
             <Link href="/" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Home
             </Link>
-            <Link href="/dashboard" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+            <Link href="/dashboard/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Dashboard
             </Link>
             <Link href="/services/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
@@ -61,7 +61,10 @@ const Navbar = () => {
               Contact
             </Link>
             <Link href="/dashboard/admin" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
-              Admin
+              Admin Dashboard
+            </Link>
+            <Link href="/services/admin" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+              Admin Services
             </Link>
             <Link href="/register" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Register

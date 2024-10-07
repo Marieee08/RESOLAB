@@ -6,8 +6,14 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
   const { pathname } = request.nextUrl;
 
+  // Allow access to dashboard and services routes without authentication
+  const publicPaths = ['/dashboard', '/services'];
 
-  // Check for authentication token for all dashboard and services routes
+  if (publicPaths.some(path => pathname.startsWith(path))) {
+    return NextResponse.next();  // Allow access without checking token
+  }
+
+  // If not accessing public paths, check for authentication token
   if (!token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
@@ -15,19 +21,10 @@ export function middleware(request: NextRequest) {
   try {
     const decoded = verify(token, process.env.JWT_SECRET!) as { role: string };
 
-    // Redirect based on role for dashboard and services root paths
-    if (pathname === '/dashboard' || pathname === '/services') {
-      if (decoded.role === 'ADMIN') {
-        return NextResponse.redirect(new URL(`${pathname}/admin`, request.url));
-      } else {
-        return NextResponse.redirect(new URL(`${pathname}/user`, request.url));
-      }
-    }
-
     // Check for admin routes
     if (pathname.startsWith('/dashboard/admin') || pathname.startsWith('/services/admin')) {
       if (decoded.role !== 'ADMIN') {
-        return NextResponse.redirect(new URL(pathname.replace('/admin', '/user'), request.url));
+        return NextResponse.redirect(new URL('/dashboard/user', request.url));
       }
     }
 

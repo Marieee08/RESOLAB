@@ -23,8 +23,9 @@ export default function Login() {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('token', data.token);
-        router.push('/dashboard/user');
+        // The token is now set as an HTTP-only cookie by the server
+        // We don't need to manually set it in localStorage
+        router.push('/dashboard');  // Let the middleware handle the redirection
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Login failed');
