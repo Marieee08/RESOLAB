@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 interface FormData {
     startDate: Date | null;
@@ -256,7 +257,11 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
 
         <div className="mt-6 flex justify-between">
             <button onClick={prevStep} className="bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
+            
+//temporary
+            <Link href="/dashboard/user">
+                <span className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">Submit</span>
+            </Link>
         </div>
     </div>
   );
