@@ -5,9 +5,10 @@ import { Calendar } from '@/components/ui/calendar';
 import TimePicker from '@/components/custom/time-picker';
 import ProgressBar from '@/components/custom/progress-bar';
 import Navbar from '@/components/custom/navbar';
-import PersonalInformation from '@/components/forms/Utilization';
-import ProcessInformation from '@/components/forms/ProcessInfo';
+import PersonalInformation from '@/components/forms/PersonalInfo';
+import ProcessInformation from '@/components/forms/UtilizationInfo';
 import BusinessInformation from '@/components/forms/BusinessInfo';
+import ReviewSubmit from '@/components/forms/ReviewSubmit';
 
 
 interface FormData {
@@ -17,13 +18,16 @@ interface FormData {
   endTime: string | null;
 
   // ClientInfo fields
+  name: string;
   contactNum: string;
   address: string;
   city: string;
   province: string;
   zipcode: string;
 
-  // ProcessInfo fields
+  // UtilizationInfo fields
+  ProductsManufactured: string;
+  BulkofCommodity: string;
   Facility: string;
   FacilityQty: number;
   FacilityHrs: number;
@@ -63,6 +67,7 @@ export default function Schedule() {
     endDate: null,
     startTime: null,
     endTime: null,
+    name: '',
     contactNum: '',
     address: '',
     city: '',
@@ -70,6 +75,8 @@ export default function Schedule() {
     zipcode: '',
 
     // Initialize ProcessInfo fields
+    ProductsManufactured: '',
+    BulkofCommodity: '',
     Facility: '',
     FacilityQty: 0,
     FacilityHrs: 0,
@@ -118,7 +125,11 @@ export default function Schedule() {
       case 4:
         return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
       case 5:
-        return <ReviewSubmit formData={formData} prevStep={prevStep} />;
+        return <ReviewSubmit formData={formData} prevStep={prevStep} updateFormData={function (field: keyof FormData, value: string | number | Date | null): void {
+          throw new Error('Function not implemented.');
+        } } nextStep={function (): void {
+          throw new Error('Function not implemented.');
+        } } />;
       default:
         return <DateTimeSelection formData={formData} updateFormData={updateFormData} nextStep={nextStep} />;
     }
@@ -127,16 +138,14 @@ export default function Schedule() {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 mt-16">
         <h1 className="text-2xl font-bold mb-4">Schedule a Service</h1>
-        <ProgressBar currentStep={step} totalSteps={6} />
+        <ProgressBar currentStep={step} totalSteps={5} />
         {renderStep()}
       </div>
     </>
   );
 }
-
-
 
 interface DateTimeSelectionProps {
     formData: FormData;
@@ -153,7 +162,7 @@ interface DateTimeSelectionProps {
   
     return (
       <div>
-        <h2 className="text-xl font-semibold mb-4">Select Date and Time</h2>
+        <h2 className="text-xl font-semibold mb-4 mt-8">Select Date and Time</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <h3>Start Date</h3>
@@ -193,20 +202,4 @@ interface DateTimeSelectionProps {
 interface ReviewSubmitProps {
   formData: FormData;
   prevStep: () => void;
-}
-
-function ReviewSubmit({ formData, prevStep }: ReviewSubmitProps) {
-  const handleSubmit = () => {
-    // Implement form submission logic
-    console.log('Form submitted:', formData);
-  };
-
-  return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Review and Submit</h2>
-      {/* Display a summary of all entered information */}
-      <button onClick={prevStep} className="mr-2 bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
-      <button onClick={handleSubmit} className="bg-green-500 text-white px-4 py-2 rounded">Submit</button>
-    </div>
-  );
 }

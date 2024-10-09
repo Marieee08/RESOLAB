@@ -1,6 +1,8 @@
 import React from 'react';
 
 interface FormData {
+  ProductsManufactured: string;
+  BulkofCommodity: string;
   Facility: string;
   FacilityQty: number;
   FacilityHrs: number;
@@ -27,9 +29,32 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Process Information</h2>
+      <h2 className="text-2xl font-semibold mb-6 mt-12">Utilization Information</h2>
       
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-6">
+      <div className="col-span-3">
+          <label htmlFor="Manufactured" className="block text-sm font-medium text-gray-700">Commodity/Products Manufactured</label>
+          <input
+            type="text"
+            id="ProductsManufactured"
+            name="ProductsManufactured"
+            value={formData.ProductsManufactured || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+          />
+      </div>
+      <div className="col-span-3">
+          <label htmlFor="Bulk" className="block text-sm font-medium text-gray-700">Bulk of Commodity per Production (in volume or weight)</label>
+          <input
+            type="text"
+            id="BulkofCommodity"
+            name="BulkofCommodity"
+            value={formData.BulkofCommodity || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+          />
+      </div>
+
         <div>
           <label htmlFor="Facility" className="block text-sm font-medium text-gray-700">Facility</label>
           <input
@@ -42,7 +67,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           />
         </div>
         <div>
-          <label htmlFor="FacilityQty" className="block text-sm font-medium text-gray-700">Facility Quantity</label>
+          <label htmlFor="FacilityQty" className="block text-sm font-medium text-gray-700">Quantity</label>
           <input
             type="number"
             id="FacilityQty"
@@ -53,7 +78,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           />
         </div>
         <div>
-          <label htmlFor="FacilityHrs" className="block text-sm font-medium text-gray-700">Facility Hours</label>
+          <label htmlFor="FacilityHrs" className="block text-sm font-medium text-gray-700">No. of hours</label>
           <input
             type="number"
             id="FacilityHrs"
@@ -76,7 +101,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           />
         </div>
         <div>
-          <label htmlFor="EquipmentQty" className="block text-sm font-medium text-gray-700">Equipment Quantity</label>
+          <label htmlFor="EquipmentQty" className="block text-sm font-medium text-gray-700">Quantity</label>
           <input
             type="number"
             id="EquipmentQty"
@@ -87,7 +112,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           />
         </div>
         <div>
-          <label htmlFor="EquipmentHrs" className="block text-sm font-medium text-gray-700">Equipment Hours</label>
+          <label htmlFor="EquipmentHrs" className="block text-sm font-medium text-gray-700">No. of hours</label>
           <input
             type="number"
             id="EquipmentHrs"
@@ -110,7 +135,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           />
         </div>
         <div>
-          <label htmlFor="ToolsQty" className="block text-sm font-medium text-gray-700">Tools Quantity</label>
+          <label htmlFor="ToolsQty" className="block text-sm font-medium text-gray-700">Quantity</label>
           <input
             type="number"
             id="ToolsQty"
@@ -121,7 +146,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           />
         </div>
         <div>
-          <label htmlFor="ToolsHrs" className="block text-sm font-medium text-gray-700">Tools Hours</label>
+          <label htmlFor="ToolsHrs" className="block text-sm font-medium text-gray-700">No. of hours</label>
           <input
             type="number"
             id="ToolsHrs"

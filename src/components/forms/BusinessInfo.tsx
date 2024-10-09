@@ -37,10 +37,10 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Business Information</h2>
+      <h2 className="text-2xl font-semibold mb-6 mt-12">Business Information</h2>
       
       <div className="grid grid-cols-2 gap-6">
-        <div>
+        <div className="col-span-2">
           <label htmlFor="CompanyName" className="block text-sm font-medium text-gray-700">Company Name</label>
           <input
             type="text"
@@ -52,7 +52,7 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
           />
         </div>
         <div>
-          <label htmlFor="BusinessOwner" className="block text-sm font-medium text-gray-700">Business Owner</label>
+          <label htmlFor="BusinessOwner" className="block text-sm font-medium text-gray-700">Company/Business Owner</label>
           <input
             type="text"
             id="BusinessOwner"
@@ -63,18 +63,20 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
           />
         </div>
         <div>
-          <label htmlFor="BusinessPermitNum" className="block text-sm font-medium text-gray-700">Business Permit Number</label>
+          <label htmlFor="CompanyEmail" className="block text-sm font-medium text-gray-700">E-mail</label>
           <input
-            type="text"
-            id="BusinessPermitNum"
-            name="BusinessPermitNum"
-            value={formData.BusinessPermitNum || ''}
+            type="email"
+            id="CompanyEmail"
+            name="CompanyEmail"
+            value={formData.CompanyEmail || ''}
             onChange={handleInputChange}
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           />
         </div>
+      </div>
+      <div className="grid grid-cols-3 gap-6 mt-6">
         <div>
-          <label htmlFor="TINNum" className="block text-sm font-medium text-gray-700">TIN Number</label>
+          <label htmlFor="TINNum" className="block text-sm font-medium text-gray-700">TIN No.</label>
           <input
             type="text"
             id="TINNum"
@@ -85,7 +87,18 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
           />
         </div>
         <div>
-          <label htmlFor="CompanyIDNum" className="block text-sm font-medium text-gray-700">Company ID Number</label>
+          <label htmlFor="BusinessPermitNum" className="block text-sm font-medium text-gray-700">Business Permit No.</label>
+          <input
+            type="text"
+            id="BusinessPermitNum"
+            name="BusinessPermitNum"
+            value={formData.BusinessPermitNum || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+          />
+        </div>
+        <div>
+          <label htmlFor="CompanyIDNum" className="block text-sm font-medium text-gray-700">Company ID No.</label>
           <input
             type="text"
             id="CompanyIDNum"
@@ -95,17 +108,8 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           />
         </div>
-        <div>
-          <label htmlFor="CompanyEmail" className="block text-sm font-medium text-gray-700">Company Email</label>
-          <input
-            type="email"
-            id="CompanyEmail"
-            name="CompanyEmail"
-            value={formData.CompanyEmail || ''}
-            onChange={handleInputChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-          />
-        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-6 mt-6">
         <div>
           <label htmlFor="ContactPerson" className="block text-sm font-medium text-gray-700">Contact Person</label>
           <input
@@ -118,7 +122,7 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
           />
         </div>
         <div>
-          <label htmlFor="Designation" className="block text-sm font-medium text-gray-700">Designation</label>
+          <label htmlFor="Designation" className="block text-sm font-medium text-gray-700">Position/Designation</label>
           <input
             type="text"
             id="Designation"
@@ -128,7 +132,7 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           />
         </div>
-        <div>
+        <div className="col-span-2">
           <label htmlFor="CompanyAddress" className="block text-sm font-medium text-gray-700">Company Address</label>
           <input
             type="text"
@@ -140,7 +144,7 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
           />
         </div>
         <div>
-          <label htmlFor="CompanyCity" className="block text-sm font-medium text-gray-700">Company City</label>
+          <label htmlFor="CompanyCity" className="block text-sm font-medium text-gray-700">City/Municipality</label>
           <input
             type="text"
             id="CompanyCity"
@@ -150,8 +154,9 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           />
         </div>
+        <div className="grid grid-cols-2 gap-6">
         <div>
-          <label htmlFor="CompanyProvince" className="block text-sm font-medium text-gray-700">Company Province</label>
+          <label htmlFor="CompanyProvince" className="block text-sm font-medium text-gray-700">Province</label>
           <input
             type="text"
             id="CompanyProvince"
@@ -162,7 +167,7 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
           />
         </div>
         <div>
-          <label htmlFor="CompanyZipcode" className="block text-sm font-medium text-gray-700">Company Zipcode</label>
+          <label htmlFor="CompanyZipcode" className="block text-sm font-medium text-gray-700">Zipcode</label>
           <input
             type="number"
             id="CompanyZipcode"
@@ -172,8 +177,9 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           />
         </div>
+        </div>
         <div>
-          <label htmlFor="CompanyPhoneNum" className="block text-sm font-medium text-gray-700">Company Phone Number</label>
+          <label htmlFor="CompanyPhoneNum" className="block text-sm font-medium text-gray-700">Phone No.</label>
           <input
             type="tel"
             id="CompanyPhoneNum"
@@ -184,7 +190,7 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
           />
         </div>
         <div>
-          <label htmlFor="CompanyMobileNum" className="block text-sm font-medium text-gray-700">Company Mobile Number</label>
+          <label htmlFor="CompanyMobileNum" className="block text-sm font-medium text-gray-700">Mobile No.</label>
           <input
             type="tel"
             id="CompanyMobileNum"
@@ -194,8 +200,8 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           />
         </div>
-        <div>
-          <label htmlFor="Manufactured" className="block text-sm font-medium text-gray-700">Manufactured</label>
+        <div className="col-span-2">
+          <label htmlFor="Manufactured" className="block text-sm font-medium text-gray-700">Commodity/Products Manufactured</label>
           <input
             type="text"
             id="Manufactured"
@@ -205,8 +211,8 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           />
         </div>
-        <div>
-          <label htmlFor="ProductionFrequency" className="block text-sm font-medium text-gray-700">Production Frequency</label>
+        <div className="col-span-2">
+          <label htmlFor="ProductionFrequency" className="block text-sm font-medium text-gray-700">Frequency of Production (Daily, Weekly, or Monthly)</label>
           <input
             type="text"
             id="ProductionFrequency"
@@ -216,8 +222,8 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           />
         </div>
-        <div>
-          <label htmlFor="Bulk" className="block text-sm font-medium text-gray-700">Bulk</label>
+        <div className="col-span-2">
+          <label htmlFor="Bulk" className="block text-sm font-medium text-gray-700">Bulk of Commodity per Production (in volume or weight)</label>
           <input
             type="text"
             id="Bulk"
