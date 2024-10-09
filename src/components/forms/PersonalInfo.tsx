@@ -7,6 +7,7 @@ interface FormData {
   endTime: string | null;
   
   // Add ClientInfo fields
+  name: string;
   contactNum: string;
   address: string;
   city: string;
@@ -30,10 +31,24 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
+    <div className="max-w-4xl mx-auto">
+      <h2 className="text-2xl font-semibold mb-4 mt-12">Personal Information</h2>
       
       <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-6 mt-6">
+      <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            required
+          />
+        </div>
+        
         <div>
           <label htmlFor="contactNum" className="block text-sm font-medium text-gray-700">Contact Number</label>
           <input
@@ -47,7 +62,7 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
           />
         </div>
 
-        <div>
+        <div className="col-span-2">
           <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
           <input
             type="text"
@@ -60,7 +75,7 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
         </div>
 
         <div>
-          <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
+          <label htmlFor="city" className="block text-sm font-medium text-gray-700">City/Municipality</label>
           <input
             type="text"
             id="city"
@@ -71,6 +86,7 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
           />
         </div>
 
+        <div className="grid grid-cols-2 gap-6">
         <div>
           <label htmlFor="province" className="block text-sm font-medium text-gray-700">Province</label>
           <input
@@ -94,6 +110,8 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
           />
         </div>
+      </div>
+      </div>
       </div>
 
       <div className="mt-6 flex justify-between">
