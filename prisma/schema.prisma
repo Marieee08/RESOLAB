@@ -12,10 +12,10 @@ datasource db {
 
 model Machine {
   id          String   @id @default(cuid())
-  name        String
-  image       String
-  description String
-  videoUrl    String?
+  Machine     String
+  Image       String
+  Desc        String
+  Link        String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
