@@ -1,141 +1,102 @@
-'use client'; // Add this at the very top of the file
+"use client";
 
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { useState } from 'react';
 
-interface FormData {
-  email: string;
-  name: string;
-  contactNum: string;
-}
+export default function Dashboard() {
+  const [formData, setFormData] = useState({ name: '', email: '', contactNum: '' });
+  const [searchId, setSearchId] = useState('');
+  const [user, setUser] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
-interface SearchResult {
-  id: number;
-  email: string;
-  name?: string;
-  contactNum?: string;
-}
+  const handleRegister = async () => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-export default function Register() {
-  const [formData, setFormData] = useState<FormData>({
-    email: '',
-    name: '',
-    contactNum: '',
-  });
+      if (!response.ok) throw new Error("Failed to register user");
 
-  const [searchId, setSearchId] = useState<number | null>(null);
-  const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (res.ok) {
-      console.log('Account created successfully!');
-    } else {
-      console.error('Failed to create account');
-      const error = await res.json();
-      console.error('Error details:', error);
+      const result = await response.json();
+      alert(`User ${result.name} registered successfully!`);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(error.message);
     }
   };
 
-  const handleSearch = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSearch = async () => {
+    try {
+      const response = await fetch(`/api/auth/search?id=${searchId}`);
 
-    if (searchId === null) return;
+      if (!response.ok) throw new Error("User not found");
 
-    const res = await fetch(`/api/search?id=${searchId}`);
-
-    if (res.ok) {
-      const data = await res.json();
-      setSearchResult(data);
-      setError(null);
-    } else {
-      const error = await res.json();
-      setSearchResult(null);
-      setError(error.error || 'Failed to fetch data');
+      const result = await response.json();
+      setUser(result);
+      setErrorMessage('');
+    } catch (error) {
+      console.error(error);
+      setUser(null);
+      setErrorMessage(error.message);
     }
   };
 
   return (
-    <div>
-      <h1>Create an Account</h1>
-      <form onSubmit={handleSubmit}>
-        <label>
-          Email:
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </label>
-        <br />
-        <label>
-          Name:
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-          />
-        </label>
-        <br />
-        <label>
-          Contact Number:
-          <input
-            type="tel"
-            name="contactNum"
-            value={formData.contactNum}
-            onChange={handleChange}
-          />
-        </label>
-        <br />
-        <button type="submit">Register</button>
-      </form>
-      <br></br><br></br>
-      <h2>Search by ID</h2>
-      <form onSubmit={handleSearch}>
-        <label>
-          ID:
-          <input
-            type="number"
-            value={searchId ?? ''}
-            onChange={(e) => setSearchId(Number(e.target.value))}
-            required
-          />
-        </label>
-        <br />
-        <button type="submit">Search</button>
-      </form>
-      <br></br>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">User Registration</h1>
 
-      {searchResult && (
-        <div>
-          <h3>Search Results:</h3>
-          <p><strong>ID:</strong> {searchResult.id}</p>
-          <p><strong>Email:</strong> {searchResult.email}</p>
-          <p><strong>Name:</strong> {searchResult.name}</p>
-          <p><strong>Contact Number:</strong> {searchResult.contactNum}</p>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          className="border px-2 py-1 mb-2 w-full"
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          className="border px-2 py-1 mb-2 w-full"
+        />
+        <input
+          type="text"
+          placeholder="Contact Number"
+          value={formData.contactNum}
+          onChange={(e) => setFormData({ ...formData, contactNum: e.target.value })}
+          className="border px-2 py-1 mb-2 w-full"
+        />
+        <button onClick={handleRegister} className="bg-blue-500 text-white px-4 py-2">
+          Register
+        </button>
+      </div>
+
+      <h2 className="text-2xl font-bold mb-4">Search User by ID</h2>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="User ID"
+          value={searchId}
+          onChange={(e) => setSearchId(e.target.value)}
+          className="border px-2 py-1 mb-2 w-full"
+        />
+        <button onClick={handleSearch} className="bg-green-500 text-white px-4 py-2">
+          Search
+        </button>
+      </div>
+
+      {user && (
+        <div className="mt-4 p-4 border">
+          <h3 className="text-xl font-bold">User Details</h3>
+          <p>Name: {user.name}</p>
+          <p>Email: {user.email}</p>
+          <p>Contact Number: {user.contactNum}</p>
         </div>
       )}
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
     </div>
   );
 }
