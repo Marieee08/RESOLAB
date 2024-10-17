@@ -55,46 +55,37 @@ export default function AdminServices() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submission started');
+  
+    const machineData = {
+      Machine: formData.name,
+      Image: formData.image,
+      Desc: formData.description,
+      Link: formData.videoUrl,
+    };
+    console.log('Form data prepared:', machineData);
+  
     try {
-      if (editingMachine) {
-        // Update existing machine
-        const response = await fetch(`/api/machines/${editingMachine.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
-        if (response.ok) {
-          const updatedMachine = await response.json();
-          setMachines(machines.map(m => m.id === updatedMachine.id ? updatedMachine : m));
-        }
+      const response = await fetch('/api/machines', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });      
+      console.log('Fetch response received:', response);
+  
+      if (response.ok) {
+        const newMachine = await response.json();
+        console.log('Machine added successfully:', newMachine);
+        setMachines([...machines, newMachine]);
+        closeModal();
       } else {
-        // Add new machine
-        const response = await fetch('/api/machines', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
-        });
-        if (response.ok) {
-          const newMachine = await response.json();
-          setMachines([...machines, newMachine]);
-        }
+        console.error('Failed to add machine:', await response.text());
       }
-      closeModal();
     } catch (error) {
       console.error('Error submitting machine:', error);
     }
   };
-
-  const deleteMachine = async (id: string) => {
-    try {
-      const response = await fetch(`/api/machines/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        setMachines(machines.filter(m => m.id !== id));
-      }
-    } catch (error) {
-      console.error('Error deleting machine:', error);
-    }
-  };
+  
 
   return (
     <main className="min-h-screen bg-[#f1f1f8] pt-24">
