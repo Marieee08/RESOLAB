@@ -21,3 +21,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Failed to create machine' }, { status: 500 });
   }
 }
+
+
+export async function GET() {
+  try {
+    const machines = await prisma.machine.findMany();  // Use your actual model name if it's different
+    return NextResponse.json(machines);
+  } catch (error) {
+    console.error('Error fetching machines:', error);
+    return NextResponse.error();
+  }
+}
