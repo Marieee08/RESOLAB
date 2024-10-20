@@ -41,21 +41,21 @@ export default function AdminServices() {
   const openModal = (machine: Machine | null = null) => {
     console.log(machine);
     setEditingMachine(machine); // Set the machine being edited
-    
+  
     // Pre-fill the form data with the machine's data
     if (machine) {
       setFormData({
-        name: machine.name || '', // machine.name must match the field in your database response
-        image: machine.image || '',
-        description: machine.description || '',
-        videoUrl: machine.videoUrl || '',
+        name: machine.Machine || '', // Capitalized field
+        image: machine.Image || '',   // Capitalized field
+        description: machine.Desc || '', // Capitalized field
+        videoUrl: machine.Link || '',
       });
     } else {
       setFormData({}); // If adding a new machine, reset formData
     }
   
     setIsModalOpen(true); // Open the modal
-  };  
+  };   
   
 
   const closeModal = () => {
