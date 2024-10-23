@@ -25,7 +25,9 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const machines = await prisma.machine.findMany();  // Use your actual model name if it's different
+    console.log('Fetching machines...');
+    const machines = await prisma.machine.findMany();
+    console.log('Machines fetched:', machines);
     return NextResponse.json(machines);
   } catch (error) {
     console.error('Error fetching machines:', error);

@@ -36,6 +36,24 @@ export default function AdminServices() {
       console.error('Error fetching machines:', error);
     }
   };  
+
+  const deleteMachine = async (id: string) => {
+      try {
+        const response = await fetch(`/api/machines/${id}`, {
+          method: 'DELETE',
+        });
+  
+        if (response.ok) {
+          // Remove the deleted machine from the state
+          setMachines(machines.filter((machine) => machine.id !== id));
+          console.log('Machine deleted successfully');
+        } else {
+          console.error('Failed to delete machine:', await response.text());
+        }
+      } catch (error) {
+        console.error('Error deleting machine:', error);
+      }
+  };  
   
 
   const openModal = (machine: Machine | null = null) => {
@@ -90,7 +108,8 @@ export default function AdminServices() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(machineData),
       });
-    } else {
+    }
+     else {
       // Add new machine
       response = await fetch('/api/machines', {
         method: 'POST',
@@ -116,6 +135,7 @@ export default function AdminServices() {
     console.error('Error submitting machine:', error);
   }
 };
+
   
 
   return (
