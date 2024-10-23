@@ -1,27 +1,44 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../../../lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
+  if (req.method === 'POST') {
+    const { Machine, Image, Desc, Link } = req.body; // Make sure these names match your form data
+
     try {
-      const machines = await prisma.machine.findMany();
-      res.status(200).json(machines);
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching machines', error });
-    }
-  } else if (req.method === 'POST') {
-    try {
-      const { name, image, description, videoUrl } = req.body;
-      const machine = await prisma.machine.create({
-        data: { name, image, description, videoUrl },
+      const newMachine = await prisma.machine.create({
+        data: {
+          Machine,
+          Image,
+          Desc,
+          Link,
+        },
       });
-      res.status(201).json(machine);
+      res.status(201).json(newMachine);
     } catch (error) {
-      res.status(500).json({ message: 'Error creating machine', error });
+      console.error('Error creating machine:', error); // Add logging for better debugging
+      res.status(500).json({ error: 'Error creating machine' });
+    }
+  } 
+  
+else if (req.method === 'POST') {
+    const { Machine, Image, Desc, Link } = req.body;
+
+    try {
+      const newMachine = await prisma.machine.create({
+        data: {
+          Machine,
+          Image,
+          Desc,
+          Link,
+        },
+      });
+      res.status(201).json(newMachine);
+    } catch (error) {
+      res.status(500).json({ error: 'Error creating machine' });
     }
   } else {
-    res.status(405).json({ message: 'Method not allowed' });
+    res.setHeader('Allow', ['GET', 'POST']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
