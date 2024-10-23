@@ -1,6 +1,6 @@
 // app/api/machines/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'; // Adjust the import based on your setup
+import prisma from '@/lib/prisma'; // Adjust the import based on setup
 
 export async function POST(request: Request) {
   try {
@@ -14,9 +14,9 @@ export async function POST(request: Request) {
         Link: videoUrl,
       },
     });
-
     return NextResponse.json(newMachine, { status: 201 });
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Error creating machine:', error);
     return NextResponse.json({ error: 'Failed to create machine' }, { status: 500 });
   }
@@ -29,7 +29,8 @@ export async function GET() {
     const machines = await prisma.machine.findMany();
     console.log('Machines fetched:', machines);
     return NextResponse.json(machines);
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Error fetching machines:', error);
     return NextResponse.error();
   }

@@ -63,16 +63,16 @@ export default function AdminServices() {
     // Pre-fill the form data with the machine's data
     if (machine) {
       setFormData({
-        name: machine.Machine || '', // Capitalized field
-        image: machine.Image || '',   // Capitalized field
-        description: machine.Desc || '', // Capitalized field
+        name: machine.Machine || '',
+        image: machine.Image || '',
+        description: machine.Desc || '',
         videoUrl: machine.Link || '',
       });
     } else {
-      setFormData({}); // If adding a new machine, reset formData
+      setFormData({});
     }
   
-    setIsModalOpen(true); // Open the modal
+    setIsModalOpen(true);
   };   
   
 
@@ -88,55 +88,59 @@ export default function AdminServices() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // Prepare data consistent with the form inputs
-  const machineData = {
-    name: formData.name,
-    image: formData.image,
-    description: formData.description,
-    videoUrl: formData.videoUrl,
+    const machineData = {
+      name: formData.name,
+      image: formData.image,
+      description: formData.description,
+      videoUrl: formData.videoUrl,
+    };
+
+    try {
+      let response;
+
+      if (editingMachine) {
+        // Update existing machine
+        response = await fetch(`/api/machines/${editingMachine.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(machineData),
+        });
+      }
+
+      else {
+        // Add new machine
+        response = await fetch('/api/machines', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(machineData),
+        });
+      }
+
+      if (response.ok) {
+        const updatedMachine = await response.json();
+        if (editingMachine) {
+          // Update machine in state
+          setMachines(machines.map((m) => (m.id === updatedMachine.id ? updatedMachine : m)));
+        }
+        else {
+          // Add new machine to state
+          setMachines([...machines, updatedMachine]);
+        }
+        closeModal();
+      }
+    
+      else {
+        console.error('Failed to save machine:', await response.text());
+      }
+    } 
+  
+    catch (error) {
+      console.error('Error submitting machine:', error);
+    }
   };
 
-  try {
-    let response;
-
-    if (editingMachine) {
-      // Update existing machine
-      response = await fetch(`/api/machines/${editingMachine.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(machineData),
-      });
-    }
-     else {
-      // Add new machine
-      response = await fetch('/api/machines', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(machineData),
-      });
-    }
-
-    if (response.ok) {
-      const updatedMachine = await response.json();
-      if (editingMachine) {
-        // Update machine in state
-        setMachines(machines.map((m) => (m.id === updatedMachine.id ? updatedMachine : m)));
-      } else {
-        // Add new machine to state
-        setMachines([...machines, updatedMachine]);
-      }
-      closeModal();
-    } else {
-      console.error('Failed to save machine:', await response.text());
-    }
-  } catch (error) {
-    console.error('Error submitting machine:', error);
-  }
-};
-
-  
 
   return (
     <main className="min-h-screen bg-[#f1f1f8] pt-24">
@@ -154,33 +158,32 @@ export default function AdminServices() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {machines.map(machine => (
-  <div key={machine.id} className="bg-white rounded-lg shadow-md p-6">
-    <img src={machine.Image} alt={machine.Machine} className="w-full h-48 object-cover rounded-md mb-4" />
-    <h2 className="text-xl font-semibold mb-2">{machine.Machine}</h2>
-    <p className="text-gray-600 mb-4">{machine.Desc}</p>
-    {machine.Link && (
-      <a href={machine.Link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline mb-4 block">
-        Watch Video
-      </a>
-    )}
-    <div className="flex justify-end space-x-2">
-      <button
-        onClick={() => openModal(machine)}
-        className="bg-blue-500 text-white p-2 rounded-full"
-      >
-        <Edit size={20} />
-      </button>
-      <button
-        onClick={() => deleteMachine(machine.id)}
-        className="bg-red-500 text-white p-2 rounded-full"
-      >
-        <Trash2 size={20} />
-      </button>
-    </div>
-  </div>
-))}
-
+          {machines.map(machine => (
+            <div key={machine.id} className="bg-white rounded-lg shadow-md p-6">
+              <img src={machine.Image} alt={machine.Machine} className="w-full h-48 object-cover rounded-md mb-4" />
+              <h2 className="text-xl font-semibold mb-2">{machine.Machine}</h2>
+              <p className="text-gray-600 mb-4">{machine.Desc}</p>
+                {machine.Link && (
+                  <a href={machine.Link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline mb-4 block">
+                    Watch Video
+                  </a>
+                )}
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => openModal(machine)}
+                  className="bg-blue-500 text-white p-2 rounded-full"
+                >
+                  <Edit size={20} />
+                </button>
+                <button
+                  onClick={() => deleteMachine(machine.id)}
+                  className="bg-red-500 text-white p-2 rounded-full"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -194,67 +197,66 @@ export default function AdminServices() {
               </button>
             </div>
             <form onSubmit={handleSubmit}>
-  <div className="mb-4">
-    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-    <input
-      type="text"
-      id="name"
-      name="name"
-      value={formData.name || ''}
-      onChange={handleInputChange}
-      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-      required
-    />
-  </div>
+            <div className="mb-4">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name || ''}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                  required
+                />
+            </div>
 
-  <div className="mb-4">
-    <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-    <textarea
-      id="description"
-      name="description"
-      value={formData.description || ''}
-      onChange={handleInputChange}
-      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-      rows={3}
-      required
-    ></textarea>
-  </div>
+            <div className="mb-4">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description || ''}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                rows={3}
+                required
+              ></textarea>
+            </div>
 
-  <div className="mb-4">
-    <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
-    <input
-      type="text"
-      id="image"
-      name="image"
-      value={formData.image || ''}
-      onChange={handleInputChange}
-      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-      required
-    />
-  </div>
+            <div className="mb-4">
+              <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
+              <input
+                type="text"
+                id="image"
+                name="image"
+                value={formData.image || ''}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                required
+              />
+            </div>
 
-  <div className="mb-4">
-    <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700">YouTube Video URL</label>
-    <input
-      type="text"
-      id="videoUrl"
-      name="videoUrl"
-      value={formData.videoUrl || ''}
-      onChange={handleInputChange}
-      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-    />
-  </div>
+            <div className="mb-4">
+              <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700">YouTube Video URL</label>
+              <input
+                type="text"
+                id="videoUrl"
+                name="videoUrl"
+                value={formData.videoUrl || ''}
+                onChange={handleInputChange}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              />
+            </div>
 
-  <div className="flex justify-end">
-    <button
-      type="submit"
-      className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-    >
-      {editingMachine ? 'Update' : 'Add'} Machine
-    </button>
-  </div>
-</form>
-
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              >
+                {editingMachine ? 'Update' : 'Add'} Machine
+              </button>
+            </div>
+            </form>
           </div>
         </div>
       )}

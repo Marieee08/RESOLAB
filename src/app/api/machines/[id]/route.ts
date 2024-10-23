@@ -1,6 +1,6 @@
 // app/api/machines/[id]/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'; // Adjust the import based on your setup
+import prisma from '@/lib/prisma'; // Adjust the import based on setup
 
 // PUT: Update a machine by ID
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
@@ -20,7 +20,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     });
 
     return NextResponse.json(updatedMachine, { status: 200 });
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Error updating machine:', error);
     return NextResponse.json({ error: 'Failed to update machine' }, { status: 500 });
   }
@@ -35,9 +36,9 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     await prisma.machine.delete({
       where: { id },
     });
-
     return NextResponse.json({ message: 'Machine deleted successfully' }, { status: 200 });
-  } catch (error) {
+  } 
+  catch (error) {
     console.error('Error deleting machine:', error);
     return NextResponse.json({ error: 'Failed to delete machine' }, { status: 500 });
   }

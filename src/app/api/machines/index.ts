@@ -15,13 +15,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         },
       });
       res.status(201).json(newMachine);
-    } catch (error) {
+    } 
+    catch (error) {
       console.error('Error creating machine:', error); // Add logging for better debugging
       res.status(500).json({ error: 'Error creating machine' });
     }
   } 
   
-else if (req.method === 'POST') {
+  else if (req.method === 'POST') {
     const { Machine, Image, Desc, Link } = req.body;
 
     try {
@@ -34,10 +35,13 @@ else if (req.method === 'POST') {
         },
       });
       res.status(201).json(newMachine);
-    } catch (error) {
+      } 
+    catch (error) {
       res.status(500).json({ error: 'Error creating machine' });
     }
-  } else {
+  } 
+  
+  else {
     res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
