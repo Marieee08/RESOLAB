@@ -162,12 +162,14 @@ export default function AdminServices() {
             <div key={machine.id} className="bg-white rounded-lg shadow-md p-6">
               <img src={machine.Image} alt={machine.Machine} className="w-full h-48 object-cover rounded-md mb-4" />
               <h2 className="text-xl font-semibold mb-2">{machine.Machine}</h2>
-              <p className="text-gray-600 mb-4">{machine.Desc}</p>
-                {machine.Link && (
-                  <a href={machine.Link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline mb-4 block">
-                    Watch Video
-                  </a>
-                )}
+              <p className="text-gray-600 mb-4">
+                {machine.Desc.length > 100 ? `${machine.Desc.substring(0, 100)}...` : machine.Desc}
+              </p>
+              {machine.Link && (
+                <a href={machine.Link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline mb-4 block">
+                  Watch Video
+                </a>
+              )}
               <div className="flex justify-end space-x-2">
                 <button
                   onClick={() => openModal(machine)}
