@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 
 const Navbar = () => {
   const [bgColor, setBgColor] = useState('transparent');
@@ -66,9 +67,6 @@ const Navbar = () => {
             <Link href="/services/admin" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Admin Services
             </Link>
-            <Link href="/register" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
-              Register
-            </Link>
           </div>
         </div>
 
@@ -92,13 +90,12 @@ const Navbar = () => {
             </div>
           </div>
           <div className="flex items-center gap-3 2xsm:gap-7">
-            <Link href="#" className="flex items-center gap-4">
-              <span className="hidden text-right lg:block">
-                <span className="block text-sm font-medium text-black">Leila Sabando</span>
-                <span className="block text-xs">Student</span>
-              </span>
-              <span className="h-12 w-12 rounded-full bg-gray-300"></span>
-            </Link>
+            <SignedOut>
+              <SignInButton mode='modal' />
+            </SignedOut>
+            <SignedIn>
+              <UserButton showName />
+            </SignedIn>
           </div>
         </div>
       </div>
