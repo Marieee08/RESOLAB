@@ -61,12 +61,6 @@ const Navbar = () => {
             <Link href="/contact" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Contact
             </Link>
-            <Link href="/dashboard/admin" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
-              Admin Dashboard
-            </Link>
-            <Link href="/services/admin" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
-              Admin Services
-            </Link>
           </div>
         </div>
 
