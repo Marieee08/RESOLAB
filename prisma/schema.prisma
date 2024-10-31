@@ -25,14 +25,13 @@ model Machine {
 
 model AccInfo {
   id              Int              @id @default(autoincrement())
-  Password        String
+  clerkId         String           @unique  // Add this!
   Name            String
-  Email           String           @unique
   Role            String           @default("USER")
-  ClientInfo      ClientInfo?      @relation(name: "AccInfoToClientInfo") //One-to-one
-  BusinessInfo    BusinessInfo?    @relation(name: "AccInfoToBusinessInfo") //One-to-one
-  UtilReqs        UtilReq[]        @relation(name: "AccInfoToUtilReq") //One-to-many
-  EVCReservations EVCReservation[] @relation(name: "AccInfoToEVCReservation") //One-to-many
+  ClientInfo      ClientInfo?      @relation(name: "AccInfoToClientInfo")
+  BusinessInfo    BusinessInfo?    @relation(name: "AccInfoToBusinessInfo")
+  UtilReqs        UtilReq[]        @relation(name: "AccInfoToUtilReq")
+  EVCReservations EVCReservation[] @relation(name: "AccInfoToEVCReservation")
 }
 
 // For Acc Registration (For External Clients)

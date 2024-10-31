@@ -5,19 +5,40 @@ const isProtectedRoute = createRouteMatcher([
   '/services/user/schedule(.*)','/dashboard(.*)'
 ])
 
+const isAdminRoute = createRouteMatcher([
+  '/services/admin(.*)', '/dashboard/admin(.*)'
+])
 
 export default clerkMiddleware((auth, req) => {
   if(isProtectedRoute(req)) {
-    auth().protect()
+    const { userId, sessionClaims } = auth();
+    auth().protect();
+    
+    // Then check for admin routes
+    if(isAdminRoute(req)) {
+      // Assuming you store role in public metadata or claims
+      const isAdmin = sessionClaims?.metadata?.role === 'admin';
+      
+      if (!isAdmin) {
+        // Redirect non-admins to user dashboard
+        return NextResponse.redirect(new URL('/dashboard/user', req.url));
+      }
+    }
+    
+    // For user routes, redirect admins to admin dashboard if they try to access user routes
+    if (req.nextUrl.pathname.startsWith('/services/user') || req.nextUrl.pathname === '/dashboard/user') {
+      const isAdmin = sessionClaims?.metadata?.role === 'admin';
+      
+      if (isAdmin) {
+        return NextResponse.redirect(new URL('/dashboard/admin', req.url));
+      }
+    }
   }
 });
 
-
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 }
