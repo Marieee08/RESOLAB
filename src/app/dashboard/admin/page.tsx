@@ -31,7 +31,7 @@ const DashboardAdmin = () => {
               <li>
                 <button
                   onClick={() => setOrderDropdownOpen(!orderDropdownOpen)}
-                  className="group relative flex w-full items-center justify-between gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]"
+                  className="group relative flex w-full items-center justify-between gap-2.5 rounded-full py-2 px-4 font-medium text-white border bg-[#1c2a52] border-[#5e86ca]"
                 >
                   <span>Orders</span>
                   {/* Dropdown arrow */}
@@ -50,14 +50,26 @@ const DashboardAdmin = () => {
                 </button>
               </li>
               {orderDropdownOpen && (
-                <li className="ml-6">
-                  <Link href="/dashboard-admin/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
-                    History
-                  </Link>
-                </li>
+                <>
+                  <li className="ml-6">
+                    <Link href="/dashboard/admin" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      General
+                    </Link>
+                  </li>
+                  <li className="ml-6">
+                    <Link href="/dashboard/admin/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      History
+                    </Link>
+                  </li>
+                  <li className="ml-6">
+                    <Link href="/dashboard/admin/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      Users
+                    </Link>
+                  </li>
+                </>
               )}
               <li>
-                <Link href="/dashboard-admin/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/dashboard/admin/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                   Reports
                 </Link>
               </li>
@@ -126,7 +138,8 @@ const DashboardAdmin = () => {
         {/* Main */}
         <main>
           <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-          <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+          <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
+          <p className="text-sm text-[#143370] mb-4 font-poppins1">Wednesday, 30 October 2024</p>
           <EditableCalendar />
             <div className="bg-white p-6 rounded-3xl shadow-lg mt-6">
               <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
