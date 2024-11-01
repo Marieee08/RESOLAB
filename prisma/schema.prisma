@@ -25,7 +25,7 @@ model Machine {
 
 model AccInfo {
   id              Int              @id @default(autoincrement())
-  clerkId         String           @unique  // Add this!
+  clerkId         String           @unique
   Name            String
   Role            String           @default("USER")
   ClientInfo      ClientInfo?      @relation(name: "AccInfoToClientInfo")
