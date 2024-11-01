@@ -31,7 +31,7 @@ export default function Home() {
           computer-controlled tools that cover several different length scales and various materials with the aim to <span className="font-poppins2">make "almost anything".</span>
         </p>
         <div className="flex flex-col md:flex-row gap-4 items-end md:items-center">
-          <a href="/services" className="border border-[#5e86ca] bg-[#193d83] text-white font-qanelas1 text-lg py-1 px-6 rounded-md hover:bg-[#2f61c2] transition duration-300 ml-auto">
+          <a href="/services/user" className="border border-[#5e86ca] bg-[#193d83] text-white font-qanelas1 text-lg py-1 px-6 rounded-md hover:bg-[#2f61c2] transition duration-300 ml-auto">
             Get Started
           </a>
           <a href="https://www.facebook.com/fablabeasternvisayas" className="text-[#1c62b5] font-qanelas1 text-lg py-1 px-6 rounded-md transition-all duration-300 flex items-center justify-end transform hover:scale-105">

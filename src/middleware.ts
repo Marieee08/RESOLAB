@@ -3,18 +3,15 @@ import { NextResponse } from 'next/server'
 
 
 
-const isProtectedRoute = createRouteMatcher([
-  '/services/user/schedule(.*)','/dashboard(.*)'
-])
-
-const isAdminRoute = createRouteMatcher([
-  '/services/admin(.*)', '/dashboard/admin(.*)'
-])
+const isProtectedRoute = createRouteMatcher(['/services/user/schedule(.*)','/dashboard(.*)'])
+const isAdminRoute = createRouteMatcher(['/services/admin(.*)', '/dashboard/admin(.*)'])
 
 export default clerkMiddleware((auth, req) => {
   if(isProtectedRoute(req)) {
     const { userId, sessionClaims } = auth();
     auth().protect();
+    
+
     
     // Then check for admin routes
     if(isAdminRoute(req)) {
@@ -36,6 +33,8 @@ export default clerkMiddleware((auth, req) => {
       }
     }
   }
+
+  { debug: true }
 });
 
 export const config = {
