@@ -1,5 +1,9 @@
-import { clerkMiddleware, createRouteMatcher, authMiddleware } from "@clerk/nextjs/server";
+'use server'
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { checkRole } from 'utils/roles'
+import { clerkClient } from '@clerk/nextjs/server'
+
 
 // Route matchers
 const isProtectedRoute = createRouteMatcher([
@@ -12,20 +16,31 @@ const isAdminRoute = createRouteMatcher([
     '/dashboard/admin(.*)'
 ]);
 
-export default clerkMiddleware((auth, req) => {
+export default clerkMiddleware(async (auth, req) => {
     if(isProtectedRoute(req)) {
       const { userId, sessionClaims } = auth();
       auth().protect();
+
+    
+    if (req.nextUrl.pathname === '/dashboard/user') {
+        if (!checkRole('ADMIN')) {
+            const url = new URL('/dashboard/admin', req.url);
+            return NextResponse.redirect(url)
+          }
+    }
+
+    if (req.nextUrl.pathname === '/dashboard/admin') {
+        if (!checkRole('USER')) {
+            const url = new URL('/dashboard/user', req.url);
+            return NextResponse.redirect(url)
+          }
+    }
       
-  
-      
-      // Then check for admin routes
-      if(isAdminRoute(req)) {
-        // Assuming you store role in public metadata or claims
-  
- 
-        }
-      
+    if (isAdminRoute(req) && !checkRole('USER')) {
+        const url = new URL('/', req.url)
+        return NextResponse.redirect(url)
+      }
+    
     }
   
     { debug: true }
