@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 
 export async function POST(req: Request) {
-    console.log('1. Webhook endpoint hit'); // First log to confirm endpoint is reached
+    console.log('1. Webhook endpoint hit');
 
     try {
         console.log('2. Starting webhook processing');
@@ -65,7 +65,6 @@ export async function POST(req: Request) {
         const eventType = evt.type;
         console.log('11. Processing event type:', eventType);
 
-
         if (eventType === 'user.created') {
             try {
                 console.log('Starting user creation process');
@@ -78,12 +77,20 @@ export async function POST(req: Request) {
                     }
                 });
         
+                // Get primary email address
+                const primaryEmail = evt.data.email_addresses?.find(email => email.id === evt.data.primary_email_address_id)?.email_address;
+                
+                if (!primaryEmail) {
+                    throw new Error('No primary email address found for user');
+                }
+        
                 // Prepare user data
                 const userData = {
                     clerkId: evt.data.id,
                     Name: evt.data.first_name 
                         ? `${evt.data.first_name} ${evt.data.last_name || ''}`
                         : 'New User',
+                    email: primaryEmail,
                     Role: "USER",
                 };
         
@@ -106,7 +113,6 @@ export async function POST(req: Request) {
                 return new Response(`Failed to create user: ${error.message}`, { status: 500 });
             }
         }
-        
 
         if (eventType === 'user.deleted') {
             try {
@@ -193,7 +199,6 @@ export async function POST(req: Request) {
                 return new Response(`Failed to delete user: ${error.message}`, { status: 500 });
             }
         }
-
 
         console.log('17. Webhook processed successfully');
         return new Response('Webhook processed successfully', { status: 200 });

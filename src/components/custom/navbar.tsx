@@ -68,7 +68,12 @@ const Navbar = () => {
               Home
             </Link>
 
-
+            <SignedOut>
+              <Link href="/services/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+                Services
+              </Link>
+            </SignedOut>
+            
             <SignedIn>
 
             {userRole === 'USER' && (
@@ -95,9 +100,6 @@ const Navbar = () => {
 
             <Link href="/contact" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Contact
-            </Link>
-            <Link href="/USERDATA" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
-              USER DATA
             </Link>
             
           </div>

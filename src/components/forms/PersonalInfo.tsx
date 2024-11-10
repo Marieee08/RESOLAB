@@ -6,7 +6,7 @@ interface FormData {
   startTime: string | null;
   endTime: string | null;
   
-  // Add ClientInfo fields
+  // ClientInfo fields
   name: string;
   contactNum: string;
   address: string;

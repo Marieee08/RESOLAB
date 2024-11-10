@@ -1,6 +1,5 @@
 "use client";
 
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 import Navbar from '@/components/custom/navbar';

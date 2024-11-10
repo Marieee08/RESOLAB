@@ -1,6 +1,6 @@
 // app/api/machines/[id]/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma'; // Adjust the import based on setup
+import { prisma } from '@/lib/prisma'
 
 
 // PUT: Update a machine by ID

@@ -1,28 +1,34 @@
 // middleware.ts
-import { clerkMiddleware, createRouteMatcher  } from "@clerk/nextjs/server";
+import { authMiddleware } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { useEffect, useState } from "react";
 
-
-// Route matchers
-const isProtectedRoute = createRouteMatcher([
-    '/services/user/schedule(.)',
-]);
-
-
-  export default clerkMiddleware(async (auth, req) => {
-
-    if(isProtectedRoute(req)) {
-      const { userId, sessionClaims } = auth();
-      auth().protect();
-
-
+export default authMiddleware({
+  // This runs after Clerk's default middleware
+  afterAuth(auth, req) {
+    // If user is not signed in and trying to access protected routes
+    if (!auth.userId && req.nextUrl.pathname.startsWith('/services/user/schedule')) {
+      const signInUrl = new URL('/sign-in', req.url);
+      return NextResponse.redirect(signInUrl);
     }
 
-  }
+    // Get the user's role from session claims
+    const role = auth.sessionClaims?.metadata?.role as string;
 
-);
+    // Protect admin routes are not yet accomplished
+
+
+    // Allow the request to continue
+    return NextResponse.next();
+  },
+
+  publicRoutes: [
+    '/',
+    '/sign-in',
+    '/sign-up',
+    '/contact'
+  ],
+});
 
 export const config = {
-    matcher: ["/((?!.+\\.[\\w]+$|_next).)", "/", "/(api|trpc)(.)"],
-  };
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+};
