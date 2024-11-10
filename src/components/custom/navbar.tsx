@@ -4,11 +4,16 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
   const [bgColor, setBgColor] = useState('transparent');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
+  const userRole = user?.publicMetadata?.role as string || "USER";
+
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +27,15 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (isLoaded && user) {
+      const path = window.location.pathname;
+      if (path.includes('/dashboard/admin') && userRole !== 'ADMIN') {
+        router.push('/dashboard/user');
+      }
+    }
+  }, [isLoaded, user, userRole, router]);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -53,18 +67,39 @@ const Navbar = () => {
             <Link href="/" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Home
             </Link>
-            <Link href="/dashboard/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
-              Dashboard
-            </Link>
-            <Link href="/services/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
-              Services
-            </Link>
+
+
+            <SignedIn>
+
+            {userRole === 'USER' && (
+                <>
+                  <Link href="/dashboard/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+                    Dashboard
+                  </Link>
+                  <Link href="/services/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+                    Services
+                  </Link>
+                </>
+              )}
+              {userRole === 'ADMIN' && (
+                <>
+                  <Link href="/dashboard/admin" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+                    Dashboard
+                  </Link>
+                  <Link href="/services/admin" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+                    Services
+                  </Link>
+                </>
+              )}
+            </SignedIn>
+
             <Link href="/contact" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Contact
             </Link>
-            <Link href="/dashboard/admin" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
-              ADMIN
+            <Link href="/USERDATA" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+              USER DATA
             </Link>
+            
           </div>
         </div>
 
