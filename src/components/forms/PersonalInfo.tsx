@@ -36,7 +36,7 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
       
       <div className="space-y-4">
       <div className="grid grid-cols-2 gap-6 mt-6">
-      <div>
+        <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
           <input
             type="text"
