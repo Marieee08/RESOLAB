@@ -102,9 +102,6 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData, nextS
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to submit reservation');
-      }
 
       const result = await response.json();
       
