@@ -5,12 +5,15 @@ import Link from "next/link";
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import Navbar from '@/components/custom/navbar';
+import { format } from 'date-fns';
 
 
 const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const [isBusinessView, setIsBusinessView] = useState(false);
+  const today = new Date();
+  const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
 
   return (
@@ -104,7 +107,7 @@ const DashboardUser = () => {
         <main>
           <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Settings</h2>
-          <p className="text-sm text-[#143370] mb-4 font-poppins1">Wednesday, 30 October 2024</p>
+          <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
          
         <section className="flex-1">
 
