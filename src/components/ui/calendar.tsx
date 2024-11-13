@@ -17,6 +17,15 @@ function Calendar({
   onSelect,
   ...props
 }: CalendarProps) {
+  const isDateDisabled = (date: Date) => {
+    const today = new Date();
+    // Disable past dates
+    if (date < today.setHours(0, 0, 0, 0)) return true;
+    // Disable weekends (Saturday and Sunday)
+    const day = date.getDay();
+    return day === 0 || day === 6;
+  }
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}

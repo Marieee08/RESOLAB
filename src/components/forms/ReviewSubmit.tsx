@@ -2,10 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 
 interface FormData {
-    startDate: Date | null;
-    endDate: Date | null;
-    startTime: string | null;
-    endTime: string | null;
+    days: {
+      date: Date;
+      startTime: string | null;
+      endTime: string | null;
+    }[];
   
     // ClientInfo fields
     name: string;
@@ -62,6 +63,11 @@ const handleSubmit = () => {
     console.log('Form submitted:', FormData);
 };
 
+interface ReviewSubmitProps {
+    formData: FormData;
+    prevStep: () => void;
+  }
+
 export default function PersonalInformation({ formData, updateFormData, nextStep, prevStep }: StepProps) {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -72,6 +78,20 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
     <div className="max-w-4xl mx-auto">
         <h2 className="text-2xl font-semibold mb-4 mt-12">Review Your Information</h2>
         <div className="border border-gray-300 rounded-md shadow-sm p-4">
+        <h2 className="text-2xl font-semibold mb-4">Selected Dates and Times</h2>
+        {formData.days.length > 0 ? (
+          formData.days.map((day, index) => (
+            <div key={index} className="mb-4">
+              <h3 className="text-lg font-semibold">Day {index + 1}: {day.date.toDateString()}</h3>
+              <p><strong>Start Time:</strong> {day.startTime || 'Not selected'}</p>
+              <p><strong>End Time:</strong> {day.endTime || 'Not selected'}</p>
+            </div>
+          ))
+        ) : (
+          <p>No dates selected.</p>
+        )}
+      </div>        
+        <div className="border border-gray-300 rounded-md shadow-sm p-4 mt-6">
             <h2 className="text-2xl font-semibold mb-4">Personal Information</h2>
             <div className="grid grid-cols-2 gap-6">
                 <div>

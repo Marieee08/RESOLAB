@@ -161,23 +161,33 @@ export default function Schedule() {
 }
 
 interface DateTimeSelectionProps {
-    formData: FormData;
-    addNewDay: (date: Date) => void;
-    updateDayTime: (index: number, time: string, field: 'startTime' | 'endTime') => void;
-    nextStep: () => void;
-  }
+  formData: FormData;
+  addNewDay: (date: Date) => void;
+  updateDayTime: (index: number, time: string, field: 'startTime' | 'endTime') => void;
+  nextStep: () => void;
+}
 
-  function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: DateTimeSelectionProps) {
-    const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
-  
-    const handleSelect = (date: Date | undefined) => {
-      if (date) {
-        setSelectedDate(date); // Update selected date
-        if (!formData.days.some(day => day.date.toDateString() === date.toDateString())) {
-          addNewDay(date);
-        }
+function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: DateTimeSelectionProps) {
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
+
+  const handleSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date); // Update selected date
+      if (!formData.days.some(day => day.date.toDateString() === date.toDateString())) {
+        addNewDay(date);
       }
-    };
+    }
+  };
+
+  // Disable dates that are in the past and weekends (Saturday and Sunday)
+  const isDateDisabled = (date: Date) => {
+    const today = new Date();
+    // Check if the date is in the past
+    const isPastDate = date < today.setHours(0, 0, 0, 0);
+    // Check if the date is a weekend (Saturday or Sunday)
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    return isPastDate || isWeekend;
+  };
 
     // const [selectedDates, setSelectedDates] = React.useState<Date[]>([]);
     //const handleSelect = (date: Date | undefined) => {
@@ -195,9 +205,10 @@ interface DateTimeSelectionProps {
         <div className="items-start w-full h-full">
           <Calendar
             className="w-full h-full" 
-            mode="single"       // multiple
-            selected={selectedDate}      //selectedDates
+            mode="single"
+            selected={selectedDate}
             onSelect={handleSelect}
+            disabled={isDateDisabled}
           />
         </div>
         <div className="mt-4 space-y-4">
@@ -224,7 +235,6 @@ interface DateTimeSelectionProps {
     </div>
     );
   }
-
 
 interface ReviewSubmitProps {
   formData: FormData;
