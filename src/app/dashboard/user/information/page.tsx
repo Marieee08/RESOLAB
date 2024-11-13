@@ -2,7 +2,8 @@
 
 
 import Link from "next/link";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useUser } from "@clerk/nextjs";
 import { format } from 'date-fns';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import Navbar from '@/components/custom/navbar';
@@ -12,6 +13,7 @@ const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const [isBusinessView, setIsBusinessView] = useState(false);
+  const { user } = useUser();
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 

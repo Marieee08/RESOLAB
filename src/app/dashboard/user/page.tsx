@@ -94,7 +94,7 @@ const handleReviewClick = (reservation: Reservation) => {
             <h2 className="text-[#0d172c] text-xl font-bold">
               {user?.firstName || user?.username || 'User'}
             </h2>
-            <p className="text-[#1c62b5]">Student</p>
+            <p className="text-[#1c62b5]">MSME</p>
           </div>
           <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-600">MENU</h3>
