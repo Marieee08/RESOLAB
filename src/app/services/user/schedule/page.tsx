@@ -63,6 +63,7 @@ type UpdateFormData = (field: keyof FormData, value: FormData[keyof FormData] | 
 
 export default function Schedule() {
   const [step, setStep] = React.useState(1);
+  const [selectedDates, setSelectedDates] = React.useState<Date[]>([]);
   const [formData, setFormData] = React.useState<FormData>({
     days: [],
     
@@ -111,8 +112,16 @@ export default function Schedule() {
     setFormData(prevData => ({ ...prevData, [field]: value }));
   };
 
+  const addOrRemoveDate = (date: Date) => {
+    setSelectedDates((prevDates) =>
+      prevDates.some((d) => d.getTime() === date.getTime())
+        ? prevDates.filter((d) => d.getTime() !== date.getTime())
+        : [...prevDates, date]
+    );
+  };  
+
   const addNewDay = (date: Date) => {
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
       days: [...prevData.days, { date, startTime: null, endTime: null }],
     }));
@@ -130,21 +139,31 @@ export default function Schedule() {
   const renderStep = () => {
     switch(step) {
       case 1:
-        return <DateTimeSelection formData={formData}  addNewDay={addNewDay} updateDayTime={updateDayTime} nextStep={nextStep} />;
+        return <DateTimeSelection formData={formData} selectedDates={selectedDates} addOrRemoveDate={addOrRemoveDate} updateDayTime={updateDayTime} nextStep={() => setStep(2)} />;
       case 2:
         return <PersonalInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
       case 3:
         return <BusinessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
       case 4:
         return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 5:
-        return <ReviewSubmit formData={formData} prevStep={prevStep} updateFormData={function (field: keyof FormData, value: string | number | Date | null): void {
-          throw new Error('Function not implemented.');
-        } } nextStep={function (): void {
-          throw new Error('Function not implemented.');
-        } } />;
-      default:
-        return <DateTimeSelection formData={formData} updateFormData={updateFormData} nextStep={nextStep} />;
+        case 5:
+          return (
+            <ReviewSubmit
+              formData={formData}
+              prevStep={prevStep}
+            />
+          );
+        default:
+          return (
+            <DateTimeSelection
+  formData={formData}
+  selectedDates={selectedDates}
+  addOrRemoveDate={addOrRemoveDate}
+  addNewDay={addNewDay}
+  nextStep={() => setStep(2)}
+/>
+
+          );        
     }
   };
 
@@ -161,43 +180,28 @@ export default function Schedule() {
 }
 
 interface DateTimeSelectionProps {
-    formData: FormData;
-    addNewDay: (date: Date) => void;
-    updateDayTime: (index: number, time: string, field: 'startTime' | 'endTime') => void;
-    nextStep: () => void;
-  }
+  formData: FormData;
+  selectedDates: Date[];
+  addOrRemoveDate: (date: Date) => void;
+  updateDayTime: (index: number, time: string, field: 'startTime' | 'endTime') => void;
+  nextStep: () => void;
+}
 
-  function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: DateTimeSelectionProps) {
-    const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
-  
-    const handleSelect = (date: Date | undefined) => {
-      if (date) {
-        setSelectedDate(date); // Update selected date
-        if (!formData.days.some(day => day.date.toDateString() === date.toDateString())) {
-          addNewDay(date);
-        }
-      }
-    };
-
-    // const [selectedDates, setSelectedDates] = React.useState<Date[]>([]);
-    //const handleSelect = (date: Date | undefined) => {
-      //if (date) {
-        //setSelectedDates(prevDates =>
-          //prevDates.some(d => d.getTime() === date.getTime())
-          //? prevDates.filter(d => d.getTime() !== date.getTime())
-          //: [...prevDates, date]
-        //);}};
-  
-    return (
-      <div>
+function DateTimeSelection({
+  formData,
+  selectedDates,
+  addOrRemoveDate,
+  updateDayTime,
+  nextStep,
+}: DateTimeSelectionProps) {
+  return (
+    <div>
       <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
       <div className="grid grid-cols-2 gap-6 mt-6">
         <div className="items-start w-full h-full">
           <Calendar
-            className="w-full h-full" 
-            mode="single"       // multiple
-            selected={selectedDate}      //selectedDates
-            onSelect={handleSelect}
+            selectedDates={selectedDates}  // Use the prop passed from Schedule
+            setSelectedDates={addOrRemoveDate} // Use the function passed from Schedule
           />
         </div>
         <div className="mt-4 space-y-4">
@@ -222,8 +226,9 @@ interface DateTimeSelectionProps {
       </div>
       <button onClick={nextStep} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Next</button>
     </div>
-    );
-  }
+  );
+}
+
 
 
 interface ReviewSubmitProps {

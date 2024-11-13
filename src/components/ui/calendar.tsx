@@ -7,22 +7,46 @@ import { DayPicker } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
+  selectedDates: Date[];
+  setSelectedDates: (dates: Date[]) => void;
+  className?: string;
+};
+
 
 function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  selected,
-  onSelect,
+  selectedDates,
+  setSelectedDates,
+  className, // Include className in the function parameters
   ...props
 }: CalendarProps) {
+  const handleDayClick = (date: Date) => {
+    // Ensure selectedDates only contains Date objects
+    setSelectedDates((prevDates) => {
+      const isSelected = prevDates.some(
+        (selectedDate) => selectedDate instanceof Date && selectedDate.getTime() === date.getTime()
+      );
+      
+      // If date is already selected, remove it
+      if (isSelected) {
+        return prevDates.filter(
+          (d) => d instanceof Date && d.getTime() !== date.getTime()
+        );
+      }
+      // Otherwise, add the date
+      return [...prevDates, date];
+    });
+  };
+  
   return (
     <DayPicker
-      showOutsideDays={showOutsideDays}
-      selected={selected}
-      onSelect={onSelect}
-      className={cn("p-6 md:p-8 lg:p-10", className)}
+    showOutsideDays={true}
+      selected={selectedDates} // Corrected prop name
+      onDayClick={handleDayClick}
+    className={cn("p-6 md:p-8 lg:p-10", className)}
+      disabled={{
+        before: new Date(),
+      }}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
@@ -46,8 +70,7 @@ function Calendar({
           "h-full w-full p-0 font-normal aria-selected:opacity-100"
         ),
         day_range_end: "day-range-end",
-        day_selected:
-          "bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600",
+        day_selected: "bg-green-500 text-white font-semibold rounded-full hover:bg-green-600",
         day_today: "bg-accent text-accent-foreground",
         day_outside:
           "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
@@ -55,7 +78,6 @@ function Calendar({
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
         day_hidden: "invisible",
-        ...classNames,
       }}
       components={{
         IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
@@ -65,6 +87,7 @@ function Calendar({
     />
   )
 }
+
 Calendar.displayName = "Calendar"
 
 export { Calendar }
