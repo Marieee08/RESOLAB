@@ -168,53 +168,47 @@ interface DateTimeSelectionProps {
 }
 
 function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: DateTimeSelectionProps) {
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
-
   const handleSelect = (date: Date | undefined) => {
-    if (date) {
-      setSelectedDate(date); // Update selected date
-      if (!formData.days.some(day => day.date.toDateString() === date.toDateString())) {
-        addNewDay(date);
-      }
+    if (!date) return;
+    
+    const dateString = date.toDateString();
+    const isDateSelected = formData.days.some(
+      day => new Date(day.date).toDateString() === dateString
+    );
+
+    if (!isDateSelected) {
+      addNewDay(date);
     }
   };
 
-  // Disable dates that are in the past and weekends (Saturday and Sunday)
   const isDateDisabled = (date: Date) => {
     const today = new Date();
-    // Check if the date is in the past
-    const isPastDate = date < today.setHours(0, 0, 0, 0);
-    // Check if the date is a weekend (Saturday or Sunday)
-    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-    return isPastDate || isWeekend;
+    today.setHours(0, 0, 0, 0);
+    return date < today || date.getDay() === 0 || date.getDay() === 6;
   };
 
-    // const [selectedDates, setSelectedDates] = React.useState<Date[]>([]);
-    //const handleSelect = (date: Date | undefined) => {
-      //if (date) {
-        //setSelectedDates(prevDates =>
-          //prevDates.some(d => d.getTime() === date.getTime())
-          //? prevDates.filter(d => d.getTime() !== date.getTime())
-          //: [...prevDates, date]
-        //);}};
-  
-    return (
-      <div>
+  // Convert formData.days dates to Date objects for the Calendar
+  const selectedDates = formData.days.map(day => new Date(day.date));
+
+  return (
+    <div>
       <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
       <div className="grid grid-cols-2 gap-6 mt-6">
         <div className="items-start w-full h-full">
           <Calendar
-            className="w-full h-full" 
             mode="single"
-            selected={selectedDate}
+            selected={selectedDates}
             onSelect={handleSelect}
             disabled={isDateDisabled}
+            className="w-full h-full"
           />
         </div>
         <div className="mt-4 space-y-4">
           {formData.days.map((day, index) => (
             <div key={index} className="border p-4 rounded-lg">
-              <h3 className="text-lg font-semibold">Day {index + 1}: {day.date.toDateString()}</h3>
+              <h3 className="text-lg font-semibold">
+                {new Date(day.date).toDateString()}
+              </h3>
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <TimePicker
                   label="Start Time"
@@ -231,10 +225,45 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
           ))}
         </div>
       </div>
-      <button onClick={nextStep} className="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Next</button>
+      <button 
+        onClick={nextStep} 
+        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+      >
+        Next
+      </button>
     </div>
-    );
-  }
+  );
+}
+
+// Helper component for time selection
+function TimePicker({ label, value, onChange }: { 
+  label: string; 
+  value: string | null; 
+  onChange: (time: string) => void; 
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium mb-1">{label}</label>
+      <select
+        className="w-full border rounded-md p-2"
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+      >
+        <option value="">Select time</option>
+        {Array.from({ length: 24 }, (_, hour) =>
+          [0, 30].map((minute) => {
+            const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+            return (
+              <option key={timeStr} value={timeStr}>
+                {timeStr}
+              </option>
+            );
+          })
+        ).flat()}
+      </select>
+    </div>
+  );
+}
 
 interface ReviewSubmitProps {
   formData: FormData;
