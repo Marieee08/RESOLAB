@@ -112,9 +112,16 @@ export default function Schedule() {
   };
 
   const addNewDay = (date: Date) => {
+    const clickedDateString = date.toDateString();
+    const existingDayIndex = formData.days.findIndex(
+      day => new Date(day.date).toDateString() === clickedDateString
+    );
+  
     setFormData(prevData => ({
       ...prevData,
-      days: [...prevData.days, { date, startTime: null, endTime: null }],
+      days: existingDayIndex >= 0
+        ? prevData.days.filter((_, index) => index !== existingDayIndex)
+        : [...prevData.days, { date, startTime: null, endTime: null }]
     }));
   };
 
@@ -130,7 +137,13 @@ export default function Schedule() {
   const renderStep = () => {
     switch(step) {
       case 1:
-        return <DateTimeSelection formData={formData}  addNewDay={addNewDay} updateDayTime={updateDayTime} nextStep={nextStep} />;
+        return <DateTimeSelection 
+        formData={formData} 
+        setFormData={setFormData}
+        addNewDay={addNewDay} 
+        updateDayTime={updateDayTime} 
+        nextStep={nextStep} 
+      />;
       case 2:
         return <PersonalInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
       case 3:
@@ -144,7 +157,13 @@ export default function Schedule() {
           throw new Error('Function not implemented.');
         } } />;
       default:
-        return <DateTimeSelection formData={formData} updateFormData={updateFormData} nextStep={nextStep} />;
+        return <DateTimeSelection 
+        formData={formData} 
+        setFormData={setFormData}
+        addNewDay={addNewDay} 
+        updateDayTime={updateDayTime} 
+        nextStep={nextStep} 
+      />;
     }
   };
 
@@ -162,6 +181,7 @@ export default function Schedule() {
 
 interface DateTimeSelectionProps {
   formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   addNewDay: (date: Date) => void;
   updateDayTime: (index: number, time: string, field: 'startTime' | 'endTime') => void;
   nextStep: () => void;
@@ -170,15 +190,7 @@ interface DateTimeSelectionProps {
 function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: DateTimeSelectionProps) {
   const handleSelect = (date: Date | undefined) => {
     if (!date) return;
-    
-    const dateString = date.toDateString();
-    const isDateSelected = formData.days.some(
-      day => new Date(day.date).toDateString() === dateString
-    );
-
-    if (!isDateSelected) {
-      addNewDay(date);
-    }
+    addNewDay(date);
   };
 
   const isDateDisabled = (date: Date) => {
@@ -195,13 +207,17 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
       <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
       <div className="grid grid-cols-2 gap-6 mt-6">
         <div className="items-start w-full h-full">
-          <Calendar
-            mode="single"
-            selected={selectedDates}
-            onSelect={handleSelect}
-            disabled={isDateDisabled}
-            className="w-full h-full"
-          />
+        <Calendar
+  mode="multiple"
+  selected={selectedDates}
+  onSelect={(_, selectedDay) => {
+    if (selectedDay) {
+      handleSelect(selectedDay);
+    }
+  }}
+  disabled={isDateDisabled}
+  className="w-full h-full"
+/>
         </div>
         <div className="mt-4 space-y-4">
           {formData.days.map((day, index) => (
