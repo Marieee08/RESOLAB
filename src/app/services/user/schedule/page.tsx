@@ -202,26 +202,31 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
   // Convert formData.days dates to Date objects for the Calendar
   const selectedDates = formData.days.map(day => new Date(day.date));
 
+  // Sort the days chronologically
+  const sortedDays = [...formData.days].sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
       <div className="grid grid-cols-2 gap-6 mt-6">
         <div className="items-start w-full h-full">
-        <Calendar
-  mode="multiple"
-  selected={selectedDates}
-  onSelect={(_, selectedDay) => {
-    if (selectedDay) {
-      handleSelect(selectedDay);
-    }
-  }}
-  disabled={isDateDisabled}
-  className="w-full h-full"
-/>
+          <Calendar
+            mode="multiple"
+            selected={selectedDates}
+            onSelect={(_, selectedDay) => {
+              if (selectedDay) {
+                handleSelect(selectedDay);
+              }
+            }}
+            disabled={isDateDisabled}
+            className="w-full h-full"
+          />
         </div>
         <div className="mt-4 space-y-4">
-          {formData.days.map((day, index) => (
-            <div key={index} className="border p-4 rounded-lg">
+          {sortedDays.map((day, index) => (
+            <div key={new Date(day.date).toISOString()} className="border p-4 rounded-lg">
               <h3 className="text-lg font-semibold">
                 {new Date(day.date).toDateString()}
               </h3>
@@ -229,12 +234,24 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
                 <TimePicker
                   label="Start Time"
                   value={day.startTime}
-                  onChange={(time) => updateDayTime(index, time, 'startTime')}
+                  onChange={(time) => {
+                    // Find the original index in formData.days
+                    const originalIndex = formData.days.findIndex(
+                      d => new Date(d.date).getTime() === new Date(day.date).getTime()
+                    );
+                    updateDayTime(originalIndex, time, 'startTime');
+                  }}
                 />
                 <TimePicker
                   label="End Time"
                   value={day.endTime}
-                  onChange={(time) => updateDayTime(index, time, 'endTime')}
+                  onChange={(time) => {
+                    // Find the original index in formData.days
+                    const originalIndex = formData.days.findIndex(
+                      d => new Date(d.date).getTime() === new Date(day.date).getTime()
+                    );
+                    updateDayTime(originalIndex, time, 'endTime');
+                  }}
                 />
               </div>
             </div>
@@ -268,7 +285,10 @@ function TimePicker({ label, value, onChange }: {
         <option value="">Select time</option>
         {Array.from({ length: 24 }, (_, hour) =>
           [0, 30].map((minute) => {
-            const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+            // Convert to 12-hour format
+            const isPM = hour >= 12;
+            const hour12 = hour % 12 || 12;
+            const timeStr = `${hour12.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${isPM ? 'PM' : 'AM'}`;
             return (
               <option key={timeStr} value={timeStr}>
                 {timeStr}
