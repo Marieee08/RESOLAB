@@ -1,13 +1,10 @@
 "use client";
 
-
 import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@clerk/nextjs";
 import { format } from 'date-fns';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import Navbar from '@/components/custom/navbar';
-
 
 const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -32,10 +29,10 @@ const DashboardUser = () => {
     </div>
     <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
     <div className="flex flex-col items-center py-8">
-    <span className="h-36 w-36 rounded-full bg-gray-600 mb-2"></span>
-      <h2 className="text-[#0d172c] text-xl font-bold">Username</h2>
-      <p className="text-[#1c62b5]">Admin</p>
-    </div>
+            <span className="h-36 w-36 rounded-full bg-gray-600 mb-2"></span>
+            <h2 className="text-[#0d172c] text-xl font-bold">{user?.firstName} {user?.lastName}</h2>
+            <p className="text-[#1c62b5]">{user?.Role || "USER"}</p>
+          </div>
       <div>
         <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-600">MENU</h3>
         <ul className="mb-6 flex flex-col gap-1.5">

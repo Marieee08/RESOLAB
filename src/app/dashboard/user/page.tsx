@@ -20,14 +20,9 @@ interface Reservation {
   };
   ProcessInfos: Array<{
     Facility: string;
-    FacilityQty: number;
-    FacilityHrs: number;
     Equipment: string;
-    EquipmentQty: number;
-    EquipmentHrs: number;
     Tools: string;
     ToolsQty: number;
-    ToolsHrs: number;
   }>;
   UtilTimes: Array<{
     StartTime: Date;
@@ -67,6 +62,20 @@ const handleReviewClick = (reservation: Reservation) => {
   setSelectedReservation(reservation);
   setIsModalOpen(true);
 };
+
+const renderSection = (title: string, fields: { label: string, value: any }[]) => (
+  <div className="mb-6">
+    <h3 className="text-lg font-medium text-gray-900 mb-3">{title}</h3>
+    <div className="grid grid-cols-2 gap-4">
+      {fields.map(({ label, value }) => (
+        <div key={label} className={`${label.toLowerCase().includes('address') ? 'col-span-2' : ''}`}>
+          <p className="text-sm text-gray-600">{label}</p>
+          <p className="mt-1">{value?.toString() || 'Not provided'}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
 
   return (
@@ -247,40 +256,6 @@ const handleReviewClick = (reservation: Reservation) => {
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
 
-        {/*dummy data
-        <tr>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <div className="flex items-center">
-              <div>
-              <div className="text-sm font-medium text-gray-500">9/29/24</div>
-              </div>
-            </div>
-          </td>
-          <td className="px-6 py-4 whitespace-nowrap">
-            <div className="flex items-center">
-              <div>
-                <div className="text-sm font-medium text-gray-900">Sir Rolex Padilla</div>
-                <div className="text-sm text-gray-500">havemercyonus@example.com</div>
-                </div>
-              </div>
-          </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">Our Beloved Teacher</div>
-                <div className="text-sm text-gray-500">Please Please</div>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap">
-                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Pending
-                </span>
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                Tarpaulin Printing
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium">
-                <a href="#" className="ml-2 text-red-600 hover:text-red-900">Review</a>
-            </td>
-        </tr>
-        */}
 
         {reservations.map((reservation) => (
           <tr key={reservation.id}>
@@ -347,10 +322,10 @@ const handleReviewClick = (reservation: Reservation) => {
 
        {/* Review Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Review Reservation</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-semibold">Review Reservation</DialogTitle>
+        </DialogHeader>
           
           {selectedReservation && (
             <div className="mt-4 space-y-6">
@@ -394,16 +369,12 @@ const handleReviewClick = (reservation: Reservation) => {
                 {selectedReservation.ProcessInfos.map((process, index) => (
                   <div key={index} className="mt-2 space-y-2">
                     <div>
-                      <p className="text-gray-600">Facility</p>
-                      <p>{process.Facility} - Qty: {process.FacilityQty}, Hours: {process.FacilityHrs}</p>
-                    </div>
-                    <div>
                       <p className="text-gray-600">Equipment</p>
-                      <p>{process.Equipment} - Qty: {process.EquipmentQty}, Hours: {process.EquipmentHrs}</p>
+                      <p>{process.Equipment}</p>
                     </div>
                     <div>
                       <p className="text-gray-600">Tools</p>
-                      <p>{process.Tools} - Qty: {process.ToolsQty}, Hours: {process.ToolsHrs}</p>
+                      <p>{process.Tools}</p>
                     </div>
                   </div>
                 ))}
