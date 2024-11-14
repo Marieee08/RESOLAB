@@ -16,10 +16,13 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
+import { format } from 'date-fns';
 
 const DashboardAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
+  const today = new Date();
+  const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
   const reservationTrendsData = [
     { month: 'Jan', reservations: 40 },
@@ -170,7 +173,7 @@ const DashboardAdmin = () => {
         <main>
           <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Analytics Overview</h2>
-          <p className="text-sm text-[#143370] mb-4 font-poppins1">Wednesday, 30 October 2024</p>
+          <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 mb-4">
              
              <Card className="bg-white shadow-sm transform hover:scale-105 transition-all duration-300 border border-[#5e86ca]">

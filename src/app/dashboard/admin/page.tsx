@@ -2,10 +2,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import EditableCalendar from '@/components/custom/editcalendar';
+import { format } from 'date-fns';
 
 const DashboardAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
+  const today = new Date();
+  const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -139,7 +142,7 @@ const DashboardAdmin = () => {
         <main>
           <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
-          <p className="text-sm text-[#143370] mb-4 font-poppins1">Wednesday, 30 October 2024</p>
+          <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
           <EditableCalendar />
             <div className="bg-white p-6 rounded-3xl shadow-lg mt-6">
               <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
