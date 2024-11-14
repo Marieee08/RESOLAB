@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import TimePicker from '@/components/custom/time-picker';
 import ProgressBar from '@/components/custom/progress-bar';
@@ -10,6 +10,7 @@ import ProcessInformation from '@/components/forms/UtilizationInfo';
 import BusinessInformation from '@/components/forms/BusinessInfo';
 import ReviewSubmit from '@/components/forms/ReviewSubmit';
 
+const MAX_DATES = 5;
 
 interface FormData {
   days: {
@@ -65,7 +66,7 @@ export default function Schedule() {
   const [step, setStep] = React.useState(1);
   const [formData, setFormData] = React.useState<FormData>({
     days: [],
-    
+
     // Client Info
     name: '',
     contactNum: '',
@@ -119,9 +120,12 @@ export default function Schedule() {
   
     setFormData(prevData => ({
       ...prevData,
-      days: existingDayIndex >= 0
-        ? prevData.days.filter((_, index) => index !== existingDayIndex)
-        : [...prevData.days, { date, startTime: null, endTime: null }]
+      days:
+        existingDayIndex >= 0
+          ? prevData.days.filter((_, index) => index !== existingDayIndex)
+          : prevData.days.length < MAX_DATES // Only add if below MAX_DATES
+          ? [...prevData.days, { date, startTime: null, endTime: null }]
+          : prevData.days, // If MAX_DATES is reached, do nothing
     }));
   };
 
@@ -137,13 +141,15 @@ export default function Schedule() {
   const renderStep = () => {
     switch(step) {
       case 1:
-        return <DateTimeSelection 
-        formData={formData} 
-        setFormData={setFormData}
-        addNewDay={addNewDay} 
-        updateDayTime={updateDayTime} 
-        nextStep={nextStep} 
-      />;
+        return (
+          <DateTimeSelection 
+            formData={formData} 
+            setFormData={setFormData}
+            addNewDay={addNewDay} 
+            updateDayTime={updateDayTime} 
+            nextStep={nextStep} 
+          />
+        );
       case 2:
         return <PersonalInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
       case 3:
@@ -156,14 +162,14 @@ export default function Schedule() {
         } } nextStep={function (): void {
           throw new Error('Function not implemented.');
         } } />;
-      default:
-        return <DateTimeSelection 
-        formData={formData} 
-        setFormData={setFormData}
-        addNewDay={addNewDay} 
-        updateDayTime={updateDayTime} 
-        nextStep={nextStep} 
-      />;
+        default:
+          return <DateTimeSelection 
+            formData={formData} 
+            setFormData={setFormData}
+            addNewDay={addNewDay} 
+            updateDayTime={updateDayTime} 
+            nextStep={nextStep} 
+          />;
     }
   };
 
@@ -195,14 +201,21 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
 
   const isDateDisabled = (date: Date) => {
     const today = new Date();
+    const oneMonthLater = new Date();
+    oneMonthLater.setMonth(today.getMonth() + 1);
     today.setHours(0, 0, 0, 0);
-    return date < today || date.getDay() === 0 || date.getDay() === 6;
+    oneMonthLater.setHours(0, 0, 0, 0);
+
+    return (
+      date < today ||
+      date > oneMonthLater ||
+      date.getDay() === 0 ||
+      date.getDay() === 6 ||
+      formData.days.length >= MAX_DATES
+    );
   };
 
-  // Convert formData.days dates to Date objects for the Calendar
   const selectedDates = formData.days.map(day => new Date(day.date));
-
-  // Sort the days chronologically
   const sortedDays = [...formData.days].sort((a, b) => 
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
@@ -232,10 +245,10 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
               </h3>
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <TimePicker
+                  className="w-5"
                   label="Start Time"
                   value={day.startTime}
                   onChange={(time) => {
-                    // Find the original index in formData.days
                     const originalIndex = formData.days.findIndex(
                       d => new Date(d.date).getTime() === new Date(day.date).getTime()
                     );
@@ -246,7 +259,6 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
                   label="End Time"
                   value={day.endTime}
                   onChange={(time) => {
-                    // Find the original index in formData.days
                     const originalIndex = formData.days.findIndex(
                       d => new Date(d.date).getTime() === new Date(day.date).getTime()
                     );
@@ -268,35 +280,62 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
   );
 }
 
-// Helper component for time selection
 function TimePicker({ label, value, onChange }: { 
   label: string; 
   value: string | null; 
   onChange: (time: string) => void; 
 }) {
+  const [hour, setHour] = useState<string>('08');
+  const [minute, setMinute] = useState<string>('00');
+
+  // Update the time when any of the fields change
+  const updateTime = (newHour: string, newMinute: string) => {
+    const formattedTime = `${newHour}:${newMinute}`;
+    onChange(formattedTime);
+  };
+
+  // Handle changes to hour and minute
+  const handleHourChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newHour = e.target.value;
+    setHour(newHour);
+    updateTime(newHour, minute);
+  };
+
+  const handleMinuteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMinute = e.target.value;
+    setMinute(newMinute);
+    updateTime(hour, newMinute);
+  };
+
+  // Generate the hours from 8 AM to 5 PM, including AM/PM in the hour
+  const hours = [
+    '08 AM', '09 AM', '10 AM', '11 AM', '12 PM', '01 PM', '02 PM', '03 PM', '04 PM', '05 PM'
+  ];
+
   return (
     <div>
       <label className="block text-sm font-medium mb-1">{label}</label>
-      <select
-        className="w-full border rounded-md p-2"
-        value={value || ''}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="">Select time</option>
-        {Array.from({ length: 24 }, (_, hour) =>
-          [0, 30].map((minute) => {
-            // Convert to 12-hour format
-            const isPM = hour >= 12;
-            const hour12 = hour % 12 || 12;
-            const timeStr = `${hour12.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${isPM ? 'PM' : 'AM'}`;
-            return (
-              <option key={timeStr} value={timeStr}>
-                {timeStr}
-              </option>
-            );
-          })
-        ).flat()}
-      </select>
+      <div className="flex space-x-2">
+        <select
+          className="border rounded-md p-2 w-auto"
+          value={hour}
+          onChange={handleHourChange}
+        >
+          {hours.map(hourValue => (
+            <option key={hourValue} value={hourValue}>{hourValue}</option>
+          ))}
+        </select>
+
+        <select
+          className="border rounded-md p-2 w-auto"
+          value={minute}
+          onChange={handleMinuteChange}
+        >
+          {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(minuteValue => (
+            <option key={minuteValue} value={minuteValue}>{minuteValue}</option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }

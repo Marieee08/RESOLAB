@@ -30,7 +30,7 @@ function Calendar({
         head_cell: "text-muted-foreground h-12 w-12 md:h-9 md:w-16 text-center text-sm p-0 relative",
         row: "flex w-full mt-2",
         cell: "h-12 w-12 md:h-16 md:w-16 text-center text-sm relative",
-        day: "h-full w-full p-0 font-normal aria-selected:opacity-100 hover:bg-gray-100 rounded-full",
+        day: "h-full w-full p-0 font-normal aria-selected:opacity-100 hover:bg-gray-400 rounded-full",
         day_selected: "bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600",
         day_today: "bg-accent text-accent-foreground",
         day_outside: "text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
