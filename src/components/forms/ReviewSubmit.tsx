@@ -58,6 +58,26 @@ interface StepProps {
     prevStep: () => void;
 }
 
+const formatTime = (time: string | null): string => {
+    if (!time) return 'Not selected';
+    
+    // Split on colon first to separate hour+period from minutes
+    const [hourPart, minutes] = time.split(':');
+    
+    if (!hourPart || !minutes) return 'Invalid time format';
+    
+    // Split hour and period (e.g., "08 AM" -> ["08", "AM"])
+    const [hour, period] = hourPart.split(' ');
+    
+    if (!hour || !period) return 'Invalid time format';
+    
+    // Remove leading zero from hour
+    const formattedHour = hour.replace(/^0/, '');
+    
+    // Combine in desired format
+    return `${formattedHour}:${minutes} ${period}`;
+};
+
 const handleSubmit = () => {
     // Implement form submission logic
     console.log('Form submitted:', FormData);
@@ -74,23 +94,33 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
         updateFormData(name as keyof FormData, value);
     };
 
-  return (
-    <div className="max-w-4xl mx-auto">
-        <h2 className="text-2xl font-semibold mb-4 mt-12">Review Your Information</h2>
-        <div className="border border-gray-300 rounded-md shadow-sm p-4">
-        <h2 className="text-2xl font-semibold mb-4">Selected Dates and Times</h2>
-        {formData.days.length > 0 ? (
-          formData.days.map((day, index) => (
+    // Sort the days chronologically
+    const sortedDays = [...formData.days].sort((a, b) => 
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    return (
+        <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-semibold mb-4 mt-12">Review Your Information</h2>
+            
+            {/* Updated Date and Time Section */}
+            <div className="border border-gray-300 rounded-md shadow-sm p-4">
+    <h2 className="text-2xl font-semibold mb-4">Selected Dates and Times</h2>
+    {formData.days.length > 0 ? (
+        [...formData.days]
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .map((day, index) => (
             <div key={index} className="mb-4">
-              <h3 className="text-lg font-semibold">Day {index + 1}: {day.date.toDateString()}</h3>
-              <p><strong>Start Time:</strong> {day.startTime || 'Not selected'}</p>
-              <p><strong>End Time:</strong> {day.endTime || 'Not selected'}</p>
+                <h3 className="text-lg font-semibold">
+                    Day {index + 1}: {new Date(day.date).toDateString()}
+                </h3>
+                <p><strong>Start Time:</strong> {formatTime(day.startTime)}</p>
+                <p><strong>End Time:</strong> {formatTime(day.endTime)}</p>
             </div>
-          ))
-        ) : (
-          <p>No dates selected.</p>
-        )}
-      </div>        
+        ))
+    ) : (
+        <p>No dates selected.</p>
+    )}
+</div>   
         <div className="border border-gray-300 rounded-md shadow-sm p-4 mt-6">
             <h2 className="text-2xl font-semibold mb-4">Personal Information</h2>
             <div className="grid grid-cols-2 gap-6">

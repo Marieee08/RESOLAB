@@ -118,17 +118,30 @@ export default function Schedule() {
       day => new Date(day.date).toDateString() === clickedDateString
     );
   
-    setFormData(prevData => ({
-      ...prevData,
-      days:
-        existingDayIndex >= 0
-          ? prevData.days.filter((_, index) => index !== existingDayIndex)
-          : prevData.days.length < MAX_DATES // Only add if below MAX_DATES
-          ? [...prevData.days, { date, startTime: null, endTime: null }]
-          : prevData.days, // If MAX_DATES is reached, do nothing
-    }));
+    setFormData((prevData) => {
+      // If date already exists, remove it
+      if (existingDayIndex >= 0) {
+        const updatedDays = [...prevData.days];
+        updatedDays.splice(existingDayIndex, 1);
+        return {
+          ...prevData,
+          days: updatedDays,
+        };
+      }
+  
+      // Add date only if under MAX_DATES limit
+      if (prevData.days.length < MAX_DATES) {
+        return {
+          ...prevData,
+          days: [...prevData.days, { date, startTime: null, endTime: null }],
+        };
+      }
+  
+      // If MAX_DATES reached and the clicked date doesn't exist, return the current state unchanged
+      return prevData;
+    });
   };
-
+  
   const updateDayTime = (index: number, time: string, field: 'startTime' | 'endTime') => {
     const updatedDays = [...formData.days];
     updatedDays[index][field] = time;
@@ -194,9 +207,49 @@ interface DateTimeSelectionProps {
 }
 
 function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: DateTimeSelectionProps) {
+  const [syncTimes, setSyncTimes] = useState(false);
+
   const handleSelect = (date: Date | undefined) => {
     if (!date) return;
     addNewDay(date);
+  };
+
+  // Function to update all times
+  const updateAllTimes = (time: string, field: 'startTime' | 'endTime') => {
+    formData.days.forEach((_, index) => {
+      updateDayTime(index, time, field);
+    });
+  };
+
+  // Handle time change for a specific date
+  const handleTimeChange = (time: string, field: 'startTime' | 'endTime', index: number) => {
+    if (syncTimes) {
+      // Update all dates with the same time
+      updateAllTimes(time, field);
+    } else {
+      // Update only the selected date
+      updateDayTime(index, time, field);
+    }
+  };
+
+  // Handle sync toggle
+  const handleSyncToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSyncTimes(e.target.checked);
+    
+    if (e.target.checked && formData.days.length > 0) {
+      // When enabling sync, get the times from the first day that has times set
+      const firstDayWithTimes = formData.days.find(day => day.startTime || day.endTime) || formData.days[0];
+      
+      // If first day has a start time, apply it to all days
+      if (firstDayWithTimes.startTime) {
+        updateAllTimes(firstDayWithTimes.startTime, 'startTime');
+      }
+      
+      // If first day has an end time, apply it to all days
+      if (firstDayWithTimes.endTime) {
+        updateAllTimes(firstDayWithTimes.endTime, 'endTime');
+      }
+    }
   };
 
   const isDateDisabled = (date: Date) => {
@@ -206,19 +259,21 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
     today.setHours(0, 0, 0, 0);
     oneMonthLater.setHours(0, 0, 0, 0);
 
-    return (
-      date < today ||
-      date > oneMonthLater ||
-      date.getDay() === 0 ||
-      date.getDay() === 6 ||
-      formData.days.length >= MAX_DATES
-    );
+    if (date < today || date > oneMonthLater || date.getDay() === 0 || date.getDay() === 6) {
+      return true;
+    }
+
+    const dateString = date.toDateString();
+    const isAlreadySelected = formData.days.some(day => new Date(day.date).toDateString() === dateString);
+    
+    return !isAlreadySelected && formData.days.length >= MAX_DATES;
   };
 
   const selectedDates = formData.days.map(day => new Date(day.date));
   const sortedDays = [...formData.days].sort((a, b) => 
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
+
 
   return (
     <div>
@@ -238,6 +293,20 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
           />
         </div>
         <div className="mt-4 space-y-4">
+          {/* Sync checkbox */}
+          <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              id="syncTimes"
+              checked={syncTimes}
+              onChange={handleSyncToggle}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="syncTimes" className="ml-2 block text-sm text-gray-900">
+              Use same time for all dates
+            </label>
+          </div>
+
           {sortedDays.map((day, index) => (
             <div key={new Date(day.date).toISOString()} className="border p-4 rounded-lg">
               <h3 className="text-lg font-semibold">
@@ -245,25 +314,14 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
               </h3>
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <TimePicker
-                  className="w-5"
                   label="Start Time"
                   value={day.startTime}
-                  onChange={(time) => {
-                    const originalIndex = formData.days.findIndex(
-                      d => new Date(d.date).getTime() === new Date(day.date).getTime()
-                    );
-                    updateDayTime(originalIndex, time, 'startTime');
-                  }}
+                  onChange={(time) => handleTimeChange(time, 'startTime', index)}
                 />
                 <TimePicker
                   label="End Time"
                   value={day.endTime}
-                  onChange={(time) => {
-                    const originalIndex = formData.days.findIndex(
-                      d => new Date(d.date).getTime() === new Date(day.date).getTime()
-                    );
-                    updateDayTime(originalIndex, time, 'endTime');
-                  }}
+                  onChange={(time) => handleTimeChange(time, 'endTime', index)}
                 />
               </div>
             </div>
@@ -285,7 +343,7 @@ function TimePicker({ label, value, onChange }: {
   value: string | null; 
   onChange: (time: string) => void; 
 }) {
-  const [hour, setHour] = useState<string>('08');
+  const [hour, setHour] = useState<string>('08 AM');
   const [minute, setMinute] = useState<string>('00');
 
   // Update the time when any of the fields change
@@ -294,7 +352,6 @@ function TimePicker({ label, value, onChange }: {
     onChange(formattedTime);
   };
 
-  // Handle changes to hour and minute
   const handleHourChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newHour = e.target.value;
     setHour(newHour);
@@ -307,9 +364,10 @@ function TimePicker({ label, value, onChange }: {
     updateTime(hour, newMinute);
   };
 
-  // Generate the hours from 8 AM to 5 PM, including AM/PM in the hour
+  // Generate the hours from 8 AM to 5 PM
   const hours = [
-    '08 AM', '09 AM', '10 AM', '11 AM', '12 PM', '01 PM', '02 PM', '03 PM', '04 PM', '05 PM'
+    '08 AM', '09 AM', '10 AM', '11 AM', '12 PM', 
+    '01 PM', '02 PM', '03 PM', '04 PM'
   ];
 
   return (
