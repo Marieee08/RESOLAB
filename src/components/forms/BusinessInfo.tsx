@@ -31,7 +31,7 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
   const [errors, setErrors] = useState<Partial<Record<keyof BusinessFormData, string>>>({});
   const [touchedFields, setTouchedFields] = useState<Set<keyof BusinessFormData>>(new Set());
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     updateFormData(
       name as keyof BusinessFormData,
@@ -65,7 +65,10 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
       error = 'Please enter a valid email address';
     } else if (fieldName === 'CompanyZipcode' && (value as number) <= 0) {
       error = 'Please enter a valid zipcode';
-    }
+    } else if (fieldName === 'ProductionFrequency' && 
+    !['daily', 'weekly', 'monthly'].includes(value as string)) {
+    error = 'Please select a valid production frequency';
+  }
 
     setErrors(prev => ({
       ...prev,
@@ -87,7 +90,7 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
       } else if (field === 'CompanyEmail' && !validateEmail(value as string)) {
         newErrors[field] = 'Please enter a valid email address';
         isValid = false;
-      }
+      } 
     });
 
     setErrors(newErrors);
@@ -419,17 +422,22 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
 
         <div className="col-span-2">
           <label htmlFor="ProductionFrequency" className="block text-sm font-medium text-gray-700">
-            Frequency of Production (Daily, Weekly, or Monthly)<span className="text-red-500">*</span>
+            Frequency of Production<span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
+          <select
             id="ProductionFrequency"
             name="ProductionFrequency"
             value={formData.ProductionFrequency || ''}
             onChange={handleInputChange}
+            onBlur={() => handleBlur('ProductionFrequency')}
             className={getInputClassName('ProductionFrequency')}
             required
-          />
+          >
+            <option value="">Select frequency</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
           {touchedFields.has('ProductionFrequency') && errors.ProductionFrequency && (
             <p className="mt-1 text-sm text-red-500">{errors.ProductionFrequency}</p>
           )}
