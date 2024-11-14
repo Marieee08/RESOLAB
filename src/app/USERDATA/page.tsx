@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 
 export default function TestPage() {
+
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
 
@@ -31,13 +32,15 @@ export default function TestPage() {
     }
   }, [user, isLoaded]);
 
+
   return (
+
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Clerk Metadata Test Page</h1>
       
       <div className="space-y-4">
         <div className="border p-4 rounded">
-          <h2 className="font-semibold">User Information:</h2>
+          <h2 className="font-semibold">Account Information:</h2>
           <p>User ID: {user?.id || "Not logged in"}</p>
           <p>Email: {user?.primaryEmailAddress?.emailAddress || "No email"}</p>
           <p>Role: {userRole}</p>
