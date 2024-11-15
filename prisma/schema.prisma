@@ -1,30 +1,38 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+//For admin to edit machine catalog
+
+model Machine {
+  id          String   @id @default(cuid())
+  Machine     String
+  Image       String
+  Desc        String
+  Link        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 // For Primary Account Creation (For All)
 
 model AccInfo {
   id              Int              @id @default(autoincrement())
-  Profile         String
+  clerkId         String           @unique
   Name            String
-  Email           String           @unique
+  email           String           @unique 
   Role            String           @default("USER")
-  ClientInfo      ClientInfo?      @relation(name: "AccInfoToClientInfo") //One-to-one
-  BusinessInfo    BusinessInfo?    @relation(name: "AccInfoToBusinessInfo") //One-to-one
-  UtilReqs        UtilReq[]        @relation(name: "AccInfoToUtilReq") //One-to-many
-  EVCReservations EVCReservation[] @relation(name: "AccInfoToEVCReservation") //One-to-many
+  ClientInfo      ClientInfo?      @relation(name: "AccInfoToClientInfo")
+  BusinessInfo    BusinessInfo?    @relation(name: "AccInfoToBusinessInfo")
+  UtilReqs        UtilReq[]        @relation(name: "AccInfoToUtilReq")
+  EVCReservations EVCReservation[] @relation(name: "AccInfoToEVCReservation")
 }
 
 // For Acc Registration (For External Clients)

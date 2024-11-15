@@ -1,38 +1,34 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { verify } from 'jsonwebtoken';
+// middleware.ts
+import { authMiddleware } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
-  const token = request.cookies.get('token')?.value;
-
-  if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  try {
-    const decoded = verify(token, process.env.JWT_SECRET!) as { role: string };
-    const { pathname } = request.nextUrl;
-
-    // Check for admin routes
-    if (pathname.startsWith('/dashboard/admin') || pathname.startsWith('/services/admin')) {
-      if (decoded.role !== 'ADMIN') {
-        return NextResponse.redirect(new URL('/dashboard/user', request.url));
-      }
+export default authMiddleware({
+  // This runs after Clerk's default middleware
+  afterAuth(auth, req) {
+    // If user is not signed in and trying to access protected routes
+    if (!auth.userId && req.nextUrl.pathname.startsWith('/services/user/schedule')) {
+      const signInUrl = new URL('/sign-in', req.url);
+      return NextResponse.redirect(signInUrl);
     }
 
-    // For user routes, both admin and user roles are allowed
-    if (pathname.startsWith('/dashboard/user') || pathname.startsWith('/services/user')) {
-      if (!['ADMIN', 'USER'].includes(decoded.role)) {
-        return NextResponse.redirect(new URL('/login', request.url));
-      }
-    }
+    // Get the user's role from session claims
+    const role = auth.sessionClaims?.metadata?.role as string;
 
+    // Protect admin routes are not yet accomplished
+
+
+    // Allow the request to continue
     return NextResponse.next();
-  } catch (error) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-}
+  },
+
+  publicRoutes: [
+    '/',
+    '/sign-in',
+    '/sign-up',
+    '/contact'
+  ],
+});
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/services/:path*'],
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
 };
