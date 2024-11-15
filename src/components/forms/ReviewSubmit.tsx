@@ -126,8 +126,8 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
                 <div key={index} className="mb-4">
                   <h4 className="font-medium">Day {index + 1}</h4>
                   <p>Date: {formatDate(day.date)}</p>
-                  <p>Start Time: {day.startTime || 'Not set'}</p>
-                  <p>End Time: {day.endTime || 'Not set'}</p>
+                  <p>Start Time: {day.startTime}</p>
+                  <p>End Time: {day.endTime}</p>
                 </div>
               ))
           ) : (

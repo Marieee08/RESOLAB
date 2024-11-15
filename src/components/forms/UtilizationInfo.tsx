@@ -92,7 +92,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
       <div className="grid grid-cols-3 gap-6">
         <div className="col-span-3">
           <label htmlFor="ProductsManufactured" className="block text-sm font-medium text-gray-700">
-            Commodity/Products Manufactured<span className="text-red-500">*</span>
+            Service to be availed<span className="text-red-500">*</span>
           </label>
           <select
             id="ProductsManufactured"
@@ -103,16 +103,17 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
             className={getInputClassName('ProductsManufactured')}
             required
           >
-            <option value="">Select service</option>
-            <option value="3D_Printing">3D Printing</option>
-            <option value="LaserPrinting">Laser Printing </option>
-            <option value="LaserCutting_Engraving">Laser Cutting and/or Engraving</option>
-            <option value="HeatPrinting">Heat Pressing</option>
-            <option value="FormatPrinting">Large Format Printing </option>
-            <option value="3D_CNC">3D CNC Milling</option>
-            <option value="2D_CNC">2D CNC Milling</option>
-            <option value="CNC_Wood">CNC Wood Routing</option>
-            <option value="Lathe">Lathe Machining</option>
+            <option value="Select service">Select service</option>
+            <option value="2D CNC Milling">2D CNC Milling</option>
+            <option value="3D CNC Milling">3D CNC Milling</option>
+            <option value="3D Printing">3D Printing</option>
+            <option value="Benchmarking">Benchmarking</option>
+            <option value="CNC Wood Routing">CNC Wood Routing</option>
+            <option value="Heat Pressing">Heat Pressing</option>
+            <option value="Large Format Printing">Large Format Printing</option>
+            <option value="Laser Cutting & Engraving">Laser Cutting & Engraving</option>
+            <option value="Laser Printing">Laser Printing</option>
+            <option value="Lathe Machining">Lathe Machining</option>
           </select>
           {touchedFields.has('ProductsManufactured') && errors.ProductsManufactured && (
             <p className="mt-1 text-sm text-red-500">{errors.ProductsManufactured}</p>
@@ -142,8 +143,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           <label htmlFor="Equipment" className="block text-sm font-medium text-gray-700">
             Equipment<span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
+          <select
             id="Equipment"
             name="Equipment"
             value={formData.Equipment || ''}
@@ -151,7 +151,15 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
             onBlur={() => handleBlur('Equipment')}
             className={getInputClassName('Equipment')}
             required
-          />
+          >
+            <option value="Select equipment">Select equipment</option>
+            <option value="3D Printer">3D Printer</option>
+            <option value="CNC Wood Router">CNC Wood Router</option>
+            <option value="CO2 Laser Cutter & Engraver">CO2 Laser Cutter & Engraver</option>
+            <option value="Lathe Machine">Lathe Machine</option>
+            <option value="Milling Machine">Milling Machine</option>
+            <option value="Print & Cut">Print & Cut</option>
+          </select>
           {touchedFields.has('Equipment') && errors.Equipment && (
             <p className="mt-1 text-sm text-red-500">{errors.Equipment}</p>
           )}
