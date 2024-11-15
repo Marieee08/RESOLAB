@@ -19,7 +19,6 @@ interface Reservation {
     email: string;
   };
   ProcessInfos: Array<{
-    Facility: string;
     Equipment: string;
     Tools: string;
     ToolsQty: number;

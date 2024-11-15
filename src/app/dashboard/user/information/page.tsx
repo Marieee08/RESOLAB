@@ -4,38 +4,68 @@ import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@clerk/nextjs";
 import { format } from 'date-fns';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+
+// Types for our data
+interface ClientInfo {
+  ContactNum: string;
+  Address: string;
+  City: string;
+  Province: string;
+  Zipcode: number;
+}
+
+interface BusinessInfo {
+  CompanyName: string;
+  BusinessOwner: string;
+  BusinessPermitNum: string;
+  TINNum: string;
+  CompanyEmail: string;
+  ContactPerson: string;
+  Designation: string;
+  CompanyAddress: string;
+  CompanyCity: string;
+  CompanyProvince: string;
+  CompanyZipcode: number;
+}
 
 const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const [isBusinessView, setIsBusinessView] = useState(false);
-  const today = new Date();
-  const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
+  const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
+  const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);
+  const today = new Date();
+  const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
   useEffect(() => {
-    const checkUserRole = async () => {
-      if (!user) {
-        setUserRole("Not logged in");
-        return;
-      }
+    const fetchUserData = async () => {
+      if (!user) return;
+      
       try {
+        // Fetch client info
+        const clientResponse = await fetch(`/api/client-info/${user.id}`);
+        const clientData = await clientResponse.json();
+        setClientInfo(clientData);
+
+        // Fetch business info
+        const businessResponse = await fetch(`/api/business-info/${user.id}`);
+        const businessData = await businessResponse.json();
+        setBusinessInfo(businessData);
+
+        // Set user role
         const publicMetadata = user.publicMetadata;
         const role = publicMetadata.role || "USER";
         setUserRole(role as string);
       } catch (error) {
-        console.error("Error fetching user role:", error);
-        setUserRole("Error fetching role");
+        console.error("Error fetching user data:", error);
       }
     };
 
     if (isLoaded) {
-      checkUserRole();
+      fetchUserData();
     }
   }, [user, isLoaded]);
-
 
   return (
   <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -175,87 +205,114 @@ const DashboardUser = () => {
           </div>
 
 
-        {/* Information Display */}
-        <div className="pt-8">
-          {!isBusinessView ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Full Name</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800">Ashkinaz P. Canonoy</p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Contact Number</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Address</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-              </div>
-              <div className="space-y-4">
-              <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-              <h3 className="text-sm text-gray-500 mb-1">City/Municipality</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Province</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Zip Code</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-              <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-              <h3 className="text-sm text-gray-500 mb-1">Company Name</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Business Owner</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">E-mail</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">TIN No.</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Business Permit No.</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-              </div>
-              <div className="space-y-4">
-              <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-              <h3 className="text-sm text-gray-500 mb-1">Contact Person</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Position/Designation</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Company Address</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">City/Municipality</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-                <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-                  <h3 className="text-sm text-gray-500 mb-1">Province</h3>
-                  <p className="text-lg font-qanelas1 text-gray-800"> </p>
-                </div>
-              </div>
-            </div>
-          )}
+{/* Information Display */}
+<div className="pt-8">
+    {!isBusinessView ? (
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Full Name</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {user?.firstName} {user?.lastName}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Contact Number</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {clientInfo?.ContactNum || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Address</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {clientInfo?.Address || "Not provided"}
+            </p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">City/Municipality</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {clientInfo?.City || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Province</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {clientInfo?.Province || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Zip Code</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {clientInfo?.Zipcode || "Not provided"}
+            </p>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Company Name</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {businessInfo?.CompanyName || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Business Owner</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {businessInfo?.BusinessOwner || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">TIN No.</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {businessInfo?.TINNum || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Business Permit No.</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {businessInfo?.BusinessPermitNum || "Not provided"}
+            </p>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Contact Person</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {businessInfo?.ContactPerson || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Position/Designation</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {businessInfo?.Designation || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Company Address</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {businessInfo?.CompanyAddress || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Company City</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {businessInfo?.CompanyCity || "Not provided"}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+            <h3 className="text-sm text-gray-500 mb-1">Company Province</h3>
+            <p className="text-lg font-qanelas1 text-gray-800">
+              {businessInfo?.CompanyProvince || "Not provided"}
+            </p>
+          </div>
+        </div>
+      </div>
+    )}
+
         </div>
       </div>
           </section>
