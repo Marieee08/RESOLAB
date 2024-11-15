@@ -151,8 +151,15 @@ export default function Schedule() {
        return <PersonalInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
      case 3:
        return <BusinessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-     case 4:
-       return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
+       case 4:
+        return (
+          <ProcessInformation 
+            formData={formData} 
+            updateFormData={updateFormData} 
+            nextStep={nextStep} 
+            prevStep={prevStep}
+          />
+        );
      case 5:
        return <ReviewSubmit formData={formData} prevStep={prevStep} updateFormData={updateFormData} nextStep={nextStep} />;
      default:

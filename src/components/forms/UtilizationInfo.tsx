@@ -1,166 +1,186 @@
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@clerk/nextjs';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import React, { useState, ChangeEvent } from 'react';
 
 interface FormData {
-  days: {
-    date: Date;
-    startTime: string | null;
-    endTime: string | null;
-  }[];
-
-  // Personal Info
-  name: string;
-  contactNum: string;
-  address: string;
-  city: string;
-  province: string;
-  zipcode: string;
-
-  // Business Info
-  CompanyName: string;
-  BusinessOwner: string;
-  BusinessPermitNum: string;
-  TINNum: string;
-  CompanyIDNum: string;
-  CompanyEmail: string;
-  ContactPerson: string;
-  Designation: string;
-  CompanyAddress: string;
-  CompanyCity: string;
-  CompanyProvince: string;
-  CompanyZipcode: number | '';
-  CompanyPhoneNum: string;
-  CompanyMobileNum: string;
-  Manufactured: string;
-  ProductionFrequency: string;
-  Bulk: string;
-
-  // Utilization Info
   ProductsManufactured: string;
   BulkofCommodity: string;
   Equipment: string;
   Tools: string;
-  ToolsQty: number;
 }
 
-interface ReviewSubmitProps {
+interface StepProps {
   formData: FormData;
-  prevStep: () => void;
-  updateFormData: (field: keyof FormData, value: FormData[keyof FormData]) => void;
+  updateFormData: (field: keyof FormData, value: string) => void;
   nextStep: () => void;
+  prevStep: () => void;
 }
 
-export default function ReviewSubmit({ formData, prevStep, updateFormData }: ReviewSubmitProps) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const { getToken } = useAuth();
+export default function ProcessInformation({ formData, updateFormData, nextStep, prevStep }: StepProps) {
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
+  const [touchedFields, setTouchedFields] = useState<Set<keyof FormData>>(new Set());
 
-  const handleSubmit = async () => {
-    try {
-      setIsSubmitting(true);
-      setError('');
-  
-      const token = await getToken();
-      
-      const response = await fetch('/api/reservations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to submit reservation');
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    updateFormData(name as keyof FormData, value);
+    
+    setErrors(prev => ({
+      ...prev,
+      [name]: undefined
+    }));
+  };
+
+  const handleBlur = (fieldName: keyof FormData) => {
+    const newTouchedFields = new Set(touchedFields);
+    newTouchedFields.add(fieldName);
+    setTouchedFields(newTouchedFields);
+    validateField(fieldName);
+  };
+
+  const validateField = (fieldName: keyof FormData) => {
+    const value = formData[fieldName];
+    let error = '';
+
+    if (value === undefined || value === '') {
+      error = 'This field is required';
+    }
+
+    setErrors(prev => ({
+      ...prev,
+      [fieldName]: error
+    }));
+
+    return !error;
+  };
+
+  const validateForm = () => {
+    const newErrors: Partial<Record<keyof FormData, string>> = {};
+    let isValid = true;
+
+    (Object.keys(formData) as Array<keyof FormData>).forEach(field => {
+      const value = formData[field];
+      if (value === undefined || value === '') {
+        newErrors[field] = 'This field is required';
+        isValid = false;
       }
-  
-      router.push('/dashboard/user');
-      
-    } catch (err) {
-      console.error('Submission error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to submit reservation');
-    } finally {
-      setIsSubmitting(false);
+    });
+
+    setErrors(newErrors);
+    const allFields = new Set(Object.keys(formData) as Array<keyof FormData>);
+    setTouchedFields(allFields);
+    return isValid;
+  };
+
+  const handleNext = () => {
+    if (validateForm()) {
+      nextStep();
     }
   };
-  
-  const renderSection = (title: string, fields: { label: string, value: any }[]) => (
-    <div className="mb-6">
-      <h3 className="text-lg font-medium mb-3">{title}</h3>
-      <div className="grid grid-cols-2 gap-4">
-        {fields.map(({ label, value }) => (
-          <div key={label} className={`${label.includes('Address') ? 'col-span-2' : ''}`}>
-            <p className="text-sm text-gray-600">{label}</p>
-            <p className="mt-1">{value?.toString() || 'Not provided'}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 
+  const getInputClassName = (fieldName: keyof FormData) => {
+    const baseClasses = "mt-1 block w-full border rounded-md shadow-sm p-2";
+    const errorClasses = touchedFields.has(fieldName) && errors[fieldName] 
+      ? "border-red-500 focus:ring-red-500 focus:border-red-500" 
+      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500";
+    return `${baseClasses} ${errorClasses}`;
+  };
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Card className="p-6">
-        <h2 className="text-2xl font-semibold mb-6">Review Your Information</h2>
-
-        {renderSection('Selected Dates and Times', [
-        ...formData.days.map((day, index) => ({
-            label: `Day ${index + 1}`,
-            value: `${new Date(day.date).toLocaleDateString()} (${day.startTime} - ${day.endTime})`
-          }))
-        ])}
-        {renderSection('Personal Information', [
-          { label: 'Name', value: formData.name },
-          { label: 'Contact Number', value: formData.contactNum },
-          { label: 'Complete Address', value: `${formData.address}, ${formData.city}, ${formData.province} ${formData.zipcode}` }
-        ])}
-
-        {renderSection('Business Information', [
-          { label: 'Company Name', value: formData.CompanyName },
-          { label: 'Business Owner', value: formData.BusinessOwner },
-          { label: 'Email', value: formData.CompanyEmail },
-          { label: 'Business Permit Number', value: formData.BusinessPermitNum },
-          { label: 'TIN Number', value: formData.TINNum },
-          { label: 'Contact Person', value: formData.ContactPerson },
-          { label: 'Company Address', value: `${formData.CompanyAddress}, ${formData.CompanyCity}, ${formData.CompanyProvince} ${formData.CompanyZipcode}` }
-        ])}
-
-        {renderSection('Utilization Information', [
-          { label: 'Products Manufactured', value: formData.ProductsManufactured },
-          { label: 'Bulk of Commodity', value: formData.BulkofCommodity },
-          { label: 'Equipment', value: formData.Equipment },
-          { label: 'Tools', value: formData.Tools }
-        ])}
-
-        {error && (
-          <Alert variant="destructive" className="mt-4">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        <div className="mt-6 flex justify-between">
-          <button 
-            onClick={prevStep}
-            disabled={isSubmitting}
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors disabled:opacity-50"
+      <h2 className="text-2xl font-semibold mb-6 mt-12">Utilization Information</h2>
+      
+      <div className="grid grid-cols-3 gap-6">
+        <div className="col-span-3">
+          <label htmlFor="ProductsManufactured" className="block text-sm font-medium text-gray-700">
+            Commodity/Products Manufactured<span className="text-red-500">*</span>
+          </label>
+          <select
+            id="ProductsManufactured"
+            name="ProductsManufactured"
+            value={formData.ProductsManufactured || ''}
+            onChange={handleInputChange}
+            onBlur={() => handleBlur('ProductsManufactured')}
+            className={getInputClassName('ProductsManufactured')}
+            required
           >
-            Previous
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Reservation'}
-          </button>
+            <option value="">Select service</option>
+            <option value="3D_Printing">3D Printing</option>
+            <option value="LaserPrinting">Laser Printing </option>
+            <option value="LaserCutting_Engraving">Laser Cutting and/or Engraving</option>
+            <option value="HeatPrinting">Heat Pressing</option>
+            <option value="FormatPrinting">Large Format Printing </option>
+            <option value="3D_CNC">3D CNC Milling</option>
+            <option value="2D_CNC">2D CNC Milling</option>
+            <option value="CNC_Wood">CNC Wood Routing</option>
+            <option value="Lathe">Lathe Machining</option>
+          </select>
+          {touchedFields.has('ProductsManufactured') && errors.ProductsManufactured && (
+            <p className="mt-1 text-sm text-red-500">{errors.ProductsManufactured}</p>
+          )}
         </div>
-      </Card>
+
+        <div className="col-span-3">
+          <label htmlFor="BulkofCommodity" className="block text-sm font-medium text-gray-700">
+            Bulk of Commodity per Production (in volume or weight)<span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="BulkofCommodity"
+            name="BulkofCommodity"
+            value={formData.BulkofCommodity || ''}
+            onChange={handleInputChange}
+            onBlur={() => handleBlur('BulkofCommodity')}
+            className={getInputClassName('BulkofCommodity')}
+            required
+          />
+          {touchedFields.has('BulkofCommodity') && errors.BulkofCommodity && (
+            <p className="mt-1 text-sm text-red-500">{errors.BulkofCommodity}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="Equipment" className="block text-sm font-medium text-gray-700">
+            Equipment<span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="Equipment"
+            name="Equipment"
+            value={formData.Equipment || ''}
+            onChange={handleInputChange}
+            onBlur={() => handleBlur('Equipment')}
+            className={getInputClassName('Equipment')}
+            required
+          />
+          {touchedFields.has('Equipment') && errors.Equipment && (
+            <p className="mt-1 text-sm text-red-500">{errors.Equipment}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="Tools" className="block text-sm font-medium text-gray-700">
+            Tools<span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="Tools"
+            name="Tools"
+            value={formData.Tools || ''}
+            onChange={handleInputChange}
+            onBlur={() => handleBlur('Tools')}
+            className={getInputClassName('Tools')}
+            required
+          />
+          {touchedFields.has('Tools') && errors.Tools && (
+            <p className="mt-1 text-sm text-red-500">{errors.Tools}</p>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-6 flex justify-between">
+        <button onClick={prevStep} className="bg-gray-500 text-white px-4 py-2 rounded">Previous</button>
+        <button onClick={handleNext} className="bg-blue-500 text-white px-4 py-2 rounded">Next</button>
+      </div>
     </div>
   );
 }
