@@ -190,9 +190,9 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
         };
       }
   
-      // Add date only if under MAX_DATES limit
+        // Add date only if under MAX_DATES limit
       if (prevData.days.length < MAX_DATES) {
-        // If sync is enabled and we have unified times, use them for the new date
+        // When sync is enabled, use the unified times for new dates
         const newDay = {
           date,
           startTime: syncTimes ? unifiedStartTime : null,
@@ -205,7 +205,6 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
         };
       }
   
-      // If MAX_DATES reached and the clicked date doesn't exist, return the current state unchanged
       return prevData;
     });
   };
@@ -223,9 +222,13 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
 
   // Function to update all times
   const updateAllTimes = (time: string, field: 'startTime' | 'endTime') => {
-    formData.days.forEach((_, index) => {
-      updateDayTime(index, time, field);
-    });
+    setFormData(prevData => ({
+      ...prevData,
+      days: prevData.days.map(day => ({
+        ...day,
+        [field]: time
+      }))
+    }));
   };
 
   // Handle unified time changes
@@ -247,18 +250,21 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
   const handleSyncToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSyncTimes(e.target.checked);
     
-    if (e.target.checked && formData.days.length > 0) {
-      const firstDayWithTimes = formData.days.find(day => day.startTime || day.endTime);
-      
-      if (firstDayWithTimes) {
-        if (firstDayWithTimes.startTime) {
-          setUnifiedStartTime(firstDayWithTimes.startTime);
-          updateAllTimes(firstDayWithTimes.startTime, 'startTime');
-        }
-        if (firstDayWithTimes.endTime) {
-          setUnifiedEndTime(firstDayWithTimes.endTime);
-          updateAllTimes(firstDayWithTimes.endTime, 'endTime');
-        }
+    if (e.target.checked) {
+      // When enabling sync, initialize unified times if they're not set
+      const firstDay = formData.days[0];
+      if (firstDay) {
+        const newStartTime = firstDay.startTime || null;
+        const newEndTime = firstDay.endTime || null;
+        setUnifiedStartTime(newStartTime);
+        setUnifiedEndTime(newEndTime);
+        
+        // Apply these times to all existing dates
+        if (newStartTime) updateAllTimes(newStartTime, 'startTime');
+        if (newEndTime) updateAllTimes(newEndTime, 'endTime');
+      } else {
+        setUnifiedStartTime(null);
+        setUnifiedEndTime(null);
       }
     }
   };
@@ -326,12 +332,12 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
               <div className="grid grid-cols-2 gap-4">
                 <TimePicker
                   label="Start Time"
-                  value={unifiedStartTime}
+                  value={unifiedStartTime  || '--'}
                   onChange={(time) => handleUnifiedTimeChange(time, 'startTime')}
                 />
                 <TimePicker
                   label="End Time"
-                  value={unifiedEndTime}
+                  value={unifiedEndTime  || '--'}
                   onChange={(time) => handleUnifiedTimeChange(time, 'endTime')}
                 />
               </div>
@@ -348,12 +354,12 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <TimePicker
                     label="Start Time"
-                    value={day.startTime}
+                    value={day.startTime || '--'}
                     onChange={(time) => handleIndividualTimeChange(time, 'startTime', index)}
                   />
                   <TimePicker
                     label="End Time"
-                    value={day.endTime}
+                    value={day.startTime || '--'}
                     onChange={(time) => handleIndividualTimeChange(time, 'endTime', index)}
                   />
                 </div>
@@ -362,11 +368,11 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>
                     <p className="text-sm font-medium">Start Time</p>
-                    <p className="mt-1">{day.startTime || 'Not selected'}</p>
+                    <p className="mt-1">{day.startTime || '--'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium">End Time</p>
-                    <p className="mt-1">{day.endTime || 'Not selected'}</p>
+                    <p className="mt-1">{day.endTime || '--'}</p>
                   </div>
                 </div>
               )}
@@ -394,13 +400,8 @@ function TimePicker({ label, value, onChange }: {
 
   // Update the time when any of the fields change
   const updateTime = (newHour: string, newMinute: string) => {
-    // Only format and update if both values are not '--'
-    if (newHour !== '--' && newMinute !== '--') {
-      const formattedTime = formatTime(newHour, newMinute);
-      onChange(formattedTime);
-    } else {
-      onChange('');
-    }
+    const formattedTime = formatTime(newHour, newMinute);
+    onChange(formattedTime);
   };
 
   const handleHourChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -422,7 +423,6 @@ function TimePicker({ label, value, onChange }: {
     '01 PM', '02 PM', '03 PM', '04 PM'
   ];
 
-  // Generate minutes with -- as default
   const minutes = ['--', ...Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))];
 
   return (
