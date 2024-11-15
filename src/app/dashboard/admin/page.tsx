@@ -2,11 +2,15 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import EditableCalendar from '@/components/custom/editcalendar';
+import { format } from 'date-fns';
 
 
 const DashboardAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
+  const today = new Date();
+  const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
+
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -32,7 +36,7 @@ const DashboardAdmin = () => {
               <li>
                 <button
                   onClick={() => setOrderDropdownOpen(!orderDropdownOpen)}
-                  className="group relative flex w-full items-center justify-between gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]"
+                  className="group relative flex w-full items-center justify-between gap-2.5 rounded-full py-2 px-4 font-medium text-white border bg-[#1c2a52] border-[#5e86ca]"
                 >
                   <span>Orders</span>
                   {/* Dropdown arrow */}
@@ -51,14 +55,26 @@ const DashboardAdmin = () => {
                 </button>
               </li>
               {orderDropdownOpen && (
-                <li className="ml-6">
-                  <Link href="/dashboard-admin/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
-                    History
-                  </Link>
-                </li>
+                <>
+                  <li className="ml-6">
+                    <Link href="/dashboard/admin" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      General
+                    </Link>
+                  </li>
+                  <li className="ml-6">
+                    <Link href="/dashboard/admin/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      History
+                    </Link>
+                  </li>
+                  <li className="ml-6">
+                    <Link href="/dashboard/admin/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      Users
+                    </Link>
+                  </li>
+                </>
               )}
               <li>
-                <Link href="/dashboard-admin/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/dashboard/admin/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                   Reports
                 </Link>
               </li>
@@ -79,6 +95,9 @@ const DashboardAdmin = () => {
 
 
 
+
+
+
       {/* Main Content */}
       <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
         {/* Header */}
@@ -91,6 +110,17 @@ const DashboardAdmin = () => {
               >
                 Menu
               </button>
+            </div>
+            <div className="flex space-x-6 lg:space-x-10">
+            <Link href="/" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+              Home
+            </Link>
+            <Link href="/services/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+              Services
+            </Link>
+            <Link href="/contact" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+              Contact
+            </Link>
             </div>
             <div className="hidden sm:block">
               <form action="#" method="POST">
@@ -113,10 +143,12 @@ const DashboardAdmin = () => {
           </div>
         </header>
 
+
         {/* Main */}
         <main>
           <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-          <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+          <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
+          <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
           <EditableCalendar />
             <div className="bg-white p-6 rounded-3xl shadow-lg mt-6">
               <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
@@ -178,6 +210,8 @@ const DashboardAdmin = () => {
                         </tr>
 
 
+
+
                         <tr>
                         <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
@@ -220,6 +254,8 @@ const DashboardAdmin = () => {
                                 <a href="#" className="ml-2 text-red-600 hover:text-red-900">Review</a>
                             </td>
                         </tr>
+
+
 
 
                         <tr>
@@ -267,6 +303,9 @@ const DashboardAdmin = () => {
 
 
 
+
+
+
                         <tr>
                             <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
@@ -310,6 +349,7 @@ const DashboardAdmin = () => {
                             </td>
                         </tr>
 
+
                         </tbody>
             </table>
               </div>
@@ -321,6 +361,5 @@ const DashboardAdmin = () => {
   );
 };
 
+
 export default DashboardAdmin;
-
-
