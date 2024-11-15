@@ -10,9 +10,31 @@ const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const [isBusinessView, setIsBusinessView] = useState(false);
-  const { user } = useUser();
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
+  const { user, isLoaded } = useUser();
+  const [userRole, setUserRole] = useState<string>("Loading...");
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (!user) {
+        setUserRole("Not logged in");
+        return;
+      }
+      try {
+        const publicMetadata = user.publicMetadata;
+        const role = publicMetadata.role || "USER";
+        setUserRole(role as string);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+        setUserRole("Error fetching role");
+      }
+    };
+
+    if (isLoaded) {
+      checkUserRole();
+    }
+  }, [user, isLoaded]);
 
 
   return (
@@ -31,7 +53,7 @@ const DashboardUser = () => {
     <div className="flex flex-col items-center py-8">
             <span className="h-36 w-36 rounded-full bg-gray-600 mb-2"></span>
             <h2 className="text-[#0d172c] text-xl font-bold">{user?.firstName} {user?.lastName}</h2>
-            <p className="text-[#1c62b5]">{user?.Role || "USER"}</p>
+            <p className="text-[#1c62b5]">{userRole}</p>
           </div>
       <div>
         <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-600">MENU</h3>

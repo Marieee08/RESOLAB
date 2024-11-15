@@ -6,6 +6,9 @@ import Navbar from '@/components/custom/navbar';
 
 
 interface Machine {
+ Link: React.JSX.Element;
+ Desc: any;
+ Machine: string | undefined;
  id: string;
  name: string;
  image: string;
@@ -67,7 +70,7 @@ export default function AdminServices() {
    if (machine) {
      setFormData({
        name: machine.Machine || '',
-       image: machine.Image || '',
+       image: machine.image || '',
        description: machine.Desc || '',
        videoUrl: machine.Link || '',
      });
@@ -171,7 +174,7 @@ export default function AdminServices() {
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
          {machines.map(machine => (
            <div key={machine.id} className="bg-white rounded-lg shadow-md p-6">
-             <img src={machine.Image} alt={machine.Machine} className="w-full h-48 object-cover rounded-md mb-4" />
+             <img src={machine.image} alt={machine.Machine} className="w-full h-48 object-cover rounded-md mb-4" />
              <h2 className="text-xl font-semibold mb-2">{machine.Machine}</h2>
              <p className="text-gray-600 mb-4">
                {machine.Desc.length > 100 ? `${machine.Desc.substring(0, 100)}...` : machine.Desc}
