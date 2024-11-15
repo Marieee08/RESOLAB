@@ -61,20 +61,27 @@ interface StepProps {
 const formatTime = (time: string | null): string => {
     if (!time) return 'Not selected';
     
-    // Split on colon first to separate hour+period from minutes
-    const [hourPart, minutes] = time.split(':');
+    // If time is already in "HH:MM AM/PM" format
+    if (time.includes(':') && (time.includes('AM') || time.includes('PM'))) {
+        // Remove any leading zeros from the hour part while keeping the format
+        const [timePart, period] = time.split(' ');
+        const [hour, minutes] = timePart.split(':');
+        const formattedHour = hour.replace(/^0/, '');
+        return `${formattedHour}:${minutes} ${period}`;
+    }
     
-    if (!hourPart || !minutes) return 'Invalid time format';
+    // If time is in the format "hour period:minutes" (e.g., "08 AM:00")
+    const parts = time.split(':');
+    if (parts.length !== 2) return 'Invalid time format';
     
-    // Split hour and period (e.g., "08 AM" -> ["08", "AM"])
+    const [hourPart, minutes] = parts;
     const [hour, period] = hourPart.split(' ');
     
-    if (!hour || !period) return 'Invalid time format';
+    if (!hour || !period || !minutes) return 'Invalid time format';
     
     // Remove leading zero from hour
     const formattedHour = hour.replace(/^0/, '');
     
-    // Combine in desired format
     return `${formattedHour}:${minutes} ${period}`;
 };
 

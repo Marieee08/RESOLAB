@@ -206,8 +206,16 @@ interface DateTimeSelectionProps {
   nextStep: () => void;
 }
 
+function formatTime(hour: string, minute: string): string {
+  const [hourNum, period] = hour.split(' ');
+  const paddedHour = hourNum.padStart(2, '0');
+  return `${paddedHour}:${minute} ${period}`;
+}
+
 function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: DateTimeSelectionProps) {
   const [syncTimes, setSyncTimes] = useState(false);
+  const [unifiedStartTime, setUnifiedStartTime] = useState<string | null>(null);
+  const [unifiedEndTime, setUnifiedEndTime] = useState<string | null>(null);
 
   const handleSelect = (date: Date | undefined) => {
     if (!date) return;
@@ -221,15 +229,19 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
     });
   };
 
-  // Handle time change for a specific date
-  const handleTimeChange = (time: string, field: 'startTime' | 'endTime', index: number) => {
-    if (syncTimes) {
-      // Update all dates with the same time
-      updateAllTimes(time, field);
+  // Handle unified time changes
+  const handleUnifiedTimeChange = (time: string, field: 'startTime' | 'endTime') => {
+    if (field === 'startTime') {
+      setUnifiedStartTime(time);
     } else {
-      // Update only the selected date
-      updateDayTime(index, time, field);
+      setUnifiedEndTime(time);
     }
+    updateAllTimes(time, field);
+  };
+
+  // Handle individual time changes
+  const handleIndividualTimeChange = (time: string, field: 'startTime' | 'endTime', index: number) => {
+    updateDayTime(index, time, field);
   };
 
   // Handle sync toggle
@@ -238,17 +250,27 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
     
     if (e.target.checked && formData.days.length > 0) {
       // When enabling sync, get the times from the first day that has times set
-      const firstDayWithTimes = formData.days.find(day => day.startTime || day.endTime) || formData.days[0];
+      const firstDayWithTimes = formData.days.find(day => day.startTime || day.endTime);
       
-      // If first day has a start time, apply it to all days
-      if (firstDayWithTimes.startTime) {
-        updateAllTimes(firstDayWithTimes.startTime, 'startTime');
+      if (firstDayWithTimes) {
+        if (firstDayWithTimes.startTime) {
+          setUnifiedStartTime(firstDayWithTimes.startTime);
+          updateAllTimes(firstDayWithTimes.startTime, 'startTime');
+        }
+        if (firstDayWithTimes.endTime) {
+          setUnifiedEndTime(firstDayWithTimes.endTime);
+          updateAllTimes(firstDayWithTimes.endTime, 'endTime');
+        }
       }
-      
-      // If first day has an end time, apply it to all days
-      if (firstDayWithTimes.endTime) {
-        updateAllTimes(firstDayWithTimes.endTime, 'endTime');
-      }
+    } else {
+      // When disabling sync, reset all times to 8:00 AM
+      const defaultTime = '08:00 AM';
+      setUnifiedStartTime(defaultTime);
+      setUnifiedEndTime(defaultTime);
+      formData.days.forEach((_, index) => {
+        updateDayTime(index, defaultTime, 'startTime');
+        updateDayTime(index, defaultTime, 'endTime');
+      });
     }
   };
 
@@ -274,7 +296,6 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
@@ -293,37 +314,73 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
           />
         </div>
         <div className="mt-4 space-y-4">
-          {/* Sync checkbox */}
-          <div className="flex items-center mb-4">
-            <input
-              type="checkbox"
-              id="syncTimes"
-              checked={syncTimes}
-              onChange={handleSyncToggle}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="syncTimes" className="ml-2 block text-sm text-gray-900">
-              Use same time for all dates
-            </label>
-          </div>
+          {/* Only show sync checkbox when there are 2 or more dates */}
+          {formData.days.length >= 2 && (
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="syncTimes"
+                checked={syncTimes}
+                onChange={handleSyncToggle}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="syncTimes" className="ml-2 block text-sm text-gray-900">
+                Use same time for all dates
+              </label>
+            </div>
+          )}
 
+          {/* Unified time selection when sync is enabled */}
+          {syncTimes && formData.days.length >= 2 && (
+            <div className="border border-blue-200 p-4 rounded-lg mb-4"> {/*bg-blue-50"*/}
+              <h3 className="text-lg font-semibold mb-2">Set Time for All Dates</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <TimePicker
+                  label="Start Time"
+                  value={unifiedStartTime}
+                  onChange={(time) => handleUnifiedTimeChange(time, 'startTime')}
+                />
+                <TimePicker
+                  label="End Time"
+                  value={unifiedEndTime}
+                  onChange={(time) => handleUnifiedTimeChange(time, 'endTime')}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Always show selected dates */}
           {sortedDays.map((day, index) => (
             <div key={new Date(day.date).toISOString()} className="border p-4 rounded-lg">
               <h3 className="text-lg font-semibold">
                 {new Date(day.date).toDateString()}
               </h3>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <TimePicker
-                  label="Start Time"
-                  value={day.startTime}
-                  onChange={(time) => handleTimeChange(time, 'startTime', index)}
-                />
-                <TimePicker
-                  label="End Time"
-                  value={day.endTime}
-                  onChange={(time) => handleTimeChange(time, 'endTime', index)}
-                />
-              </div>
+              {!syncTimes && (
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <TimePicker
+                    label="Start Time"
+                    value={day.startTime}
+                    onChange={(time) => handleIndividualTimeChange(time, 'startTime', index)}
+                  />
+                  <TimePicker
+                    label="End Time"
+                    value={day.endTime}
+                    onChange={(time) => handleIndividualTimeChange(time, 'endTime', index)}
+                  />
+                </div>
+              )}
+              {syncTimes && (
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <p className="text-sm font-medium">Start Time</p>
+                    <p className="mt-1">{day.startTime || '08:00 AM'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">End Time</p>
+                    <p className="mt-1">{day.endTime || '08:00 AM'}</p>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -348,7 +405,7 @@ function TimePicker({ label, value, onChange }: {
 
   // Update the time when any of the fields change
   const updateTime = (newHour: string, newMinute: string) => {
-    const formattedTime = `${newHour}:${newMinute}`;
+    const formattedTime = formatTime(newHour, newMinute);
     onChange(formattedTime);
   };
 
