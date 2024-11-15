@@ -111,6 +111,67 @@ export default function Schedule() {
   const updateFormData: UpdateFormData = (field, value) => {
     setFormData(prevData => ({ ...prevData, [field]: value }));
   };
+  
+  const nextStep = () => setStep(prevStep => prevStep + 1);
+  const prevStep = () => setStep(prevStep => prevStep - 1);
+
+  const renderStep = () => {
+    switch(step) {
+      case 1:
+        return (
+          <DateTimeSelection 
+            formData={formData} 
+            setFormData={setFormData}
+            nextStep={nextStep} 
+          />
+        );
+      case 2:
+        return <PersonalInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
+      case 3:
+        return <BusinessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
+      case 4:
+        return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
+      case 5:
+        return <ReviewSubmit formData={formData} prevStep={prevStep} updateFormData={updateFormData} nextStep={nextStep} />;
+      default:
+        return (
+          <DateTimeSelection 
+            formData={formData} 
+            setFormData={setFormData}
+            nextStep={nextStep} 
+          />
+        );
+    }
+  };
+
+  return (
+    <>
+      <Navbar />
+      <div className="container mx-auto p-4 mt-16">
+        <h1 className="text-2xl font-bold mb-4">Schedule a Service</h1>
+        <ProgressBar currentStep={step} totalSteps={5} />
+        {renderStep()}
+      </div>
+    </>
+  );
+}
+
+interface DateTimeSelectionProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  nextStep: () => void;
+}
+
+function formatTime(hour: string, minute: string): string {
+  const [hourNum, period] = hour.split(' ');
+  const paddedHour = hourNum.padStart(2, '0');
+  return `${paddedHour}:${minute} ${period}`;
+}
+
+function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectionProps) {
+  const [syncTimes, setSyncTimes] = useState(false);
+  const [unifiedStartTime, setUnifiedStartTime] = useState<string | null>(null);
+  const [unifiedEndTime, setUnifiedEndTime] = useState<string | null>(null);
 
   const addNewDay = (date: Date) => {
     const clickedDateString = date.toDateString();
@@ -131,9 +192,16 @@ export default function Schedule() {
   
       // Add date only if under MAX_DATES limit
       if (prevData.days.length < MAX_DATES) {
+        // If sync is enabled and we have unified times, use them for the new date
+        const newDay = {
+          date,
+          startTime: syncTimes ? unifiedStartTime : null,
+          endTime: syncTimes ? unifiedEndTime : null
+        };
+
         return {
           ...prevData,
-          days: [...prevData.days, { date, startTime: null, endTime: null }],
+          days: [...prevData.days, newDay],
         };
       }
   
@@ -141,81 +209,12 @@ export default function Schedule() {
       return prevData;
     });
   };
-  
+
   const updateDayTime = (index: number, time: string, field: 'startTime' | 'endTime') => {
     const updatedDays = [...formData.days];
     updatedDays[index][field] = time;
     setFormData({ ...formData, days: updatedDays });
   };
-  
-  const nextStep = () => setStep(prevStep => prevStep + 1);
-  const prevStep = () => setStep(prevStep => prevStep - 1);
-
-  const renderStep = () => {
-    switch(step) {
-      case 1:
-        return (
-          <DateTimeSelection 
-            formData={formData} 
-            setFormData={setFormData}
-            addNewDay={addNewDay} 
-            updateDayTime={updateDayTime} 
-            nextStep={nextStep} 
-          />
-        );
-      case 2:
-        return <PersonalInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 3:
-        return <BusinessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 4:
-        return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 5:
-        return <ReviewSubmit formData={formData} prevStep={prevStep} updateFormData={function (field: keyof FormData, value: string | number | Date | null): void {
-          throw new Error('Function not implemented.');
-        } } nextStep={function (): void {
-          throw new Error('Function not implemented.');
-        } } />;
-        default:
-          return <DateTimeSelection 
-            formData={formData} 
-            setFormData={setFormData}
-            addNewDay={addNewDay} 
-            updateDayTime={updateDayTime} 
-            nextStep={nextStep} 
-          />;
-    }
-  };
-
-  return (
-    <>
-      <Navbar />
-      <div className="container mx-auto p-4 mt-16">
-        <h1 className="text-2xl font-bold mb-4">Schedule a Service</h1>
-        <ProgressBar currentStep={step} totalSteps={5} />
-        {renderStep()}
-      </div>
-    </>
-  );
-}
-
-interface DateTimeSelectionProps {
-  formData: FormData;
-  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
-  addNewDay: (date: Date) => void;
-  updateDayTime: (index: number, time: string, field: 'startTime' | 'endTime') => void;
-  nextStep: () => void;
-}
-
-function formatTime(hour: string, minute: string): string {
-  const [hourNum, period] = hour.split(' ');
-  const paddedHour = hourNum.padStart(2, '0');
-  return `${paddedHour}:${minute} ${period}`;
-}
-
-function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: DateTimeSelectionProps) {
-  const [syncTimes, setSyncTimes] = useState(false);
-  const [unifiedStartTime, setUnifiedStartTime] = useState<string | null>(null);
-  const [unifiedEndTime, setUnifiedEndTime] = useState<string | null>(null);
 
   const handleSelect = (date: Date | undefined) => {
     if (!date) return;
@@ -249,7 +248,6 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
     setSyncTimes(e.target.checked);
     
     if (e.target.checked && formData.days.length > 0) {
-      // When enabling sync, get the times from the first day that has times set
       const firstDayWithTimes = formData.days.find(day => day.startTime || day.endTime);
       
       if (firstDayWithTimes) {
@@ -262,15 +260,6 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
           updateAllTimes(firstDayWithTimes.endTime, 'endTime');
         }
       }
-    } else {
-      // When disabling sync, reset all times to 8:00 AM
-      const defaultTime = '08:00 AM';
-      setUnifiedStartTime(defaultTime);
-      setUnifiedEndTime(defaultTime);
-      formData.days.forEach((_, index) => {
-        updateDayTime(index, defaultTime, 'startTime');
-        updateDayTime(index, defaultTime, 'endTime');
-      });
     }
   };
 
@@ -306,7 +295,7 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
             selected={selectedDates}
             onSelect={(_, selectedDay) => {
               if (selectedDay) {
-                handleSelect(selectedDay);
+                addNewDay(selectedDay);
               }
             }}
             disabled={isDateDisabled}
@@ -314,7 +303,7 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
           />
         </div>
         <div className="mt-4 space-y-4">
-          {/* Only show sync checkbox when there are 2 or more dates */}
+          {/* Sync times checkbox */}
           {formData.days.length >= 2 && (
             <div className="flex items-center mb-4">
               <input
@@ -330,9 +319,9 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
             </div>
           )}
 
-          {/* Unified time selection when sync is enabled */}
+          {/* Unified time selection */}
           {syncTimes && formData.days.length >= 2 && (
-            <div className="border border-blue-200 p-4 rounded-lg mb-4"> {/*bg-blue-50"*/}
+            <div className="border border-blue-200 p-4 rounded-lg mb-4">
               <h3 className="text-lg font-semibold mb-2">Set Time for All Dates</h3>
               <div className="grid grid-cols-2 gap-4">
                 <TimePicker
@@ -349,7 +338,7 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
             </div>
           )}
 
-          {/* Always show selected dates */}
+          {/* Selected dates */}
           {sortedDays.map((day, index) => (
             <div key={new Date(day.date).toISOString()} className="border p-4 rounded-lg">
               <h3 className="text-lg font-semibold">
@@ -373,11 +362,11 @@ function DateTimeSelection({ formData, addNewDay, updateDayTime, nextStep }: Dat
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>
                     <p className="text-sm font-medium">Start Time</p>
-                    <p className="mt-1">{day.startTime || '08:00 AM'}</p>
+                    <p className="mt-1">{day.startTime || 'Not selected'}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium">End Time</p>
-                    <p className="mt-1">{day.endTime || '08:00 AM'}</p>
+                    <p className="mt-1">{day.endTime || 'Not selected'}</p>
                   </div>
                 </div>
               )}
@@ -400,13 +389,18 @@ function TimePicker({ label, value, onChange }: {
   value: string | null; 
   onChange: (time: string) => void; 
 }) {
-  const [hour, setHour] = useState<string>('08 AM');
-  const [minute, setMinute] = useState<string>('00');
+  const [hour, setHour] = useState<string>('--');
+  const [minute, setMinute] = useState<string>('--');
 
   // Update the time when any of the fields change
   const updateTime = (newHour: string, newMinute: string) => {
-    const formattedTime = formatTime(newHour, newMinute);
-    onChange(formattedTime);
+    // Only format and update if both values are not '--'
+    if (newHour !== '--' && newMinute !== '--') {
+      const formattedTime = formatTime(newHour, newMinute);
+      onChange(formattedTime);
+    } else {
+      onChange('');
+    }
   };
 
   const handleHourChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -423,9 +417,13 @@ function TimePicker({ label, value, onChange }: {
 
   // Generate the hours from 8 AM to 5 PM
   const hours = [
+    '--',
     '08 AM', '09 AM', '10 AM', '11 AM', '12 PM', 
     '01 PM', '02 PM', '03 PM', '04 PM'
   ];
+
+  // Generate minutes with -- as default
+  const minutes = ['--', ...Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))];
 
   return (
     <div>
@@ -446,7 +444,7 @@ function TimePicker({ label, value, onChange }: {
           value={minute}
           onChange={handleMinuteChange}
         >
-          {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(minuteValue => (
+          {minutes.map(minuteValue => (
             <option key={minuteValue} value={minuteValue}>{minuteValue}</option>
           ))}
         </select>
