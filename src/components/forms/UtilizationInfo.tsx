@@ -5,11 +5,12 @@ import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface FormData {
-  startDate: Date | null;
-  endDate: Date | null;
-  startTime: string | null;
-  endTime: string | null;
-  
+  days: {
+    date: Date;
+    startTime: string | null;
+    endTime: string | null;
+  }[];
+
   // Personal Info
   name: string;
   contactNum: string;
@@ -40,15 +41,9 @@ interface FormData {
   // Utilization Info
   ProductsManufactured: string;
   BulkofCommodity: string;
-  Facility: string;
-  FacilityQty: number;
-  FacilityHrs: number;
   Equipment: string;
-  EquipmentQty: number;
-  EquipmentHrs: number;
   Tools: string;
   ToolsQty: number;
-  ToolsHrs: number;
 }
 
 interface ReviewSubmitProps {
@@ -68,40 +63,22 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
     try {
       setIsSubmitting(true);
       setError('');
-
+  
       const token = await getToken();
       
-      // Format dates and times
-      const startDateTime = formData.startDate ? new Date(formData.startDate) : null;
-      const endDateTime = formData.endDate ? new Date(formData.endDate) : null;
-      
-      if (startDateTime && formData.startTime) {
-        const [hours, minutes] = formData.startTime.split(':');
-        startDateTime.setHours(parseInt(hours), parseInt(minutes));
-      }
-      
-      if (endDateTime && formData.endTime) {
-        const [hours, minutes] = formData.endTime.split(':');
-        endDateTime.setHours(parseInt(hours), parseInt(minutes));
-      }
-
       const response = await fetch('/api/reservations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ...formData,
-          startTime: startDateTime?.toISOString(),
-          endTime: endDateTime?.toISOString(),
-        }),
+        body: JSON.stringify(formData),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to submit reservation');
       }
-
+  
       router.push('/dashboard/user');
       
     } catch (err) {
@@ -111,7 +88,7 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
       setIsSubmitting(false);
     }
   };
-
+  
   const renderSection = (title: string, fields: { label: string, value: any }[]) => (
     <div className="mb-6">
       <h3 className="text-lg font-medium mb-3">{title}</h3>
@@ -126,16 +103,18 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
     </div>
   );
 
+
   return (
     <div className="max-w-4xl mx-auto">
       <Card className="p-6">
         <h2 className="text-2xl font-semibold mb-6">Review Your Information</h2>
-        
-        {renderSection('Schedule', [
-          { label: 'Start Date & Time', value: `${formData.startDate?.toLocaleDateString()} ${formData.startTime}` },
-          { label: 'End Date & Time', value: `${formData.endDate?.toLocaleDateString()} ${formData.endTime}` }
-        ])}
 
+        {renderSection('Selected Dates and Times', [
+        ...formData.days.map((day, index) => ({
+            label: `Day ${index + 1}`,
+            value: `${new Date(day.date).toLocaleDateString()} (${day.startTime} - ${day.endTime})`
+          }))
+        ])}
         {renderSection('Personal Information', [
           { label: 'Name', value: formData.name },
           { label: 'Contact Number', value: formData.contactNum },

@@ -1,11 +1,12 @@
 import React from 'react';
 
 interface FormData {
-  startDate: Date | null;
-  endDate: Date | null;
-  startTime: string | null;
-  endTime: string | null;
-  
+  days: {
+    date: Date;
+    startTime: string | null;
+    endTime: string | null;
+  }[];
+
   // ClientInfo fields
   name: string;
   contactNum: string;

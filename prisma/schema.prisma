@@ -100,15 +100,9 @@ model UtilReq {
 
 model ProcessInfo {
   id           Int      @id @default(autoincrement())
-  Facility     String?
-  FacilityQty  Int?
-  FacilityHrs  Int?
   Equipment    String?
-  EquipmentQty Int?
-  EquipmentHrs Int?
   Tools        String?
   ToolsQty     Int?
-  ToolsHrs     Int?
   utilReqId    Int? //Foreign key for one-to-many relationship
   utilReq      UtilReq? @relation(name: "UtilReqToProcessInfo", fields: [utilReqId], references: [id])
 }

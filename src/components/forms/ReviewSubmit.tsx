@@ -1,17 +1,16 @@
-import React from 'react';
-import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface FormData {
-  startDate: Date | null;
-  endDate: Date | null;
-  startTime: string | null;
-  endTime: string | null;
-  
+  days: {
+    date: Date;
+    startTime: string | null;
+    endTime: string | null;
+  }[];
+
   // Personal Info
   name: string;
   contactNum: string;
@@ -42,15 +41,9 @@ interface FormData {
   // Utilization Info
   ProductsManufactured: string;
   BulkofCommodity: string;
-  Facility: string;
-  FacilityQty: number;
-  FacilityHrs: number;
   Equipment: string;
-  EquipmentQty: number;
-  EquipmentHrs: number;
   Tools: string;
   ToolsQty: number;
-  ToolsHrs: number;
 }
 
 interface ReviewSubmitProps {
@@ -60,7 +53,16 @@ interface ReviewSubmitProps {
   nextStep: () => void;
 }
 
-export default function ReviewSubmit({ formData, prevStep, updateFormData, nextStep }: ReviewSubmitProps) {
+const formatDate = (date: Date): string => {
+  return new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+export default function ReviewSubmit({ formData, prevStep, updateFormData }: ReviewSubmitProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -71,41 +73,21 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData, nextS
       setIsSubmitting(true);
       setError('');
 
-    // Get the authentication token from Clerk
-    const token = await getToken();
-
-
-      // Format dates and times for submission
-    const startDateTime = formData.startDate ? new Date(formData.startDate) : null;
-    const endDateTime = formData.endDate ? new Date(formData.endDate) : null;
+      const token = await getToken();
       
-    if (startDateTime && formData.startTime) {
-        const [hours, minutes] = formData.startTime.split(':');
-        startDateTime.setHours(parseInt(hours), parseInt(minutes));
-    }
-      
-      if (endDateTime && formData.endTime) {
-        const [hours, minutes] = formData.endTime.split(':');
-        endDateTime.setHours(parseInt(hours), parseInt(minutes));
-      }
-
       const response = await fetch('/api/reservations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Add the auth token
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          ...formData,
-          startTime: startDateTime?.toISOString(),
-          endTime: endDateTime?.toISOString(),
-        }),
+        body: JSON.stringify(formData),
       });
 
+      if (!response.ok) {
+        throw new Error('Failed to submit reservation');
+      }
 
-      const result = await response.json();
-      
-      // Redirect to success page or dashboard
       router.push('/dashboard/user');
       
     } catch (err) {
@@ -116,94 +98,72 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData, nextS
     }
   };
 
+  const renderSection = (title: string, fields: { label: string, value: any }[]) => (
+    <div className="mb-6">
+      <h3 className="text-lg font-medium mb-3">{title}</h3>
+      <div className="grid grid-cols-2 gap-4">
+        {fields.map(({ label, value }) => (
+          <div key={label} className={`${label.includes('Address') ? 'col-span-2' : ''}`}>
+            <p className="text-sm text-gray-600">{label}</p>
+            <p className="mt-1">{value?.toString() || 'Not provided'}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
     <div className="max-w-4xl mx-auto">
       <Card className="p-6">
         <h2 className="text-2xl font-semibold mb-6">Review Your Information</h2>
         
-        <div className="space-y-6">
-          {/* DateTime Section */}
-          <div>
-            <h3 className="text-lg font-medium mb-2">Schedule</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Start Date & Time</p>
-                <p>{formData.startDate?.toLocaleDateString()} {formData.startTime}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">End Date & Time</p>
-                <p>{formData.endDate?.toLocaleDateString()} {formData.endTime}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Personal Info Section */}
-          <div>
-            <h3 className="text-lg font-medium mb-2">Personal Information</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-gray-600">Name</p>
-                <p>{formData.name}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Contact Number</p>
-                <p>{formData.contactNum}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-sm text-gray-600">Address</p>
-                <p>{formData.address}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">City</p>
-                <p>{formData.city}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Province</p>
-                <p>{formData.province}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Zipcode</p>
-                <p>{formData.zipcode}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Business Info Section */}
-          <div>
-            <h3 className="text-lg font-medium mb-2">Business Information</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <p className="text-sm text-gray-600">Company Name</p>
-                <p>{formData.CompanyName}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Business Owner</p>
-                <p>{formData.BusinessOwner}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Email</p>
-                <p>{formData.CompanyEmail}</p>
-              </div>
-              {/* Add more business info fields as needed */}
-            </div>
-          </div>
-
-          {/* Utilization Info Section */}
-          <div>
-            <h3 className="text-lg font-medium mb-2">Utilization Information</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <p className="text-sm text-gray-600">Products Manufactured</p>
-                <p>{formData.ProductsManufactured}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-sm text-gray-600">Bulk of Commodity</p>
-                <p>{formData.BulkofCommodity}</p>
-              </div>
-              {/* Add more utilization info fields as needed */}
-            </div>
-          </div>
+        <div className="border border-gray-300 rounded-md shadow-sm p-4 mb-6">
+          <h3 className="text-lg font-medium mb-3">Selected Dates and Times</h3>
+          {formData.days.length > 0 ? (
+            [...formData.days]
+              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+              .map((day, index) => (
+                <div key={index} className="mb-4">
+                  <h4 className="font-medium">Day {index + 1}</h4>
+                  <p>Date: {formatDate(day.date)}</p>
+                  <p>Start Time: {day.startTime || 'Not set'}</p>
+                  <p>End Time: {day.endTime || 'Not set'}</p>
+                </div>
+              ))
+          ) : (
+            <p>No dates selected</p>
+          )}
         </div>
+
+        {renderSection('Personal Information', [
+          { label: 'Name', value: formData.name },
+          { label: 'Contact Number', value: formData.contactNum },
+          { label: 'Complete Address', value: `${formData.address}, ${formData.city}, ${formData.province} ${formData.zipcode}` }
+        ])}
+
+        {renderSection('Business Information', [
+          { label: 'Company Name', value: formData.CompanyName },
+          { label: 'Business Owner', value: formData.BusinessOwner },
+          { label: 'Email', value: formData.CompanyEmail },
+          { label: 'Business Permit Number', value: formData.BusinessPermitNum },
+          { label: 'TIN Number', value: formData.TINNum },
+          { label: 'Contact Person', value: formData.ContactPerson },
+          { label: 'Position/Designation', value: formData.Designation },
+          { label: 'Company Address', value: `${formData.CompanyAddress}, ${formData.CompanyCity}, ${formData.CompanyProvince} ${formData.CompanyZipcode}` },
+          { label: 'Phone Number', value: formData.CompanyPhoneNum },
+          { label: 'Mobile Number', value: formData.CompanyMobileNum },
+          { label: 'Products Manufactured', value: formData.Manufactured },
+          { label: 'Production Frequency', value: formData.ProductionFrequency },
+          { label: 'Bulk per Production', value: formData.Bulk }
+        ])}
+
+        {renderSection('Utilization Information', [
+          { label: 'Products to be Manufactured', value: formData.ProductsManufactured },
+          { label: 'Bulk of Commodity', value: formData.BulkofCommodity },
+          { label: 'Equipment', value: formData.Equipment },
+          { label: 'Tools', value: formData.Tools },
+          { label: 'Tools Quantity', value: formData.ToolsQty }
+        ])}
 
         {error && (
           <Alert variant="destructive" className="mt-4">
@@ -213,16 +173,16 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData, nextS
 
         <div className="mt-6 flex justify-between">
           <button 
-            onClick={prevStep} 
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
+            onClick={prevStep}
             disabled={isSubmitting}
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors disabled:opacity-50"
           >
             Previous
           </button>
           <button
             onClick={handleSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
             disabled={isSubmitting}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
           >
             {isSubmitting ? 'Submitting...' : 'Submit Request'}
           </button>
