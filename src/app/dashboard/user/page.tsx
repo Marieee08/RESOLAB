@@ -30,8 +30,11 @@ interface Reservation {
   }>;
 }
 
+
 const DashboardUser = () => {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
+  const [userRole, setUserRole] = useState<string>("Loading...");
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -39,7 +42,6 @@ const DashboardUser = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
-
 
  // useEffect to fetch reservations
  useEffect(() => {
@@ -57,6 +59,28 @@ const DashboardUser = () => {
 
   fetchReservations();
 }, []);
+
+ // useEffect to user role
+useEffect(() => {
+  const checkUserRole = async () => {
+    if (!user) {
+      setUserRole("Not logged in");
+      return;
+    }
+    try {
+      const publicMetadata = user.publicMetadata;
+      const role = publicMetadata.role || "USER";
+      setUserRole(role as string);
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+      setUserRole("Error fetching role");
+    }
+  };
+
+  if (isLoaded) {
+    checkUserRole();
+  }
+}, [user, isLoaded]);
 
 const handleReviewClick = (reservation: Reservation) => {
   setSelectedReservation(reservation);
@@ -101,9 +125,9 @@ const renderSection = (title: string, fields: { label: string, value: any }[]) =
               <span className="h-36 w-36 rounded-full bg-gray-600 mb-2"></span>
             )}
             <h2 className="text-[#0d172c] text-xl font-bold">
-              {user?.firstName || user?.username || 'User'}
+              {user?.firstName} {user?.lastName}
             </h2>
-            <p className="text-[#1c62b5]">MSME</p>
+            <p className="text-[#1c62b5]">{userRole}</p>
           </div>
           <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-600">MENU</h3>

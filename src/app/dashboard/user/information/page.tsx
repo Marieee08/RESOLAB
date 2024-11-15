@@ -38,7 +38,7 @@ const DashboardUser = () => {
 
 
   return (
-<div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
+  <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
   {/* Sidebar */}
   <aside className={`absolute left-0 top-0 z-50 flex h-screen w-72 flex-col overflow-y-hidden bg-white duration-300 ease-linear lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
     <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
@@ -50,9 +50,20 @@ const DashboardUser = () => {
       </button>
     </div>
     <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
+
     <div className="flex flex-col items-center py-8">
-            <span className="h-36 w-36 rounded-full bg-gray-600 mb-2"></span>
-            <h2 className="text-[#0d172c] text-xl font-bold">{user?.firstName} {user?.lastName}</h2>
+            {user?.imageUrl ? (
+              <img 
+                src={user.imageUrl} 
+                alt="Profile" 
+                className="h-36 w-36 rounded-full object-cover mb-2"
+              />
+            ) : (
+              <span className="h-36 w-36 rounded-full bg-gray-600 mb-2"></span>
+            )}
+            <h2 className="text-[#0d172c] text-xl font-bold">
+              {user?.firstName} {user?.lastName}
+            </h2>
             <p className="text-[#1c62b5]">{userRole}</p>
           </div>
       <div>
@@ -115,10 +126,20 @@ const DashboardUser = () => {
             <div className="flex items-center gap-3 2xsm:gap-7">
               <Link href="#" className="flex items-center gap-4">
                 <span className="hidden text-right lg:block">
-                  <span className="block text-sm font-medium text-black">Ashkinaz Canonoy</span>
+                  <span className="block text-sm font-medium text-black">
+                    {user?.firstName} {user?.lastName || ''}
+                  </span>
                   <span className="block text-xs">Student</span>
                 </span>
-                <span className="h-12 w-12 rounded-full bg-gray-300"></span>
+                {user?.imageUrl ? (
+                  <img 
+                    src={user.imageUrl} 
+                    alt="Profile" 
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="h-12 w-12 rounded-full bg-gray-300"></span>
+                )}
               </Link>
             </div>
           </div>
