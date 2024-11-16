@@ -7,26 +7,43 @@ import { format } from 'date-fns';
 
 // Types for our data
 interface ClientInfo {
+  id: number;
   ContactNum: string;
   Address: string;
   City: string;
   Province: string;
   Zipcode: number;
+  accInfo: {
+    name: string;
+    email: string;
+  };
 }
 
 interface BusinessInfo {
-  CompanyName: string;
-  BusinessOwner: string;
-  BusinessPermitNum: string;
-  TINNum: string;
-  CompanyEmail: string;
-  ContactPerson: string;
-  Designation: string;
-  CompanyAddress: string;
-  CompanyCity: string;
-  CompanyProvince: string;
-  CompanyZipcode: number;
+  id: number;
+  CompanyName?: string;
+  BusinessOwner?: string;
+  BusinessPermitNum?: string;
+  TINNum?: string;
+  CompanyIDNum?: string;
+  CompanyEmail?: string;
+  ContactPerson?: string;
+  Designation?: string;
+  CompanyAddress?: string;
+  CompanyCity?: string;
+  CompanyProvince?: string;
+  CompanyZipcode?: number;
+  CompanyPhoneNum?: string;
+  CompanyMobileNum?: string;
+  Manufactured?: string;
+  ProductionFrequency?: string;
+  Bulk?: string;
+  accInfo?: {
+    name: string;
+    email: string;
+  };
 }
+
 
 const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -51,16 +68,23 @@ const DashboardUser = () => {
         // Fetch business info
         const businessResponse = await fetch(`/api/business-info/${user.id}`);
         const businessData = await businessResponse.json();
-        setBusinessInfo(businessData);
+  
+        if (businessData) {
+          setBusinessInfo(businessData);
+        } else {
+          setBusinessInfo(null); // Handle case where no data is returned
+        }
+      } catch (error) {
+        console.error("Error fetching business data:", error);
+        setBusinessInfo(null); // Clear the state on error
+      }
+      
 
         // Set user role
         const publicMetadata = user.publicMetadata;
         const role = publicMetadata.role || "USER";
         setUserRole(role as string);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
       }
-    };
 
     if (isLoaded) {
       fetchUserData();
