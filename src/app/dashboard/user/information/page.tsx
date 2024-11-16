@@ -1,11 +1,9 @@
 "use client";
 
-
 import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@clerk/nextjs";
 import { format } from 'date-fns';
-
 
 // Types for our data
 interface ClientInfo {
@@ -15,7 +13,6 @@ interface ClientInfo {
   Province: string;
   Zipcode: number;
 }
-
 
 interface BusinessInfo {
   CompanyName: string;
@@ -31,7 +28,6 @@ interface BusinessInfo {
   CompanyZipcode: number;
 }
 
-
 const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isBusinessView, setIsBusinessView] = useState(false);
@@ -39,39 +35,53 @@ const DashboardUser = () => {
   const [userRole, setUserRole] = useState<string>("Loading...");
   const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
   const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);
+  const [loading, setLoading] = useState(true);
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
-
 
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user) return;
-     
+  
       try {
+        setLoading(true);
+  
         // Fetch client info
-        const clientResponse = await fetch(`/api/client-info/${user.id}`);
+        const clientResponse = await fetch(`/api/client-info?userId=${user.id}`);
+        if (!clientResponse.ok) {
+          throw new Error("Failed to fetch client info");
+        }
         const clientData = await clientResponse.json();
         setClientInfo(clientData);
-
-
+  
         // Fetch business info
         const businessResponse = await fetch(`/api/business-info?userId=${user.id}`);
-        const businessData = await businessResponse.json();
-        console.log("Business Data:", businessData);
-        setBusinessInfo(businessData);
-
-
-
-        // Set user role
-        const publicMetadata = user.publicMetadata;
-        const role = publicMetadata.role || "USER";
-        setUserRole(role as string);
+        if (!businessResponse.ok) {
+          console.warn("Business info fetch status:", businessResponse.status);
+          const errorText = await businessResponse.text();
+          console.warn("Business info error:", errorText);
+          // Optionally, show an error to the user or set default business data
+          setBusinessInfo(null);
+        } else {
+          const businessData = await businessResponse.json();
+          console.log("Business Data:", businessData);
+          if (businessData && Object.keys(businessData).length > 0) {
+            setBusinessInfo(businessData);
+          } else {
+            console.warn("No business info found for the user.");
+            setBusinessInfo(null); // Optionally, set an empty state or default value
+          }
+        }
+  
+  
       } catch (error) {
         console.error("Error fetching user data:", error);
+        // You can also set an error state to show user-friendly messages if needed
+      } finally {
+        setLoading(false);
       }
     };
-
-
+  
     if (isLoaded) {
       fetchUserData();
     }
@@ -218,6 +228,7 @@ const DashboardUser = () => {
                 className="ml-4 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 text-blue-800 bg-blue-100 border border-[#5e86ca]">
                 Edit Information
               </button>
+            
           </div>
 
 
