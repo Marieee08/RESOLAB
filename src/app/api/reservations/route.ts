@@ -30,13 +30,37 @@ export async function POST(request: Request) {
      );
    }
 
+   // Handle ClientInfo creation/update
+   if (data.ContactNum) {
+     await prisma.clientInfo.upsert({
+       where: {
+         accInfoId: userAccount.id,
+       },
+       update: {
+         ContactNum: data.ContactNum,
+         Address: data.Address,
+         City: data.City,
+         Province: data.Province,
+         Zipcode: data.Zipcode,
+       },
+       create: {
+         accInfoId: userAccount.id,
+         ContactNum: data.ContactNum,
+         Address: data.Address,
+         City: data.City,
+         Province: data.Province,
+         Zipcode: data.Zipcode,
+       },
+     });
+   }
+
    // Create the UtilReq entry
    const utilReq = await prisma.utilReq.create({
      data: {
        ProductsManufactured: data.ProductsManufactured,
        BulkofCommodity: data.BulkofCommodity,
        RequestDate: new Date(),
-       EndDate: new Date(data.days[data.days.length - 1].date), // Use last selected date
+       EndDate: new Date(data.days[data.days.length - 1].date),
        accInfoId: userAccount.id,
        
        // Create ProcessInfo
@@ -111,11 +135,15 @@ export async function POST(request: Request) {
      });
    }
 
-   return NextResponse.json(utilReq);
+   return NextResponse.json({
+     utilReq,
+     success: true,
+     message: 'Data saved successfully'
+   });
  } catch (error) {
-   console.error('Reservation creation error:', error);
+   console.error('Error:', error);
    return NextResponse.json(
-     { error: 'Failed to create reservation' },
+     { error: 'Failed to process request' },
      { status: 500 }
    );
  }

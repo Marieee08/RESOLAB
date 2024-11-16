@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { useUser } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+
 
 interface FormData {
   days: {
@@ -11,13 +13,13 @@ interface FormData {
     endTime: string | null;
   }[];
 
-  // Personal Info
-  name: string;
-  contactNum: string;
-  address: string;
-  city: string;
-  province: string;
-  zipcode: string;
+
+ // ClientInfo fields
+ ContactNum: string;
+ Address: string;
+ City: string;
+ Province: string;
+ Zipcode: number;
 
   // Business Info
   CompanyName: string;
@@ -63,10 +65,19 @@ const formatDate = (date: Date): string => {
 };
 
 export default function ReviewSubmit({ formData, prevStep, updateFormData }: ReviewSubmitProps) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const { getToken } = useAuth();
+    const router = useRouter();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState('');
+    const { user, isLoaded } = useUser();
+    const [userName, setUserName] = useState<string>("");
+    const { getToken } = useAuth();
+  
+    useEffect(() => {
+      if (isLoaded && user) {
+        const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+        setUserName(fullName);
+      }
+    }, [user, isLoaded]);
 
   const handleSubmit = async () => {
     try {
@@ -102,12 +113,18 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
     <div className="mb-6">
       <h3 className="text-lg font-medium mb-3">{title}</h3>
       <div className="grid grid-cols-2 gap-4">
-        {fields.map(({ label, value }) => (
-          <div key={label} className={`${label.includes('Address') ? 'col-span-2' : ''}`}>
-            <p className="text-sm text-gray-600">{label}</p>
-            <p className="mt-1">{value?.toString() || 'Not provided'}</p>
-          </div>
-        ))}
+        {fields.map(({ label, value }) => {
+          // Special handling for the Name field
+          if (label === 'Name') {
+            value = userName;
+          }
+          return (
+            <div key={label} className={`${label.includes('Address') ? 'col-span-2' : ''}`}>
+              <p className="text-sm text-gray-600">{label}</p>
+              <p className="mt-1">{value?.toString() || 'Not provided'}</p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -136,9 +153,9 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
         </div>
 
         {renderSection('Personal Information', [
-          { label: 'Name', value: formData.name },
-          { label: 'Contact Number', value: formData.contactNum },
-          { label: 'Complete Address', value: `${formData.address}, ${formData.city}, ${formData.province} ${formData.zipcode}` }
+          { label: 'Name', value: userName },
+          { label: 'Contact Number', value: formData.ContactNum },
+          { label: 'Complete Address', value: `${formData.Address}, ${formData.City}, ${formData.Province} ${formData.Zipcode}` }
         ])}
 
         {renderSection('Business Information', [

@@ -19,12 +19,11 @@ interface FormData {
  }[];
 
  // ClientInfo fields
- name: string;
- contactNum: string;
- address: string;
- city: string;
- province: string;
- zipcode: string;
+ ContactNum: string;
+ Address: string;
+ City: string;
+ Province: string;
+ Zipcode: number;
 
  // UtilizationInfo fields
  ProductsManufactured: string;
@@ -61,12 +60,11 @@ export default function Schedule() {
    days: [],
 
    // Client info
-   name: '',
-   contactNum: '',
-   address: '',
-   city: '',
-   province: '',
-   zipcode: '',
+   ContactNum: '',
+   Address: '',
+   City: '',
+   Province: '',
+   Zipcode: 0,
 
    // ProcessInfo fields
    ProductsManufactured: '',
