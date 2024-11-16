@@ -343,16 +343,6 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
-      {errors.length > 0 && (
-        <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          <p className="font-bold">Please correct the following errors:</p>
-          <ul className="list-disc list-inside">
-            {errors.map((error, index) => (
-              <li key={index} className="ml-2">{error}</li>
-            ))}
-          </ul>
-        </div>
-      )}
       <div className="grid grid-cols-2 gap-6 mt-6">
         <div className="items-start w-full h-full">
           <Calendar
@@ -474,6 +464,25 @@ function TimePicker({
   required?: boolean;
 }) {
   const isFirstSelection = React.useRef(true);
+  const [showError, setShowError] = React.useState(false);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = React.useState(false);
+
+   // Listen for validation attempts from parent
+   React.useEffect(() => {
+    const handleNextClick = () => {
+      setHasAttemptedSubmit(true);
+    };
+
+    document.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).textContent?.includes('Next')) {
+        handleNextClick();
+      }
+    });
+
+    return () => {
+      document.removeEventListener('click', handleNextClick);
+    };
+  }, []);
 
   const validateTimeOrder = React.useCallback((currentTime: string) => {
     if (!isEndTime || !startTime) return false;
@@ -484,7 +493,7 @@ function TimePicker({
     if (startMinutes === -1 || endMinutes === -1) return false;
     return endMinutes <= startMinutes;
   }, [isEndTime, startTime]);
-  
+
   const parseTime = (timeString: string | null): { hour: string; minute: string } => {
     if (!timeString || timeString === '--:-- AM' || timeString === '--:-- PM') {
       return { hour: '--', minute: '--' };
@@ -502,6 +511,13 @@ function TimePicker({
   const [localHour, setLocalHour] = React.useState<string>(() => parseTime(value).hour);
   const [localMinute, setLocalMinute] = React.useState<string>(() => parseTime(value).minute);
   const [isInvalid, setIsInvalid] = React.useState(false);
+
+  // Listen for parent validation triggers
+  React.useEffect(() => {
+    if (hasAttemptedSubmit) {
+      setShowError(required && (localHour === '--' || localMinute === '--'));
+    }
+  }, [hasAttemptedSubmit, required, localHour, localMinute]);
 
   const formatTime = (hour: string, minute: string): string => {
     if (hour === '--' || minute === '--') {
@@ -546,9 +562,15 @@ function TimePicker({
       const formattedTime = formatTime(newHour, localMinute);
       setIsInvalid(validateTimes(formattedTime));
       onChange(formattedTime);
+      if (hasAttemptedSubmit) {
+        setShowError(false);
+      }
     } else if (newHour === '--') {
       setIsInvalid(false);
       onChange('--:-- AM');
+      if (hasAttemptedSubmit) {
+        setShowError(true);
+      }
     }
     
     isFirstSelection.current = false;
@@ -562,9 +584,15 @@ function TimePicker({
       const formattedTime = formatTime(localHour, newMinute);
       setIsInvalid(validateTimes(formattedTime));
       onChange(formattedTime);
+      if (hasAttemptedSubmit) {
+        setShowError(false);
+      }
     } else if (newMinute === '--') {
       setIsInvalid(false);
       onChange('--:-- AM');
+      if (hasAttemptedSubmit) {
+        setShowError(true);
+      }
     }
     
     isFirstSelection.current = false;
@@ -595,8 +623,9 @@ function TimePicker({
   const minutes = ['--', ...Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))];
 
   const selectClassName = `border rounded-md p-2 w-auto ${
-    isInvalid ? 'border-red-500 bg-red-50' : 
-    required && (localHour === '--' || localMinute === '--') ? 'border-yellow-500' : ''
+    isInvalid ? 'border-red-500' : 
+    showError ? 'border-red-500' :
+    'border-gray-300'
   }`;
 
   return (
@@ -630,13 +659,18 @@ function TimePicker({
         </select>
       </div>
 
-      <label className="block text-sm font-medium mb-1">
+      <div className="mt-1">
         {isInvalid && (
-         <span className="text-red-500 mt-2 text-sm block">
+          <span className="text-red-500 text-sm block">
             End time must be after start time
           </span>
         )}
-        </label>
+        {showError && (
+          <span className="text-red-500 text-sm block">
+            This field is required
+          </span>
+        )}
+      </div>
     </div>
   );
 }
