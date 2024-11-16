@@ -5,9 +5,7 @@ import { Calendar } from '@/components/ui/calendar';
 import TimePicker from '@/components/custom/time-picker';
 import ProgressBar from '@/components/custom/progress-bar';
 import Navbar from '@/components/custom/navbar';
-import PersonalInformation from '@/components/forms/PersonalInfo';
 import ProcessInformation from '@/components/forms/UtilizationInfo';
-import BusinessInformation from '@/components/forms/BusinessInfo';
 import ReviewSubmit from '@/components/forms/ReviewSubmit';
 
 const MAX_DATES = 5;
@@ -38,14 +36,6 @@ interface FormData {
   unifiedStartTime: string | null; // Add this field to persist unified start time
   unifiedEndTime: string | null;
 
-  // ClientInfo fields
-  name: string;
-  contactNum: string;
-  address: string;
-  city: string;
-  province: string;
-  zipcode: string;
-
   // UtilizationInfo fields
   ProductsManufactured: string;
   BulkofCommodity: string;
@@ -58,25 +48,6 @@ interface FormData {
   Tools: string;
   ToolsQty: number;
   ToolsHrs: number;
-
-  // Add BusinessInfo fields
-  CompanyName: string;
-  BusinessOwner: string;
-  BusinessPermitNum: string;
-  TINNum: string;
-  CompanyIDNum: string;
-  CompanyEmail: string;
-  ContactPerson: string;
-  Designation: string;
-  CompanyAddress: string;
-  CompanyCity: string;
-  CompanyProvince: string;
-  CompanyZipcode: number | '';
-  CompanyPhoneNum: string;
-  CompanyMobileNum: string;
-  Manufactured: string;
-  ProductionFrequency: string;
-  Bulk: string;
 }
 
 type UpdateFormData = (field: keyof FormData, value: FormData[keyof FormData] | number) => void;
@@ -88,14 +59,6 @@ export default function Schedule() {
     syncTimes: false, // Initialize sync state
     unifiedStartTime: null, // Initialize unified start time
     unifiedEndTime: null,
-
-    // Client Info
-    name: '',
-    contactNum: '',
-    address: '',
-    city: '',
-    province: '',
-    zipcode: '',
 
     // Initialize ProcessInfo fields
     ProductsManufactured: '',
@@ -109,25 +72,6 @@ export default function Schedule() {
     Tools: '',
     ToolsQty: 0,
     ToolsHrs: 0,
-
-    // Initialize BusinessInfo fields
-    CompanyName: '',
-    BusinessOwner: '',
-    BusinessPermitNum: '',
-    TINNum: '',
-    CompanyIDNum: '',
-    CompanyEmail: '',
-    ContactPerson: '',
-    Designation: '',
-    CompanyAddress: '',
-    CompanyCity: '',
-    CompanyProvince: '',
-    CompanyZipcode: '',
-    CompanyPhoneNum: '',
-    CompanyMobileNum: '',
-    Manufactured: '',
-    ProductionFrequency: '',
-    Bulk: '',
   });
 
   const updateFormData: UpdateFormData = (field, value) => {
@@ -147,21 +91,17 @@ export default function Schedule() {
             nextStep={nextStep} 
           />
         );
-      case 2:
-        return <PersonalInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 3:
-        return <BusinessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 4:
-        return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-      case 5:
-        return <ReviewSubmit formData={formData} prevStep={prevStep} updateFormData={updateFormData} nextStep={nextStep} />;
-      default:
-        return (
-          <DateTimeSelection 
-            formData={formData} 
-            setFormData={setFormData}
-            nextStep={nextStep} 
-          />
+        case 2:
+          return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
+        case 3:
+          return <ReviewSubmit formData={formData} prevStep={prevStep} />;
+        default:
+          return (
+            <DateTimeSelection 
+              formData={formData} 
+              setFormData={setFormData}
+              nextStep={nextStep} 
+            />
         );
     }
   };
@@ -171,7 +111,7 @@ export default function Schedule() {
       <Navbar />
       <div className="container mx-auto p-4 mt-16">
         <h1 className="text-2xl font-bold mb-4">Schedule a Service</h1>
-        <ProgressBar currentStep={step} totalSteps={5} />
+        <ProgressBar currentStep={step} totalSteps={3} />
         {renderStep()}
       </div>
     </>
