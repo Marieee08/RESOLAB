@@ -1,47 +1,34 @@
 "use client";
 
+
 import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@clerk/nextjs";
 import { format } from 'date-fns';
 
+
 // Types for our data
 interface ClientInfo {
-  id: number;
   ContactNum: string;
   Address: string;
   City: string;
   Province: string;
   Zipcode: number;
-  accInfo: {
-    name: string;
-    email: string;
-  };
 }
 
+
 interface BusinessInfo {
-  id: number;
-  CompanyName?: string;
-  BusinessOwner?: string;
-  BusinessPermitNum?: string;
-  TINNum?: string;
-  CompanyIDNum?: string;
-  CompanyEmail?: string;
-  ContactPerson?: string;
-  Designation?: string;
-  CompanyAddress?: string;
-  CompanyCity?: string;
-  CompanyProvince?: string;
-  CompanyZipcode?: number;
-  CompanyPhoneNum?: string;
-  CompanyMobileNum?: string;
-  Manufactured?: string;
-  ProductionFrequency?: string;
-  Bulk?: string;
-  accInfo?: {
-    name: string;
-    email: string;
-  };
+  CompanyName: string;
+  BusinessOwner: string;
+  BusinessPermitNum: string;
+  TINNum: string;
+  CompanyEmail: string;
+  ContactPerson: string;
+  Designation: string;
+  CompanyAddress: string;
+  CompanyCity: string;
+  CompanyProvince: string;
+  CompanyZipcode: number;
 }
 
 
@@ -55,41 +42,41 @@ const DashboardUser = () => {
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
+
   useEffect(() => {
     const fetchUserData = async () => {
       if (!user) return;
-      
+     
       try {
         // Fetch client info
         const clientResponse = await fetch(`/api/client-info/${user.id}`);
         const clientData = await clientResponse.json();
         setClientInfo(clientData);
 
+
         // Fetch business info
-        const businessResponse = await fetch(`/api/business-info/${user.id}`);
+        const businessResponse = await fetch(`/api/business-info?userId=${user.id}`);
         const businessData = await businessResponse.json();
-  
-        if (businessData) {
-          setBusinessInfo(businessData);
-        } else {
-          setBusinessInfo(null); // Handle case where no data is returned
-        }
-      } catch (error) {
-        console.error("Error fetching business data:", error);
-        setBusinessInfo(null); // Clear the state on error
-      }
-      
+        console.log("Business Data:", businessData);
+        setBusinessInfo(businessData);
+
+
 
         // Set user role
         const publicMetadata = user.publicMetadata;
         const role = publicMetadata.role || "USER";
         setUserRole(role as string);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
       }
+    };
+
 
     if (isLoaded) {
       fetchUserData();
     }
   }, [user, isLoaded]);
+
 
   return (
   <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -105,11 +92,12 @@ const DashboardUser = () => {
     </div>
     <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
 
+
     <div className="flex flex-col items-center py-8">
             {user?.imageUrl ? (
-              <img 
-                src={user.imageUrl} 
-                alt="Profile" 
+              <img
+                src={user.imageUrl}
+                alt="Profile"
                 className="h-36 w-36 rounded-full object-cover mb-2"
               />
             ) : (
@@ -142,6 +130,8 @@ const DashboardUser = () => {
       </div>
     </nav>
   </aside>
+
+
 
 
       {/* Main Content */}
@@ -186,9 +176,9 @@ const DashboardUser = () => {
                   <span className="block text-xs">Student</span>
                 </span>
                 {user?.imageUrl ? (
-                  <img 
-                    src={user.imageUrl} 
-                    alt="Profile" 
+                  <img
+                    src={user.imageUrl}
+                    alt="Profile"
                     className="h-12 w-12 rounded-full object-cover"
                   />
                 ) : (
@@ -198,6 +188,8 @@ const DashboardUser = () => {
             </div>
           </div>
         </header>
+
+
 
 
         <main>
@@ -227,6 +219,8 @@ const DashboardUser = () => {
                 Edit Information
               </button>
           </div>
+
+
 
 
 {/* Information Display */}
@@ -337,6 +331,7 @@ const DashboardUser = () => {
       </div>
     )}
 
+
         </div>
       </div>
           </section>
@@ -346,6 +341,8 @@ const DashboardUser = () => {
     </div>
   );
 };
+
+
 
 
 export default DashboardUser;
