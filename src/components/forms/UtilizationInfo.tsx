@@ -40,11 +40,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
   ) => {
     const { name, value } = e.target;
     updateFormData(name as keyof FormData, value);
-    
-    setErrors(prev => ({
-      ...prev,
-      [name]: undefined
-    }));
+    validateField(name as keyof FormData, value);
   };
 
   const isFieldDisabled = (fieldName: keyof FormData) => {
@@ -55,15 +51,20 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     const newTouchedFields = new Set(touchedFields);
     newTouchedFields.add(fieldName);
     setTouchedFields(newTouchedFields);
-    validateField(fieldName);
+    validateField(fieldName, formData[fieldName]);
   };
 
-  const validateField = (fieldName: keyof FormData) => {
-    const value = formData[fieldName];
+  const validateField = (fieldName: keyof FormData, value: string) => {
     let error = '';
 
-    if (value === undefined || value === '') {
-      error = 'This field is required';
+    if (fieldName === 'ProductsManufactured') {
+      if (!value || value === 'Select service') {
+        error = 'Please select a service';
+      }
+    } else if (!isFieldDisabled(fieldName)) {
+      if (!value || value === 'Select equipment') {
+        error = 'This field is required';
+      }
     }
 
     setErrors(prev => ({
@@ -78,13 +79,27 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     const newErrors: Partial<Record<keyof FormData, string>> = {};
     let isValid = true;
 
-    (Object.keys(formData) as Array<keyof FormData>).forEach(field => {
-      const value = formData[field];
-      if (value === undefined || value === '') {
-        newErrors[field] = 'This field is required';
+    // Validate ProductsManufactured first
+    if (!formData.ProductsManufactured || formData.ProductsManufactured === 'Select service') {
+      newErrors.ProductsManufactured = 'Please select a service';
+      isValid = false;
+    }
+
+    // If it's not Benchmarking, validate other fields
+    if (formData.ProductsManufactured !== 'Benchmarking') {
+      if (!formData.Equipment || formData.Equipment === 'Select equipment') {
+        newErrors.Equipment = 'Please select equipment';
         isValid = false;
       }
-    });
+      if (!formData.BulkofCommodity) {
+        newErrors.BulkofCommodity = 'This field is required';
+        isValid = false;
+      }
+      if (!formData.Tools) {
+        newErrors.Tools = 'This field is required';
+        isValid = false;
+      }
+    }
 
     setErrors(newErrors);
     const allFields = new Set(Object.keys(formData) as Array<keyof FormData>);
@@ -119,7 +134,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           <select
             id="ProductsManufactured"
             name="ProductsManufactured"
-            value={formData.ProductsManufactured || ''}
+            value={formData.ProductsManufactured}
             onChange={handleInputChange}
             onBlur={() => handleBlur('ProductsManufactured')}
             className={getInputClassName('ProductsManufactured')}
@@ -149,7 +164,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           <select
             id="Equipment"
             name="Equipment"
-            value={formData.Equipment || ''}
+            value={formData.Equipment}
             onChange={handleInputChange}
             onBlur={() => handleBlur('Equipment')}
             className={getInputClassName('Equipment')}
@@ -177,7 +192,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
             type="text"
             id="BulkofCommodity"
             name="BulkofCommodity"
-            value={formData.BulkofCommodity || ''}
+            value={formData.BulkofCommodity}
             onChange={handleInputChange}
             onBlur={() => handleBlur('BulkofCommodity')}
             className={getInputClassName('BulkofCommodity')}
@@ -197,7 +212,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
             type="text"
             id="Tools"
             name="Tools"
-            value={formData.Tools || ''}
+            value={formData.Tools}
             onChange={handleInputChange}
             onBlur={() => handleBlur('Tools')}
             className={getInputClassName('Tools')}

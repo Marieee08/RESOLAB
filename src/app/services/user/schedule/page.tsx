@@ -39,15 +39,8 @@ interface FormData {
   // UtilizationInfo fields
   ProductsManufactured: string;
   BulkofCommodity: string;
-  Facility: string;
-  FacilityQty: number;
-  FacilityHrs: number;
   Equipment: string;
-  EquipmentQty: number;
-  EquipmentHrs: number;
   Tools: string;
-  ToolsQty: number;
-  ToolsHrs: number;
 }
 
 type UpdateFormData = (field: keyof FormData, value: FormData[keyof FormData] | number) => void;
@@ -63,15 +56,8 @@ export default function Schedule() {
     // Initialize ProcessInfo fields
     ProductsManufactured: '',
     BulkofCommodity: '',
-    Facility: '',
-    FacilityQty: 0,
-    FacilityHrs: 0,
     Equipment: '',
-    EquipmentQty: 0,
-    EquipmentHrs: 0,
     Tools: '',
-    ToolsQty: 0,
-    ToolsHrs: 0,
   });
 
   const updateFormData: UpdateFormData = (field, value) => {
