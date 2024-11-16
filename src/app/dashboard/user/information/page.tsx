@@ -44,12 +44,12 @@ const DashboardUser = () => {
       
       try {
         // Fetch client info
-        const clientResponse = await fetch(`/api/client-info/${user.id}`);
+        const clientResponse = await fetch(`/api/clientInfo/${user.id}`);
         const clientData = await clientResponse.json();
         setClientInfo(clientData);
 
         // Fetch business info
-        const businessResponse = await fetch(`/api/business-info/${user.id}`);
+        const businessResponse = await fetch(`/api/businessInfo/${user.id}`);
         const businessData = await businessResponse.json();
         setBusinessInfo(businessData);
 
