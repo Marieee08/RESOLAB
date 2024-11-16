@@ -3,10 +3,10 @@
 import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@clerk/nextjs";
+import EditClientModal from "@/components/custom/EditClientModal";
 import { format } from 'date-fns';
 
 interface ClientInfo {
-  id: number;
   ContactNum: string;
   Address: string | null;
   City: string | null;
@@ -47,23 +47,31 @@ interface AccInfo {
 
 
 
-
-
-
 const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isBusinessView, setIsBusinessView] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
   
   const [accInfo, setAccInfo] = useState<AccInfo | null>(null);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
+  const handleInfoUpdate = (updatedData: ClientInfo) => {
+    setAccInfo((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        ClientInfo: updatedData
+      };
+    });
+  };
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -104,15 +112,6 @@ const DashboardUser = () => {
       {content}
     </div>
   );
-
-  if (loading) {
-    return <div className="p-4">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="p-4 text-red-500">Error: {error}</div>;
-  }
-
 
 
   return (
@@ -247,9 +246,10 @@ const DashboardUser = () => {
               </button>
             </div>
             <button
-                className="ml-4 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 text-blue-800 bg-blue-100 border border-[#5e86ca]">
-                Edit Information
-              </button>
+              onClick={() => setIsEditModalOpen(true)}
+              className="ml-4 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 text-blue-800 bg-blue-100 border border-[#5e86ca]">
+              Edit Information
+            </button>
           </div>
 
 
@@ -366,6 +366,17 @@ const DashboardUser = () => {
           </section>
           </div>
         </main>
+
+
+        <EditClientModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          clientInfo={accInfo?.ClientInfo}
+          onUpdate={handleInfoUpdate}
+        />
+
+
+
       </div>
     </div>
   );
