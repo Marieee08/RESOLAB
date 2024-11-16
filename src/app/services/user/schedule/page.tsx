@@ -638,12 +638,8 @@ function TimePicker({
       <label className="block text-sm font-medium mb-1">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
-        {isInvalid && (
-          <span className="text-red-500 ml-2 text-sm">
-            End time must be after start time
-          </span>
-        )}
       </label>
+
       <div className="flex space-x-2">
         <select
           className={selectClassName}
@@ -667,6 +663,14 @@ function TimePicker({
           ))}
         </select>
       </div>
+
+      <label className="block text-sm font-medium mb-1">
+        {isInvalid && (
+         <span className="text-red-500 mt-2 text-sm block">
+            End time must be after start time
+          </span>
+        )}
+        </label>
     </div>
   );
 }
