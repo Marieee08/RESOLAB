@@ -5,67 +5,115 @@ import React, { useState, useEffect } from 'react';
 import { useUser } from "@clerk/nextjs";
 import { format } from 'date-fns';
 
-// Types for our data
 interface ClientInfo {
+  id: number;
   ContactNum: string;
-  Address: string;
-  City: string;
-  Province: string;
-  Zipcode: number;
+  Address: string | null;
+  City: string | null;
+  Province: string | null;
+  Zipcode: number | null;
 }
 
 interface BusinessInfo {
-  CompanyName: string;
-  BusinessOwner: string;
-  BusinessPermitNum: string;
-  TINNum: string;
-  CompanyEmail: string;
-  ContactPerson: string;
-  Designation: string;
-  CompanyAddress: string;
-  CompanyCity: string;
-  CompanyProvince: string;
-  CompanyZipcode: number;
+  id: number;
+  CompanyName: string | null;
+  BusinessOwner: string | null;
+  BusinessPermitNum: string | null;
+  TINNum: string | null;
+  CompanyIDNum: string | null;
+  CompanyEmail: string | null;
+  ContactPerson: string | null;
+  Designation: string | null;
+  CompanyAddress: string | null;
+  CompanyCity: string | null;
+  CompanyProvince: string | null;
+  CompanyZipcode: number | null;
+  CompanyPhoneNum: string | null;
+  CompanyMobileNum: string | null;
+  Manufactured: string | null;
+  ProductionFrequency: string | null;
+  Bulk: string | null;
 }
+
+interface AccInfo {
+  id: number;
+  clerkId: string;
+  Name: string;
+  email: string;
+  Role: string;
+  ClientInfo: ClientInfo | null;
+  BusinessInfo: BusinessInfo | null;
+}
+
+
+
+
+
 
 const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isBusinessView, setIsBusinessView] = useState(false);
+
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
-  const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
-  const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);
+  
+  const [accInfo, setAccInfo] = useState<AccInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user) return;
-      
+    const fetchAllData = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        // Fetch client info
-        const clientResponse = await fetch(`/api/clientInfo/${user.id}`);
-        const clientData = await clientResponse.json();
-        setClientInfo(clientData);
+        // Fetch AccInfo with related data
+        const response = await fetch(`/api/account/${user.id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch account data');
+        }
+        const data = await response.json();
+        setAccInfo(data);
 
-        // Fetch business info
-        const businessResponse = await fetch(`/api/businessInfo/${user.id}`);
-        const businessData = await businessResponse.json();
-        setBusinessInfo(businessData);
-
-        // Set user role
+        // Set user role from Clerk metadata
         const publicMetadata = user.publicMetadata;
         const role = publicMetadata.role || "USER";
         setUserRole(role as string);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
     if (isLoaded) {
-      fetchUserData();
+      fetchAllData();
     }
   }, [user, isLoaded]);
+
+  const renderSection = (title: string, content: React.ReactNode) => (
+    <div className="border p-4 rounded shadow-sm bg-white">
+      <h2 className="font-semibold mb-3 text-lg border-b pb-2">{title}</h2>
+      {content}
+    </div>
+  );
+
+  if (loading) {
+    return <div className="p-4">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="p-4 text-red-500">Error: {error}</div>;
+  }
+
+
 
   return (
   <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -159,7 +207,7 @@ const DashboardUser = () => {
                   <span className="block text-sm font-medium text-black">
                     {user?.firstName} {user?.lastName || ''}
                   </span>
-                  <span className="block text-xs">Student</span>
+                  <span className="block text-xs">{userRole}</span>
                 </span>
                 {user?.imageUrl ? (
                   <img 
@@ -219,13 +267,13 @@ const DashboardUser = () => {
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Contact Number</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {clientInfo?.ContactNum || "Not provided"}
+              {accInfo?.ClientInfo?.ContactNum || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Address</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {clientInfo?.Address || "Not provided"}
+              {accInfo?.ClientInfo?.Address || "Not provided"}
             </p>
           </div>
         </div>
@@ -233,19 +281,19 @@ const DashboardUser = () => {
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">City/Municipality</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {clientInfo?.City || "Not provided"}
+              {accInfo?.ClientInfo?.City || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Province</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {clientInfo?.Province || "Not provided"}
+              {accInfo?.ClientInfo?.Province || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Zip Code</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {clientInfo?.Zipcode || "Not provided"}
+              {accInfo?.ClientInfo?.Zipcode || "Not provided"}
             </p>
           </div>
         </div>
@@ -256,25 +304,25 @@ const DashboardUser = () => {
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Company Name</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {businessInfo?.CompanyName || "Not provided"}
+              {accInfo?.BusinessInfo?.CompanyName || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Business Owner</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {businessInfo?.BusinessOwner || "Not provided"}
+              {accInfo?.BusinessInfo?.BusinessOwner || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">TIN No.</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {businessInfo?.TINNum || "Not provided"}
+              {accInfo?.BusinessInfo?.TINNum || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Business Permit No.</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {businessInfo?.BusinessPermitNum || "Not provided"}
+              {accInfo?.BusinessInfo?.BusinessPermitNum || "Not provided"}
             </p>
           </div>
         </div>
@@ -282,31 +330,31 @@ const DashboardUser = () => {
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Contact Person</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {businessInfo?.ContactPerson || "Not provided"}
+              {accInfo?.BusinessInfo?.ContactPerson || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Position/Designation</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {businessInfo?.Designation || "Not provided"}
+              {accInfo?.BusinessInfo?.Designation || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Company Address</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {businessInfo?.CompanyAddress || "Not provided"}
+              {accInfo?.BusinessInfo?.CompanyAddress || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Company City</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {businessInfo?.CompanyCity || "Not provided"}
+              {accInfo?.BusinessInfo?.CompanyCity || "Not provided"}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Company Province</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {businessInfo?.CompanyProvince || "Not provided"}
+              {accInfo?.BusinessInfo?.CompanyProvince || "Not provided"}
             </p>
           </div>
         </div>
