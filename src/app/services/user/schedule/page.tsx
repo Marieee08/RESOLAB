@@ -132,21 +132,23 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
 
     for (const day of formData.days) {
       const date = new Date(day.date).toDateString();
-      if (!day.startTime || day.startTime === '--:-- AM' || day.startTime === '--:-- PM') {
-        newErrors.push(`Please select a start time for ${date}`);
-      }
-      if (!day.endTime || day.endTime === '--:-- AM' || day.endTime === '--:-- PM') {
-        newErrors.push(`Please select an end time for ${date}`);
-      }
-
-      // Compare start and end times if both exist
-      if (day.startTime && day.endTime &&
-          day.startTime !== '--:-- AM' && day.endTime !== '--:-- AM') {
+  
+      // Ensure both start and end times exist
+      if (
+        day.startTime &&
+        day.endTime &&
+        day.startTime !== '--:-- AM' &&
+        day.endTime !== '--:-- PM'
+      ) {
         const startMinutes = timeToMinutes(day.startTime);
         const endMinutes = timeToMinutes(day.endTime);
+  
+        // Ensure end time is after start time
         if (endMinutes <= startMinutes) {
           newErrors.push(`End time must be after start time for ${date}`);
         }
+      } else {
+        return false; 
       }
     }
     return newErrors;
@@ -331,6 +333,13 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
       <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
       <div className="grid grid-cols-2 gap-6 mt-6">
         <div className="items-start w-full h-full">
+        {errors.length > 0 && (
+        <div>
+            {errors.map((error, index) => (
+              <p key={index} className="ml-2 text-red-500">{error}</p>
+            ))}
+        </div>
+      )}
           <Calendar
             mode="multiple"
             selected={formData.days.map(day => new Date(day.date))}
@@ -426,7 +435,7 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
       </div>
       <button 
         onClick={handleNext}
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
       >
         Next
       </button>

@@ -1,5 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+
+interface ToolItem {
+    id: string;
+    name: string;
+    quantity: number;
+  } 
+
+  const parseToolString = (toolString: string): ToolItem[] => {
+    if (!toolString || toolString === 'NOT APPLICABLE') return [];
+    try {
+      return JSON.parse(toolString);
+    } catch {
+      return [];
+    }
+  };
 
 interface FormData {
     days: {
@@ -96,15 +111,23 @@ interface ReviewSubmitProps {
   }
 
 export default function PersonalInformation({ formData, updateFormData, nextStep, prevStep }: StepProps) {
+    const [currentDateTime, setCurrentDateTime] = useState('');
+
+    useEffect(() => {
+        const now = new Date();
+        const formattedDate = now.toLocaleString(); // You can customize the format as needed
+        setCurrentDateTime(formattedDate);
+    }, []);
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         updateFormData(name as keyof FormData, value);
     };
 
-    // Sort the days chronologically
     const sortedDays = [...formData.days].sort((a, b) => 
         new Date(a.date).getTime() - new Date(b.date).getTime()
     );
+
     return (
         <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-semibold mb-4 mt-12">Review Your Information</h2>
@@ -241,76 +264,44 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
         </div>
 
         <div className="border border-gray-300 rounded-md shadow-sm p-4 mt-6">
-            <div className="grid grid-cols-3 gap-6">
-                <h2 className="text-2xl font-semibold">Utilization Information</h2>
-                <div className="col-span-3">
-                    <h3 className="font-medium">Commodity/Products Manufactured:</h3>
-                    <p>{formData.ProductsManufactured}</p>
-                </div>
-                <div className="col-span-3">
-                    <h3 className="font-medium">Bulk of Commodity per Production:</h3>
-                    <p>{formData.BulkofCommodity}</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">Facility:</h3>
-                    <p>{formData.Facility}</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">Quantity:</h3>
-                    <p>{formData.FacilityQty}</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">No. of hours:</h3>
-                    <p>{formData.FacilityHrs}</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">Equipment:</h3>
-                    <p>{formData.Equipment}</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">Quantity:</h3>
-                    <p>{formData.EquipmentQty}</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">No. of hours:</h3>
-                    <p>{formData.EquipmentHrs}</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">Tools:</h3>
-                    <p>{formData.Tools}</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">Quantity:</h3>
-                    <p>{formData.ToolsQty}</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">No. of hours:</h3>
-                    <p>{formData.ToolsHrs}</p>
-                </div>
+        <h2 className="text-2xl font-semibold mb-4">Utilization Information</h2>
+        <div className="grid grid-cols-2 gap-6">
+            <div className="col-span-2">
+                <h3 className="font-medium">Service to be availed:</h3>
+                <p>{formData.ProductsManufactured}</p>
             </div>
+            <div className="col-span-2">
+                <h3 className="font-medium">Bulk of Commodity per Production:</h3>
+                <p>{formData.BulkofCommodity}</p>
+            </div>
+            <div className="col-span-2">
+                <h3 className="font-medium">Equipment:</h3>
+                <p>{formData.Equipment}</p>
+            </div>
+            <div className="col-span-2">
+                <h3 className="font-medium">Tools:</h3>
+                {formData.Tools === 'NOT APPLICABLE' ? (
+                    <p>Not Applicable</p>
+                ) : (
+                    <div className="space-y-2">
+                        {parseToolString(formData.Tools).map((tool) => (
+                            <div key={tool.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                                <span>{tool.name}</span>
+                                <span className="text-gray-600">Quantity: {tool.quantity}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             <div className="grid grid-cols-2 gap-6">
-                <div className="col-span-2">
-                    <h3 className="font-medium">Request Date:</h3>
-                    <p>//insert current date</p>
-                </div>
-                <div>
-                    <h3 className="font-medium">Start Date:</h3>
-                    <p></p>
-                </div>
-                <div>
-                    <h3 className="font-medium">Start Time:</h3>
-                    <p></p>
-                </div>
-                <div>
-                    <h3 className="font-medium">End Date:</h3>
-                    <p></p>
-                </div>
-                <div>
-                    <h3 className="font-medium">End Time:</h3>
-                    <p></p>
-                </div>
+            <div className="col-span-2">
+                <h3 className="font-medium">Request Date and Time:</h3>
+                <p>{currentDateTime}</p>
+            </div>
             </div>
         </div>
+    </div>
 
         <div className="mt-6 flex justify-between">
             <button onClick={prevStep} className="bg-gray-500 text-white px-4 py-2 rounded">Previous</button>

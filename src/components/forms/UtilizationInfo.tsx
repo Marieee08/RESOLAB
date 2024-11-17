@@ -1,4 +1,5 @@
 import React, { useState, ChangeEvent, useEffect } from 'react';
+import { Plus, Minus, X } from 'lucide-react';
 
 interface FormData {
   ProductsManufactured: string;
@@ -13,6 +14,162 @@ interface StepProps {
   nextStep: () => void;
   prevStep: () => void;
 }
+
+interface ToolItem {
+  id: string;
+  name: string;
+  quantity: number;
+}
+
+interface ToolsSelectorProps {
+  value: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSelectorProps) => {
+  const availableTools = [
+    "Cutting Tool",
+    "End Mill",
+    "Drill Bit",
+    "Face Mill",
+    "Boring Bar",
+    "Threading Tool",
+    "Reamer",
+    "Collet",
+    "Tool Holder",
+    "Measuring Tool"
+  ];
+
+  const parseToolString = (str: string): ToolItem[] => {
+    if (!str || str === 'NOT APPLICABLE') return [];
+    try {
+      return JSON.parse(str);
+    } catch {
+      return [];
+    }
+  };
+
+  const [selectedTools, setSelectedTools] = useState<ToolItem[]>(parseToolString(value));
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  const updateParentValue = (tools: ToolItem[]) => {
+    const toolString = tools.length > 0 ? JSON.stringify(tools) : '';
+    onChange(toolString);
+  };
+
+  const addTool = (toolName: string) => {
+    const existingTool = selectedTools.find(tool => tool.name === toolName);
+    if (!existingTool) {
+      const newTool: ToolItem = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: toolName,
+        quantity: 1
+      };
+      const updatedTools = [...selectedTools, newTool];
+      setSelectedTools(updatedTools);
+      updateParentValue(updatedTools);
+    }
+    setShowDropdown(false);
+  };
+
+  const removeTool = (toolId: string) => {
+    const updatedTools = selectedTools.filter(tool => tool.id !== toolId);
+    setSelectedTools(updatedTools);
+    updateParentValue(updatedTools);
+  };
+
+  const updateQuantity = (toolId: string, delta: number) => {
+    const updatedTools = selectedTools.map(tool => {
+      if (tool.id === toolId) {
+        const newQuantity = Math.max(1, tool.quantity + delta);
+        return { ...tool, quantity: newQuantity };
+      }
+      return tool;
+    });
+    setSelectedTools(updatedTools);
+    updateParentValue(updatedTools);
+  };
+
+  return (
+    <div className="relative">
+      <div 
+        className={`min-h-[120px] p-4 border rounded-md ${
+          disabled ? 'bg-gray-100' : 'bg-white'
+        } ${className}`}
+      >
+        {selectedTools.length === 0 ? (
+          <div className="text-gray-500 text-sm">No tools selected</div>
+        ) : (
+          <div className="space-y-2">
+            {selectedTools.map(tool => (
+              <div key={tool.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                <span className="flex-grow">{tool.name}</span>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(tool.id, -1)}
+                    className="p-1 hover:bg-gray-200 rounded"
+                    disabled={disabled}
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="w-8 text-center">{tool.quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => updateQuantity(tool.id, 1)}
+                    className="p-1 hover:bg-gray-200 rounded"
+                    disabled={disabled}
+                  >
+                    <Plus size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeTool(tool.id)}
+                    className="p-1 hover:bg-gray-200 rounded text-red-500"
+                    disabled={disabled}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {!disabled && (
+          <button
+            type="button"
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="mt-2 px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Add Tool
+          </button>
+        )}
+
+        {showDropdown && !disabled && (
+          <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg">
+            <div className="max-h-48 overflow-y-auto">
+              {availableTools
+                .filter(tool => !selectedTools.some(st => st.name === tool))
+                .map(tool => (
+                  <div
+                    key={tool}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => addTool(tool)}
+                  >
+                    {tool}
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default function ProcessInformation({ formData, updateFormData, nextStep, prevStep }: StepProps) {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
@@ -79,13 +236,11 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     const newErrors: Partial<Record<keyof FormData, string>> = {};
     let isValid = true;
 
-    // Validate ProductsManufactured first
     if (!formData.ProductsManufactured || formData.ProductsManufactured === 'Select service') {
       newErrors.ProductsManufactured = 'Please select a service';
       isValid = false;
     }
 
-    // If it's not Benchmarking, validate other fields
     if (formData.ProductsManufactured !== 'Benchmarking') {
       if (!formData.Equipment || formData.Equipment === 'Select equipment') {
         newErrors.Equipment = 'Please select equipment';
@@ -208,16 +363,13 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           <label htmlFor="Tools" className="block text-sm font-medium text-gray-700">
             Tools<span className="text-red-500">*</span>
           </label>
-          <input
-            type="text"
+          <ToolsSelector
             id="Tools"
-            name="Tools"
             value={formData.Tools}
-            onChange={handleInputChange}
+            onChange={(value) => updateFormData('Tools', value)}
             onBlur={() => handleBlur('Tools')}
             className={getInputClassName('Tools')}
             disabled={isFieldDisabled('Tools')}
-            required
           />
           {touchedFields.has('Tools') && errors.Tools && (
             <p className="mt-1 text-sm text-red-500">{errors.Tools}</p>
