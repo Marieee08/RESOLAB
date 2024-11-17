@@ -10,7 +10,8 @@ interface Machine {
   Machine: string;
   Image: string;
   Desc: string;
-  Link: string; // Add Link property for the video
+  Link: string;
+  isAvailable: boolean;
 }
 
 export default function Services() {
@@ -85,19 +86,29 @@ export default function Services() {
         </div>
       )}
 
-      <section className="container mx-auto p-10">
+<section className="container mx-auto p-10">
         <h2 className="text-3xl font-semibold mb-4">Available Machines</h2>
         <div className={`grid grid-cols-1 md:grid-cols-3 gap-8 transition-opacity duration-1000 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}>
           {machines.map((machine) => (
-            <div key={machine.id} className="bg-white p-6 rounded-lg shadow-lg">
+            <div key={machine.id} className="bg-white p-6 rounded-lg shadow-lg relative">
+              {!machine.isAvailable && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-lg font-bold">Currently Unavailable</span>
+                </div>
+              )}
               <img src={machine.Image} alt={machine.Machine} className="h-80 w-full object-cover rounded-t-lg mb-4" />
-              <h3 className="text-2xl font-bold mb-2">{machine.Machine}</h3>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-2xl font-bold">{machine.Machine}</h3>
+              </div>
               <p className="text-gray-600 mb-4">
                 {machine.Desc.length > 100 ? `${machine.Desc.substring(0, 100)}...` : machine.Desc}
               </p>
               <button 
                 onClick={() => openModal(machine)} 
-                className="bg-[#145da0] text-white py-2 px-4 rounded-full hover:bg-[#0d4a8d] transition duration-300 mt-4"
+                className={`bg-[#145da0] text-white py-2 px-4 rounded-full transition duration-300 mt-4 ${
+                  !machine.isAvailable ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#0d4a8d]'
+                }`}
+                disabled={!machine.isAvailable}
               >
                 About Machine
               </button>
