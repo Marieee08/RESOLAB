@@ -10,7 +10,7 @@ const DashboardAdmin = () => {
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
-
+  const [blockedDates, setBlockedDates] = useState<Date[]>([]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -149,7 +149,7 @@ const DashboardAdmin = () => {
           <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
-          <EditableCalendar />
+          <EditableCalendar blockedDates={blockedDates} setBlockedDates={setBlockedDates} />
             <div className="bg-white p-6 rounded-3xl shadow-lg mt-6">
               <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
               <div className="overflow-x-auto">

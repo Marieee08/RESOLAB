@@ -46,16 +46,8 @@ const DashboardUser = () => {
       try {
         setLoading(true);
   
-        // Fetch client info
-        const clientResponse = await fetch(`/api/client-info?userId=${user.id}`);
-        if (!clientResponse.ok) {
-          throw new Error("Failed to fetch client info");
-        }
-        const clientData = await clientResponse.json();
-        setClientInfo(clientData);
-  
         // Fetch business info
-        const businessResponse = await fetch(`/api/business-info?userId=${user.id}`);
+        const businessResponse = await fetch(`/api/businessinfo?userId=${user.id}`);
         if (!businessResponse.ok) {
           console.warn("Business info fetch status:", businessResponse.status);
           const errorText = await businessResponse.text();
