@@ -67,7 +67,7 @@ export default function TestPage() {
 
         // Set user role from Clerk metadata
         const publicMetadata = user.publicMetadata;
-        const role = publicMetadata.role || "USER";
+        const role = publicMetadata.role;
         setUserRole(role as string);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
