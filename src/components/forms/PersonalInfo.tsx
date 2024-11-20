@@ -69,6 +69,18 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
             )}
           </div>
 
+          <div>
+            <label htmlFor="Zipcode" className="block text-sm font-medium text-gray-700">Zipcode</label>
+            <input
+              type="text"
+              id="Zipcode"
+              name="Zipcode"
+              value={formData.Zipcode || ''}
+              onChange={handleInputChange}
+              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+            />
+          </div>
+
           <div className="col-span-2">
             <label htmlFor="Address" className="block text-sm font-medium text-gray-700">Address</label>
             <input
@@ -105,17 +117,6 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
             />
           </div>
 
-          <div>
-            <label htmlFor="Zipcode" className="block text-sm font-medium text-gray-700">Zipcode</label>
-            <input
-              type="number"
-              id="Zipcode"
-              name="Zipcode"
-              value={formData.Zipcode || ''}
-              onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-            />
-          </div>
         </div>
       </div>
 

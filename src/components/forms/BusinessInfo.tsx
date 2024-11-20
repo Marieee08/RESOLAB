@@ -346,7 +346,7 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
               Zipcode<span className="text-red-500">*</span>
             </label>
             <input
-              type="number"
+              type="text"
               id="CompanyZipcode"
               name="CompanyZipcode"
               value={formData.CompanyZipcode}
@@ -354,7 +354,6 @@ export default function BusinessInformation({ formData, updateFormData, nextStep
               onBlur={() => handleBlur('CompanyZipcode')}
               className={getInputClassName('CompanyZipcode')}
               required
-              min="1"
             />
             {touchedFields.has('CompanyZipcode') && errors.CompanyZipcode && (
               <p className="mt-1 text-sm text-red-500">{errors.CompanyZipcode}</p>
