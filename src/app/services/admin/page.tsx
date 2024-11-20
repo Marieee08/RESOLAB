@@ -97,7 +97,6 @@ export default function AdminServices() {
   };
 
   const openModal = (machine: Machine | null = null) => {
-    console.log(machine);
     setEditingMachine(machine);
     if (machine) {
       setFormData({
@@ -113,7 +112,7 @@ export default function AdminServices() {
         image: '',
         description: '',
         videoUrl: '',
-        isAvailable: true // Reset form with isAvailable as true for new machines
+        isAvailable: true
       });
     }
     setIsModalOpen(true);
@@ -135,51 +134,79 @@ export default function AdminServices() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
-    const machineData = {
-      name: formData.name,
-      image: formData.image,
-      description: formData.description,
-      videoUrl: formData.videoUrl,
-      isAvailable: true // Explicitly set to true for new machines
-    };
+    // Validate input data before sending
+    if (!formData.name || !formData.image || !formData.description) {
+      alert('Please fill in all required fields');
+      return;
+    }
   
     try {
       let response;
   
+      const machinePayload = {
+        Machine: formData.name,
+        Image: formData.image,
+        Desc: formData.description,
+        Link: formData.videoUrl || '', // Ensure Link is always a string
+        isAvailable: formData.isAvailable ?? true
+      };
+  
+      console.log('Sending payload:', JSON.stringify(machinePayload, null, 2));
+  
       if (editingMachine) {
         response = await fetch(`/api/machines/${editingMachine.id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: formData.name,
-            Image: formData.image,
-            Desc: formData.description,
-            Link: formData.videoUrl,
-            isAvailable: editingMachine.isAvailable // Preserve existing availability for edits
-          }),
+          headers: { 
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(machinePayload)
         });
       } else {
         response = await fetch('/api/machines', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(machineData),
+          headers: { 
+            'Content-Type': 'application/json' 
+          },
+          body: JSON.stringify(machinePayload)
         });
       }
   
-      if (response.ok) {
-        const updatedMachine = await response.json();
-        if (editingMachine) {
-          setMachines(machines.map((m) => (m.id === updatedMachine.id ? updatedMachine : m)));
-        } else {
-          setMachines([...machines, updatedMachine]);
-        }
-        closeModal();
-      } else {
-        const errorData = await response.text();
-        console.error('Failed to save machine:', errorData);
+      // Log the raw response details
+      console.log('Response status:', response.status);
+      
+      // Parse the response text first
+      const responseText = await response.text();
+      console.log('Full Response text:', responseText);
+  
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}, message: ${responseText}`);
       }
+  
+      // Parse the response
+      const updatedMachine = responseText ? JSON.parse(responseText) : null;
+      
+      if (editingMachine) {
+        setMachines(machines.map((m) => 
+          m.id === updatedMachine.id ? updatedMachine : m
+        ));
+      } else {
+        setMachines([...machines, updatedMachine]);
+      }
+      
+      closeModal();
+  
     } catch (error) {
-      console.error('Error submitting machine:', error);
+      // Comprehensive error logging
+      console.error('Submission ERROR:', error);
+      
+      if (error instanceof SyntaxError) {
+        alert('Error parsing server response. Please check the server logs.');
+      } else if (error instanceof Error) {
+        alert(`Error: ${error.message}`);
+      } else {
+        alert('An unexpected error occurred');
+      }
     }
   };
 
@@ -260,15 +287,15 @@ return (
            <form onSubmit={handleSubmit}>
            <div className="mb-4">
              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-               <input
-                 type="text"
-                 id="name"
-                 name="name"
-                 value={formData.name || ''}
-                 onChange={handleInputChange}
-                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                 required
-               />
+             <input
+  type="text"
+  id="name"
+  name="name"
+  value={formData.name || ''}
+  onChange={handleInputChange}
+  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+  required
+/>
            </div>
 
 

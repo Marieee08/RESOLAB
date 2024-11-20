@@ -14,6 +14,7 @@ interface Machine {
   Desc: string;
   Link: string;
   isAvailable: boolean;
+  createdAt: string;
 }
 
 
@@ -29,13 +30,31 @@ export default function Services() {
       try {
         const response = await fetch('/api/machines');
         const data = await response.json();
-        setMachines(data);
+        
+        // Create a custom sorting function based on creation time and availability
+        const customSort = (a: Machine, b: Machine) => {
+          // First, sort by availability (available machines first)
+          if (a.isAvailable && !b.isAvailable) return -1;
+          if (!a.isAvailable && b.isAvailable) return 1;
+          
+          // If both are available, sort by creation time
+          if (a.isAvailable && b.isAvailable) {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          }
+          
+          // If both are unavailable, sort by creation time
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        };
+        
+        // Sort the machines
+        const sortedMachines = [...data].sort(customSort);
+        
+        setMachines(sortedMachines);
       } catch (error) {
         console.error('Error fetching machines:', error);
       }
     };
-
-
+  
     fetchMachines();
   }, []);
 
