@@ -19,8 +19,10 @@ export default function AdminServices() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMachine, setEditingMachine] = useState<Machine | null>(null);
   const [formData, setFormData] = useState<Partial<Machine>>({
-    isAvailable: true // Set default value for new machines
+    isAvailable: true
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMachines();
@@ -81,6 +83,12 @@ export default function AdminServices() {
 
 
   const deleteMachine = async (id: string) => {
+    // Show confirmation dialog
+    const isConfirmed = window.confirm('Are you sure you want to delete this machine? This action cannot be undone.');
+    
+    // Only proceed if user confirms
+    if (!isConfirmed) return;
+  
     try {
       const response = await fetch(`/api/machines/${id}`, {
         method: 'DELETE',
@@ -131,29 +139,97 @@ export default function AdminServices() {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleImageUpload = async () => {
+    if (!imageFile) return null;
+  
+    const formData = new FormData();
+    formData.append('file', imageFile);
+  
+    try {
+      const response = await fetch('/api/machines/upload', {
+        method: 'POST',
+        body: formData
+      });
+  
+      // Log the entire response for debugging
+      console.log('Full response:', response);
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+  
+      // Try to parse the response text
+      const responseText = await response.text();
+      console.log('Raw response text:', responseText);
+  
+      // Try to parse the response as JSON
+      let parsedData;
+      try {
+        parsedData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('JSON parsing error:', parseError);
+        throw new Error(`Invalid server response: ${responseText}`);
+      }
+  
+      // Check if the response was successful
+      if (response.ok) {
+        if (parsedData.path) {
+          return parsedData.path;
+        }
+        throw new Error(parsedData.error || 'Upload failed');
+      } else {
+        throw new Error(parsedData.error || 'Upload unsuccessful');
+      }
+    } catch (error) {
+      console.error('Complete upload error:', error);
+      alert(`Failed to upload image: ${error.message}`);
+      return null;
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+        // Update formData with the file name or temporary path
+        setFormData(prev => ({
+          ...prev, 
+          image: file.name // or you could use a temporary path
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
-    // Validate input data before sending
-    if (!formData.name || !formData.image || !formData.description) {
-      alert('Please fill in all required fields');
-      return;
-    }
-  
     try {
-      let response;
+      let imageUrl = formData.image;
+      
+      // Upload image if a new file is selected
+      if (imageFile) {
+        imageUrl = await handleImageUpload();
+        if (!imageUrl) {
+          alert('Failed to upload image');
+          return;
+        }
+      }
   
       const machinePayload = {
         Machine: formData.name,
-        Image: formData.image,
+        Image: imageUrl, // Use the uploaded image URL
         Desc: formData.description,
-        Link: formData.videoUrl || '', // Ensure Link is always a string
+        Link: formData.videoUrl || '',
         isAvailable: formData.isAvailable ?? true
       };
   
       console.log('Sending payload:', JSON.stringify(machinePayload, null, 2));
   
-      if (editingMachine) {
+      let response;
+
+       if (editingMachine) {
         response = await fetch(`/api/machines/${editingMachine.id}`, {
           method: 'PUT',
           headers: { 
@@ -261,11 +337,11 @@ return (
                  <Edit size={20} />
                </button>
                <button
-                 onClick={() => deleteMachine(machine.id)}
-                 className="bg-red-500 text-white p-2 rounded-full"
-               >
-                 <Trash2 size={20} />
-               </button>
+  onClick={() => deleteMachine(machine.id)}
+  className="bg-red-500 text-white p-2 rounded-full"
+>
+  <Trash2 size={20} />
+</button>
              </div>
            </div>
          ))}
@@ -318,17 +394,25 @@ return (
 
 
            <div className="mb-4">
-             <label htmlFor="image" className="block text-sm font-medium text-gray-700">Image URL</label>
-             <input
-               type="text"
-               id="image"
-               name="image"
-               value={formData.image || ''}
-               onChange={handleInputChange}
-               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-               required
-             />
-           </div>
+        <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+          {imageFile ? 'Change Image' : 'Upload Image'}
+        </label>
+        <input
+          type="file"
+          id="image"
+          name="image"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="mt-1 block w-full"
+        />
+        {imagePreview && (
+          <img 
+            src={imagePreview} 
+            alt="Preview" 
+            className="mt-2 w-full h-48 object-cover rounded-md" 
+          />
+        )}
+      </div>
 
 
 
@@ -363,7 +447,5 @@ return (
    </main>
  );
 }
-
-
 
 
