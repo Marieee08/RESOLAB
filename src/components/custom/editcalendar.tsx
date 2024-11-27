@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Calendar, Plus, Ban, CircleSlash2} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Plus, Ban, CircleSlash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -9,66 +9,133 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { toast } from "@/components/ui/use-toast"
 
 interface CalendarDate extends Date {}
 
+interface BlockedDate {
+  id: string;
+  date: string;
+}
+
+interface CalendarDate extends Date {
+  getDate(): number;
+  getMonth(): number;
+  getFullYear(): number;
+}
+
 const EditableCalendar: React.FC = () => {
-  
   const [selectedDate, setSelectedDate] = useState<CalendarDate | null>(null);
   const [blockedDates, setBlockedDates] = useState<CalendarDate[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [currentMonth, setCurrentMonth] = useState<CalendarDate>(new Date());
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  // Fetch blocked dates on component mount
+  useEffect(() => {
+    fetchBlockedDates();
+  }, []);
 
-  const getDaysInMonth = (date: CalendarDate): (CalendarDate | null)[] => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    
-    const days: (CalendarDate | null)[] = [];
-    
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(null);
+  const fetchBlockedDates = async () => {
+    try {
+      const response = await fetch('/api/blocked-dates');
+      const data = await response.json();
+      const dates = data.map((item: BlockedDate) => new Date(item.date));
+      setBlockedDates(dates);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch blocked dates",
+        variant: "destructive",
+      });
     }
-    
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(new Date(year, month, i));
-    }
-    
-    return days;
   };
 
-  const isDateBlocked = (date: CalendarDate | null): boolean => {
-    if (!date) return false;
-    return blockedDates.some(blockedDate => 
-      blockedDate.getDate() === date.getDate() &&
-      blockedDate.getMonth() === date.getMonth() &&
-      blockedDate.getFullYear() === date.getFullYear()
-    );
+  const handleBlockDate = async () => {
+    if (!selectedDate || isDateBlocked(selectedDate)) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/blocked-dates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date: selectedDate }),
+      });
+
+      if (!response.ok) throw new Error('Failed to block date');
+
+      setBlockedDates([...blockedDates, selectedDate]);
+      toast({
+        title: "Success",
+        description: "Date blocked successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to block date",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+      setIsModalOpen(false);
+    }
   };
 
-  const handleDateClick = (date: CalendarDate): void => {
+  const handleDateClick = (date: Date): void => {
     setSelectedDate(date);
     setIsModalOpen(true);
   };
 
-  const handleBlockDate = (): void => {
-    if (selectedDate && !isDateBlocked(selectedDate)) {
-      setBlockedDates([...blockedDates, selectedDate]);
-    }
-    setIsModalOpen(false);
-  };
+  const handleUnblockDate = async () => {
+    if (!selectedDate) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/blocked-dates', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date: selectedDate }),
+      });
 
-  const handleUnblockDate = (): void => {
-    if (selectedDate) {
+      if (!response.ok) throw new Error('Failed to unblock date');
+
       setBlockedDates(blockedDates.filter(date => 
         date.getDate() !== selectedDate.getDate() ||
         date.getMonth() !== selectedDate.getMonth() ||
         date.getFullYear() !== selectedDate.getFullYear()
       ));
+      toast({
+        title: "Success",
+        description: "Date unblocked successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to unblock date",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+      setIsModalOpen(false);
     }
-    setIsModalOpen(false);
+  };
+
+  const isSameDay = (date1: CalendarDate | null, date2: CalendarDate): boolean => {
+    if (!date1) return false;
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
+  };
+  
+  const isDateBlocked = (date: CalendarDate | null): boolean => {
+    if (!date) return false;
+    return blockedDates.some(blockedDate => isSameDay(blockedDate, date));
   };
 
   const nextMonth = (): void => {
@@ -88,12 +155,32 @@ const EditableCalendar: React.FC = () => {
     }).format(date);
   };
 
+  const getDaysInMonth = (date: Date): (Date | null)[] => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    
+    const days: (Date | null)[] = [];
+    
+    // Add empty slots for days before the first day of month
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      days.push(null);
+    }
+    
+    // Add dates for current month
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    
+    return days;
+  };
+
   const days = getDaysInMonth(currentMonth);
   const weekDays: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
   return (
     <div className="calendar">
-      <div className="calendar-header">
+            <div className="calendar-header">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Calendar className="h-5 w-5" />
           {new Intl.DateTimeFormat('en-US', { 
@@ -145,7 +232,6 @@ const EditableCalendar: React.FC = () => {
           </div>
         ))}
       </div>
-
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -161,13 +247,13 @@ const EditableCalendar: React.FC = () => {
             <Button 
               variant={isDateBlocked(selectedDate) ? "destructive" : "default"}
               onClick={isDateBlocked(selectedDate) ? handleUnblockDate : handleBlockDate}
+              disabled={isLoading}
             >
-              {isDateBlocked(selectedDate) ? 'Unblock Date' : 'Block Date'}
+              {isLoading ? 'Loading...' : isDateBlocked(selectedDate) ? 'Unblock Date' : 'Block Date'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <style jsx>{`
         .calendar {
           width: 100%;

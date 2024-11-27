@@ -118,7 +118,6 @@ model UtilTime {
   utilReq   UtilReq?  @relation(name: "UtilReqToUtilTime", fields: [utilReqId], references: [id])
 }
 
-
 // For blocking dates
 
 model BlockedDate {
