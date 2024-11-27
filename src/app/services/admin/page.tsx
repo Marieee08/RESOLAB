@@ -114,6 +114,12 @@ export default function AdminServices() {
         videoUrl: machine.Link || '',
         isAvailable: machine.isAvailable
       });
+      
+      // Set the image preview to the current machine's image
+      setImagePreview(machine.Image || null);
+      
+      // Reset the image file to null since we're using the existing image
+      setImageFile(null);
     } else {
       setFormData({
         name: '',
@@ -122,6 +128,10 @@ export default function AdminServices() {
         videoUrl: '',
         isAvailable: true
       });
+      
+      // Reset image preview and file for a new machine
+      setImagePreview(null);
+      setImageFile(null);
     }
     setIsModalOpen(true);
   };
@@ -215,14 +225,18 @@ export default function AdminServices() {
           alert('Failed to upload image');
           return;
         }
+      } else if (editingMachine) {
+        // If no new file is uploaded and we're editing, keep the existing image
+        imageUrl = editingMachine.Image;
       }
   
       const machinePayload = {
         Machine: formData.name,
-        Image: imageUrl, // Use the uploaded image URL
+        Image: imageUrl,
         Desc: formData.description,
         Link: formData.videoUrl || '',
-        isAvailable: formData.isAvailable ?? true
+        isAvailable: formData.isAvailable ?? true,
+        oldImagePath: editingMachine ? editingMachine.Image : null // Add old image path
       };
   
       console.log('Sending payload:', JSON.stringify(machinePayload, null, 2));
