@@ -4,7 +4,23 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import Link from 'next/link';
 
+interface ToolItem {
+   id: string;
+   name: string;
+   quantity: number;
+ }
+
+
+ const parseToolString = (toolString: string): ToolItem[] => {
+   if (!toolString || toolString === 'NOT APPLICABLE') return [];
+   try {
+     return JSON.parse(toolString);
+   } catch {
+     return [];
+   }
+ };
 
 interface FormData {
   days: {
@@ -65,19 +81,19 @@ const formatDate = (date: Date): string => {
 };
 
 export default function ReviewSubmit({ formData, prevStep, updateFormData }: ReviewSubmitProps) {
-    const router = useRouter();
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState('');
-    const { user, isLoaded } = useUser();
-    const [userName, setUserName] = useState<string>("");
-    const { getToken } = useAuth();
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const { user, isLoaded } = useUser();
+  const [userName, setUserName] = useState<string>("");
+  const { getToken } = useAuth();
   
-    useEffect(() => {
-      if (isLoaded && user) {
-        const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
-        setUserName(fullName);
-      }
-    }, [user, isLoaded]);
+  useEffect(() => {
+    if (isLoaded && user) {
+      const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      setUserName(fullName);
+    }
+  }, [user, isLoaded]);
 
   const handleSubmit = async () => {
     try {
@@ -109,15 +125,38 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
     }
   };
 
-  const renderSection = (title: string, fields: { label: string, value: any }[]) => (
+  const renderSection = (title: string, fields: { label: string, value: any, type?: 'tools' }[]) => (
     <div className="mb-6">
       <h3 className="text-lg font-medium mb-3">{title}</h3>
       <div className="grid grid-cols-2 gap-4">
-        {fields.map(({ label, value }) => {
+        {fields.map(({ label, value, type }) => {
           // Special handling for the Name field
           if (label === 'Name') {
             value = userName;
           }
+
+          // Special handling for tools
+          if (type === 'tools') {
+            const parsedTools = parseToolString(value);
+            return (
+              <div key={label} className="col-span-2">
+                <p className="text-sm text-gray-600">{label}</p>
+                {parsedTools.length === 0 ? (
+                  <p className="mt-1">No tools selected</p>
+                ) : (
+                  <div className="mt-2 space-y-1">
+                    {parsedTools.map((tool, index) => (
+                      <div key={index} className="bg-gray-50 p-2 rounded">
+                        <span>{tool.name}</span>
+                        <span className="ml-2 text-gray-600">Quantity: {tool.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
           return (
             <div key={label} className={`${label.includes('Address') ? 'col-span-2' : ''}`}>
               <p className="text-sm text-gray-600">{label}</p>
@@ -174,15 +213,14 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
           { label: 'Bulk per Production', value: formData.Bulk }
         ])}
 
-        {renderSection('Utilization Information', [
+{renderSection('Utilization Information', [
           { label: 'Products to be Manufactured', value: formData.ProductsManufactured },
           { label: 'Bulk of Commodity', value: formData.BulkofCommodity },
           { label: 'Equipment', value: formData.Equipment },
-          { label: 'Tools', value: formData.Tools },
-          { label: 'Tools Quantity', value: formData.ToolsQty }
+          { label: 'Tools', value: formData.Tools, type: 'tools' }
         ])}
 
-        {error && (
+{error && (
           <Alert variant="destructive" className="mt-4">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
