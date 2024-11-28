@@ -216,13 +216,6 @@ export default function TestPage() {
           </div>
         </div>
       ))}
-
-      {/* Raw Data Display */}
-      {renderSection("Raw Data", (
-        <pre className="bg-gray-100 p-4 rounded overflow-x-auto text-sm">
-          {JSON.stringify({ accInfo, clerkUser: user }, null, 2)}
-        </pre>
-      ))}
     </div>
   );
 }
