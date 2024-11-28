@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Write file to uploads directory
     const fullPath = path.join(uploadDir, filename);
-    await writeFile(fullPath, buffer);
+    await writeFile(fullPath, new Uint8Array(buffer)); // Convert Buffer to Uint8Array
 
     // Return the path that can be used in the frontend
     return NextResponse.json({ 
