@@ -1,26 +1,28 @@
+// api/tools/[id]/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET /api/tools/[id] - Get a specific tool
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: Request) {
   try {
-    const tool = await prisma.tool.findUnique({
-      where: {
-        id: params.id,
-      },
+    const { searchParams } = new URL(req.url);
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
+    const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : undefined;
+
+    const tools = await prisma.tool.findMany({
+      take: limit,
+      skip: offset
     });
 
-    if (!tool) {
-      return NextResponse.json({ error: 'Tool not found' }, { status: 404 });
-    }
-
-    return NextResponse.json(tool);
+    return NextResponse.json(tools);
   } catch (error) {
-    console.error('Error fetching tool:', error);
-    return NextResponse.json({ error: 'Failed to fetch tool' }, { status: 500 });
+    console.error('Error fetching tools:', error);
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch tools', 
+        details: error instanceof Error ? error.message : String(error)
+      }, 
+      { status: 500 }
+    );
   }
 }
 

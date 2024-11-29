@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, X } from 'lucide-react';
+import { Plus, Edit, Trash2, X, Minus } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import Navbar from '@/components/custom/navbar';
 
@@ -130,6 +130,7 @@ export default function AdminServices() {
       setToolQuantity(1);
     }
     setIsToolModalOpen(true);
+    setIsAddingTool(true);  // Add this line
   };
 
   const closeToolModal = () => {
@@ -141,40 +142,43 @@ export default function AdminServices() {
 
   const handleToolSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTool.trim()) return;
-
+    
+    // Validate input
+    if (!newTool.trim()) {
+      alert('Please enter a tool name');
+      return;
+    }
+  
     try {
-      let response;
       const toolData = {
         Tool: newTool.trim(),
         Quantity: toolQuantity
       };
-
-      if (editingTool) {
-        response = await fetch(`/api/tools/${editingTool.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(toolData),
-        });
-      } else {
-        response = await fetch('/api/tools', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(toolData),
-        });
+  
+      console.log('Sending tool data:', toolData);
+  
+      const response = await fetch('/api/tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(toolData),
+      });
+  
+      console.log('Response status:', response.status);
+  
+      const responseData = await response.json();
+  
+      if (!response.ok) {
+        console.error('Error response:', responseData);
+        alert(`Error: ${responseData.error || 'Failed to add tool'}`);
+        return;
       }
-
-      if (response.ok) {
-        const updatedTool = await response.json();
-        if (editingTool) {
-          setTools(tools.map((t) => (t.id === updatedTool.id ? updatedTool : t)));
-        } else {
-          setTools([...tools, updatedTool]);
-        }
-        closeToolModal();
-      }
+  
+      // Successfully added tool
+      setTools([...tools, responseData]);
+      closeToolModal();
     } catch (error) {
-      console.error('Error submitting tool:', error);
+      console.error('Submission error:', error);
+      alert('Failed to add tool. Please try again.');
     }
   };
 
@@ -244,11 +248,10 @@ export default function AdminServices() {
   const handleToolInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setToolFormData({
-      ...toolFormData,
+      ...toolFormData, 
       [name]: name === 'Quantity' ? parseInt(value) || 0 : value,
     });
-  };
-
+  };  
 
   return (
     <main className="min-h-screen bg-[#f1f1f8] pt-24">
@@ -454,17 +457,6 @@ export default function AdminServices() {
             <div className="mb-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Available Tools</h3>
-                <button
-                  onClick={() => {
-                    setEditingTool(null);
-                    setNewTool('');
-                    setToolQuantity(1);
-                    setIsAddingTool(true);
-                  }}
-                  className="bg-green-500 text-white px-4 py-2 rounded-full flex items-center"
-                >
-                  <Plus size={20} className="mr-2" /> Add New Tool
-                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

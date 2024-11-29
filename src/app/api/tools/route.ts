@@ -1,33 +1,73 @@
+// api/tools/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET /api/tools - Get all tools
 export async function GET() {
   try {
+    // Fetch all tools from the database
     const tools = await prisma.tool.findMany();
+
     return NextResponse.json(tools);
   } catch (error) {
     console.error('Error fetching tools:', error);
-    return NextResponse.json({ error: 'Failed to fetch tools' }, { status: 500 });
+    return NextResponse.json(
+      { 
+        error: 'Failed to fetch tools', 
+        details: error instanceof Error ? error.message : String(error)
+      }, 
+      { status: 500 }
+    );
   }
 }
 
-// POST /api/tools - Create a new tool
 export async function POST(req: Request) {
   try {
+    // Parse the request body
     const data = await req.json();
-    const { Tool, Quantity } = data;
+    console.log('Received data:', data);
 
+    // Destructure with default values and type conversion
+    const { Tool = '', Quantity = 0 } = data;
+
+    // Validate input
+    if (!Tool.trim()) {
+      return NextResponse.json(
+        { error: 'Tool name is required' }, 
+        { status: 400 }
+      );
+    }
+
+    // Ensure Quantity is a number
+    const quantityNum = Number(Quantity);
+    if (isNaN(quantityNum)) {
+      return NextResponse.json(
+        { error: 'Quantity must be a number' }, 
+        { status: 400 }
+      );
+    }
+
+    // Attempt to create the tool
     const tool = await prisma.tool.create({
       data: {
-        Tool,
-        Quantity: parseInt(Quantity),
-      },
+        Tool: Tool.trim(),
+        Quantity: quantityNum
+      }
     });
 
-    return NextResponse.json(tool);
+    console.log('Created tool:', tool);
+
+    return NextResponse.json(tool, { status: 201 });
   } catch (error) {
-    console.error('Error creating tool:', error);
-    return NextResponse.json({ error: 'Failed to create tool' }, { status: 500 });
+    // Log the full error for debugging
+    console.error('Full error creating tool:', error);
+
+    // More detailed error response
+    return NextResponse.json(
+      { 
+        error: 'Failed to create tool', 
+        details: error instanceof Error ? error.message : String(error)
+      }, 
+      { status: 500 }
+    );
   }
 }

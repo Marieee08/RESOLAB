@@ -15,35 +15,34 @@ interface StepProps {
   prevStep: () => void;
 }
 
-interface ToolItem {
+interface Tool {
   id: string;
-  name: string;
-  quantity: number;
+  Tool: string;
+  Quantity: number;
 }
 
 interface ToolsSelectorProps {
   value: string;
   onChange: (value: string) => void;
   onBlur: () => void;
+  equipment?: string;
   disabled?: boolean;
   className?: string;
 }
 
-const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSelectorProps) => {
-  const availableTools = [
-    "Cutting Tool",
-    "End Mill",
-    "Drill Bit",
-    "Face Mill",
-    "Boring Bar",
-    "Threading Tool",
-    "Reamer",
-    "Collet",
-    "Tool Holder",
-    "Measuring Tool"
-  ];
+const ToolsSelector: React.FC<ToolsSelectorProps> = ({ 
+  value, 
+  onChange, 
+  onBlur, 
+  equipment,
+  disabled, 
+  className 
+}) => {
+  const [availableTools, setAvailableTools] = useState<Tool[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const parseToolString = (str: string): ToolItem[] => {
+  const parseToolString = (str: string): Tool[] => {
     if (!str || str === 'NOT APPLICABLE') return [];
     try {
       return JSON.parse(str);
@@ -52,21 +51,52 @@ const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSe
     }
   };
 
-  const [selectedTools, setSelectedTools] = useState<ToolItem[]>(parseToolString(value));
+  const [selectedTools, setSelectedTools] = useState<Tool[]>(parseToolString(value));
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const updateParentValue = (tools: ToolItem[]) => {
+  // Fetch tools based on selected equipment
+  useEffect(() => {
+    const fetchTools = async () => {
+      // Skip fetching if disabled
+      if (disabled) {
+        setAvailableTools([]);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch('/api/tools');
+        if (!response.ok) {
+          throw new Error('Failed to fetch tools');
+        }
+        const data = await response.json();
+        setAvailableTools(data);
+      } catch (err) {
+        setError('Failed to fetch tools. Please try again.');
+        console.error('Tools fetch error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTools();
+  }, [disabled]);
+
+  const updateParentValue = (tools: Tool[]) => {
     const toolString = tools.length > 0 ? JSON.stringify(tools) : '';
     onChange(toolString);
   };
 
-  const addTool = (toolName: string) => {
-    const existingTool = selectedTools.find(tool => tool.name === toolName);
-    if (!existingTool) {
-      const newTool: ToolItem = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: toolName,
-        quantity: 1
+  const addTool = (tool: Tool) => {
+    const existingToolIndex = selectedTools.findIndex(t => t.Tool === tool.Tool);
+    
+    if (existingToolIndex === -1) {
+      const newTool: Tool = {
+        id: tool.id,
+        Tool: tool.Tool,
+        Quantity: 1
       };
       const updatedTools = [...selectedTools, newTool];
       setSelectedTools(updatedTools);
@@ -84,58 +114,78 @@ const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSe
   const updateQuantity = (toolId: string, delta: number) => {
     const updatedTools = selectedTools.map(tool => {
       if (tool.id === toolId) {
-        const newQuantity = Math.max(1, tool.quantity + delta);
-        return { ...tool, quantity: newQuantity };
+        // Find the corresponding available tool to get its max quantity
+        const availableTool = availableTools.find(t => t.id === toolId);
+        const maxQuantity = availableTool ? availableTool.Quantity : 1;
+        
+        // Calculate new quantity, ensuring it's between 1 and maxQuantity
+        const newQuantity = Math.max(
+          1, 
+          Math.min(tool.Quantity + delta, maxQuantity)
+        );
+
+        return { ...tool, Quantity: newQuantity };
       }
       return tool;
     });
+
     setSelectedTools(updatedTools);
     updateParentValue(updatedTools);
   };
 
   return (
     <div className="relative">
-      <div 
-        className={`min-h-[120px] p-4 border rounded-md ${
-          disabled ? 'bg-gray-100' : 'bg-white'
-        } ${className}`}
-      >
+    <div 
+      className={`min-h-[120px] p-4 border rounded-md ${
+        disabled ? 'bg-gray-100' : 'bg-white'
+      } ${className}`}
+    >
         {selectedTools.length === 0 ? (
-          <div className="text-gray-500 text-sm">No tools selected</div>
+          <div className="text-gray-500 text-sm">
+            {isLoading ? 'Loading tools...' : 'No tools selected'}
+          </div>
         ) : (
           <div className="space-y-2">
-            {selectedTools.map(tool => (
-              <div key={tool.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                <span className="flex-grow">{tool.name}</span>
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(tool.id, -1)}
-                    className="p-1 hover:bg-gray-200 rounded"
-                    disabled={disabled}
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="w-8 text-center">{tool.quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(tool.id, 1)}
-                    className="p-1 hover:bg-gray-200 rounded"
-                    disabled={disabled}
-                  >
-                    <Plus size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeTool(tool.id)}
-                    className="p-1 hover:bg-gray-200 rounded text-red-500"
-                    disabled={disabled}
-                  >
-                    <X size={16} />
-                  </button>
+            {selectedTools.map(tool => {
+              // Find the corresponding available tool to get its max quantity
+              const availableTool = availableTools.find(t => t.id === tool.id);
+              const maxQuantity = availableTool ? availableTool.Quantity : 1;
+
+              return (
+                <div key={tool.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                  <span className="flex-grow">{tool.Tool}</span>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(tool.id, -1)}
+                      className="p-1 hover:bg-gray-200 rounded"
+                      disabled={disabled}
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <span className="w-8 text-center">
+                      {tool.Quantity} / {maxQuantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(tool.id, 1)}
+                      className="p-1 hover:bg-gray-200 rounded"
+                      disabled={disabled || tool.Quantity >= maxQuantity}
+                    >
+                      <Plus size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeTool(tool.id)}
+                      className="p-1 hover:bg-gray-200 rounded text-red-500"
+                      disabled={disabled}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         
@@ -144,26 +194,38 @@ const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSe
             type="button"
             onClick={() => setShowDropdown(!showDropdown)}
             className="mt-2 px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+            disabled={isLoading || availableTools.length === 0}
           >
             Add Tool
           </button>
         )}
 
+        {error && (
+          <div className="text-red-500 text-sm mt-2">{error}</div>
+        )}
+
         {showDropdown && !disabled && (
           <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg">
-            <div className="max-h-48 overflow-y-auto">
-              {availableTools
-                .filter(tool => !selectedTools.some(st => st.name === tool))
-                .map(tool => (
-                  <div
-                    key={tool}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => addTool(tool)}
-                  >
-                    {tool}
-                  </div>
-                ))}
-            </div>
+            {isLoading ? (
+              <div className="p-4 text-center text-gray-500">Loading tools...</div>
+            ) : (
+              <div className="max-h-48 overflow-y-auto">
+                {availableTools
+                  .filter(tool => !selectedTools.some(st => st.Tool === tool.Tool))
+                  .map(tool => (
+                    <div
+                      key={tool.id}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => addTool(tool)}
+                    >
+                      {tool.Tool}
+                    </div>
+                  ))}
+                {availableTools.filter(tool => !selectedTools.some(st => st.Tool === tool.Tool)).length === 0 && (
+                  <div className="p-4 text-center text-gray-500">No additional tools available</div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -364,13 +426,14 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
             Tools<span className="text-red-500">*</span>
           </label>
           <ToolsSelector
-            id="Tools"
-            value={formData.Tools}
-            onChange={(value) => updateFormData('Tools', value)}
-            onBlur={() => handleBlur('Tools')}
-            className={getInputClassName('Tools')}
-            disabled={isFieldDisabled('Tools')}
-          />
+        id="Tools"
+        value={formData.Tools}
+        onChange={(value) => updateFormData('Tools', value)}
+        onBlur={() => handleBlur('Tools')}
+        equipment={formData.Equipment}
+        className={getInputClassName('Tools')}
+        disabled={isFieldDisabled('Tools')}
+      />
           {touchedFields.has('Tools') && errors.Tools && (
             <p className="mt-1 text-sm text-red-500">{errors.Tools}</p>
           )}
