@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import EditableCalendar from '@/components/custom/editcalendar';
+import TestCalendar from '@/components/custom/testcalendar';
 import { format } from 'date-fns';
 
 
@@ -149,7 +150,7 @@ const DashboardAdmin = () => {
           <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
-          <EditableCalendar blockedDates={blockedDates} setBlockedDates={setBlockedDates} />
+          <TestCalendar blockedDates={blockedDates} setBlockedDates={setBlockedDates}/>
             <div className="bg-white p-6 rounded-3xl shadow-lg mt-6">
               <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
               <div className="overflow-x-auto">
