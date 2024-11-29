@@ -170,11 +170,12 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Card className="p-6">
+      <Card className="p-6 mt-11">
         <h2 className="text-2xl font-semibold mb-6">Review Your Information</h2>
         
         <div className="border border-gray-300 rounded-md shadow-sm p-4 mb-6">
           <h3 className="text-lg font-medium mb-3">Selected Dates and Times</h3>
+          <div className="grid grid-cols-2 gap-6">
           {formData.days.length > 0 ? (
             [...formData.days]
               .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -189,6 +190,7 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
           ) : (
             <p>No dates selected</p>
           )}
+          </div>
         </div>
 
         {renderSection('Personal Information', [

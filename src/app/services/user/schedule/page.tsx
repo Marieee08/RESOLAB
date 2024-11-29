@@ -350,7 +350,7 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
 
 
  return (
-   <div>
+   <div className="max-w-6xl mx-auto">
      <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
      <div className="grid grid-cols-2 gap-6 mt-6">
        <div className="items-start w-full h-full">
@@ -455,12 +455,14 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
          ))}
        </div>
      </div>
+     <div className="mt-4 flex justify-end">
      <button
        onClick={handleNext}
        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
      >
        Next
      </button>
+     </div>
    </div>
  );
 }
