@@ -27,6 +27,11 @@ model Tool {
   Quantity    Int
 }
 
+model Service {
+  id          String   @id @default(cuid())
+  Service     String
+}
+
 // For Primary Account Creation (For All)
 
 model AccInfo {
