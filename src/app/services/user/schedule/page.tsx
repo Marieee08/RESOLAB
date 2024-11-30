@@ -658,7 +658,7 @@ function TimePicker({
  ];
 
 
- const minutes = ['--', ...Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))];
+ const minutes = ['--', '00', '15', '30', '45'];
 
 
  const selectClassName = `border rounded-md p-2 w-auto ${
