@@ -3,8 +3,8 @@
 import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@clerk/nextjs";
-import EditClientModal from "@/components/custom/EditClientModal";
 import { format } from 'date-fns';
+import InfoEditModal from './components/InfoEditModal';
 
 interface ClientInfo {
   ContactNum: string;
@@ -54,24 +54,13 @@ const DashboardUser = () => {
 
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
-  
   const [accInfo, setAccInfo] = useState<AccInfo | null>(null);
-  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
-  const handleInfoUpdate = (updatedData: ClientInfo) => {
-    setAccInfo((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        ClientInfo: updatedData
-      };
-    });
-  };
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -105,13 +94,6 @@ const DashboardUser = () => {
       fetchAllData();
     }
   }, [user, isLoaded]);
-
-  const renderSection = (title: string, content: React.ReactNode) => (
-    <div className="border p-4 rounded shadow-sm bg-white">
-      <h2 className="font-semibold mb-3 text-lg border-b pb-2">{title}</h2>
-      {content}
-    </div>
-  );
 
 
   return (
@@ -368,14 +350,12 @@ const DashboardUser = () => {
         </main>
 
 
-        <EditClientModal
+        <InfoEditModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          clientInfo={accInfo?.ClientInfo}
-          onUpdate={handleInfoUpdate}
+          currentInfo={accInfo?.ClientInfo}  // Now TypeScript won't complain
+          userId={user?.id ?? ''}  // Using nullish coalescing operator for better null handling
         />
-
-
 
       </div>
     </div>

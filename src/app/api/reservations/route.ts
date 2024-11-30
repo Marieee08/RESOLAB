@@ -30,29 +30,7 @@ export async function POST(request: Request) {
      );
    }
 
-   // Handle ClientInfo creation/update
-   if (data.ContactNum) {
-     await prisma.clientInfo.upsert({
-       where: {
-         accInfoId: userAccount.id,
-       },
-       update: {
-         ContactNum: data.ContactNum,
-         Address: data.Address,
-         City: data.City,
-         Province: data.Province,
-         Zipcode: data.Zipcode,
-       },
-       create: {
-         accInfoId: userAccount.id,
-         ContactNum: data.ContactNum,
-         Address: data.Address,
-         City: data.City,
-         Province: data.Province,
-         Zipcode: data.Zipcode,
-       },
-     });
-   }
+ 
 
    // Create the UtilReq entry
    const utilReq = await prisma.utilReq.create({
@@ -87,54 +65,7 @@ export async function POST(request: Request) {
      },
    });
 
-   // Handle BusinessInfo creation/update
-   if (data.CompanyName) {
-     await prisma.businessInfo.upsert({
-       where: {
-         accInfoId: userAccount.id,
-       },
-       update: {
-         CompanyName: data.CompanyName,
-         BusinessOwner: data.BusinessOwner,
-         BusinessPermitNum: data.BusinessPermitNum,
-         TINNum: data.TINNum,
-         CompanyIDNum: data.CompanyIDNum,
-         CompanyEmail: data.CompanyEmail,
-         ContactPerson: data.ContactPerson,
-         Designation: data.Designation,
-         CompanyAddress: data.CompanyAddress,
-         CompanyCity: data.CompanyCity,
-         CompanyProvince: data.CompanyProvince,
-         CompanyZipcode: data.CompanyZipcode,
-         CompanyPhoneNum: data.CompanyPhoneNum,
-         CompanyMobileNum: data.CompanyMobileNum,
-         Manufactured: data.Manufactured,
-         ProductionFrequency: data.ProductionFrequency,
-         Bulk: data.Bulk,
-       },
-       create: {
-         accInfoId: userAccount.id,
-         CompanyName: data.CompanyName,
-         BusinessOwner: data.BusinessOwner,
-         BusinessPermitNum: data.BusinessPermitNum,
-         TINNum: data.TINNum,
-         CompanyIDNum: data.CompanyIDNum,
-         CompanyEmail: data.CompanyEmail,
-         ContactPerson: data.ContactPerson,
-         Designation: data.Designation,
-         CompanyAddress: data.CompanyAddress,
-         CompanyCity: data.CompanyCity,
-         CompanyProvince: data.CompanyProvince,
-         CompanyZipcode: data.CompanyZipcode,
-         CompanyPhoneNum: data.CompanyPhoneNum,
-         CompanyMobileNum: data.CompanyMobileNum,
-         Manufactured: data.Manufactured,
-         ProductionFrequency: data.ProductionFrequency,
-         Bulk: data.Bulk,
-       },
-     });
-   }
-
+  
    return NextResponse.json({
      utilReq,
      success: true,
