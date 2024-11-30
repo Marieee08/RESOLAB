@@ -46,7 +46,7 @@ const EditClientModal = ({
     setError('');
 
     try {
-      const response = await fetch(`/api/updateClientInfo/${clientInfo.id}`, {
+      const response = await fetch(`/api/updateClientInfo/${clientInfo?.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
