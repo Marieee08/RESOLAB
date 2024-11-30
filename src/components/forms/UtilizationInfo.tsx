@@ -237,7 +237,30 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [touchedFields, setTouchedFields] = useState<Set<keyof FormData>>(new Set());
   const [previousService, setPreviousService] = useState<string>('');
+  const [services, setServices] = useState<{ id: string; Service: string }[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
+  const [serviceError, setServiceError] = useState<string | null>(null);
   
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch('/api/services');
+        if (!response.ok) {
+          throw new Error('Failed to fetch services');
+        }
+        const data = await response.json();
+        setServices(data);
+        setIsLoadingServices(false);
+      } catch (err) {
+        console.error('Services fetch error:', err);
+        setServiceError('Failed to load services. Please try again.');
+        setIsLoadingServices(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
   useEffect(() => {
     if (formData.ProductsManufactured === 'Benchmarking') {
       setPreviousService('Benchmarking');
@@ -340,7 +363,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-semibold mb-6 mt-12">Utilization Information</h2>
       
       <div className="grid grid-cols-2 gap-6">
@@ -348,27 +371,32 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           <label htmlFor="ProductsManufactured" className="block text-sm font-medium text-gray-700">
             Service to be availed<span className="text-red-500">*</span>
           </label>
-          <select
-            id="ProductsManufactured"
-            name="ProductsManufactured"
-            value={formData.ProductsManufactured}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('ProductsManufactured')}
-            className={getInputClassName('ProductsManufactured')}
-            required
-          >
-            <option value="Select service">Select service</option>
-            <option value="Benchmarking">Benchmarking</option>
-            <option value="2D CNC Milling">2D CNC Milling</option>
-            <option value="3D CNC Milling">3D CNC Milling</option>
-            <option value="3D Printing">3D Printing</option>
-            <option value="CNC Wood Routing">CNC Wood Routing</option>
-            <option value="Heat Pressing">Heat Pressing</option>
-            <option value="Large Format Printing">Large Format Printing</option>
-            <option value="Laser Cutting & Engraving">Laser Cutting & Engraving</option>
-            <option value="Laser Printing">Laser Printing</option>
-            <option value="Lathe Machining">Lathe Machining</option>
-          </select>
+          {isLoadingServices ? (
+            <div className="mt-1 block w-full border rounded-md shadow-sm p-2 bg-gray-100 text-gray-500">
+              Loading services...
+            </div>
+          ) : serviceError ? (
+            <div className="mt-1 block w-full border rounded-md shadow-sm p-2 bg-red-50 text-red-500">
+              {serviceError}
+            </div>
+          ) : (
+            <select
+              id="ProductsManufactured"
+              name="ProductsManufactured"
+              value={formData.ProductsManufactured}
+              onChange={handleInputChange}
+              onBlur={() => handleBlur('ProductsManufactured')}
+              className={getInputClassName('ProductsManufactured')}
+              required
+            >
+              <option value="Select service">Select service</option>
+              {services.map((service) => (
+                <option key={service.id} value={service.Service}>
+                  {service.Service}
+                </option>
+              ))}
+            </select>
+          )}
           {touchedFields.has('ProductsManufactured') && errors.ProductsManufactured && (
             <p className="mt-1 text-sm text-red-500">{errors.ProductsManufactured}</p>
           )}

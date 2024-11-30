@@ -279,9 +279,10 @@ export default function AdminServices() {
   }; 
 
   const handleServiceSubmit = async (e: React.FormEvent) => {
+    console.log('handleServiceSubmit called');
+  console.log('isServiceModalOpen:', isServiceModalOpen);
+  console.log('newServiceName:', newServiceName);
     e.preventDefault();
-    
-    console.log('Submitting service:', newServiceName);
     
     if (!newServiceName.trim()) {
       alert('Please enter a service name');
@@ -293,28 +294,40 @@ export default function AdminServices() {
         Service: newServiceName.trim()
       };
   
-      console.log('Sending service data:', serviceData);
-  
-      const response = await fetch('/api/services', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(serviceData),
-      });
-  
-      console.log('Response status:', response.status);
+      const response = editingService 
+        ? await fetch(`/api/services/${editingService.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(serviceData)
+          })
+        : await fetch('/api/services', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(serviceData)
+          });
   
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error response:', errorData);
         throw new Error(errorData.error || 'Failed to save service');
       }
   
       const savedService = await response.json();
-      console.log('Saved service:', savedService);
   
-      setServices([...services, savedService]);
+      // Update services list
+      if (editingService) {
+        // If editing, replace the existing service
+        setServices(services.map(service => 
+          service.id === savedService.id ? savedService : service
+        ));
+      } else {
+        // If adding new, append to the list
+        setServices([...services, savedService]);
+      }
+  
+      // Close the modal and reset state
       setIsServiceModalOpen(false);
       setNewServiceName('');
+      setEditingService(null);
     } catch (error) {
       console.error('Service submission error:', error);
       alert(error instanceof Error ? error.message : 'Failed to add service');
@@ -335,14 +348,22 @@ export default function AdminServices() {
   };
 
   const openServiceModal = (service: Service | null = null) => {
-    console.log('Opening service modal', service);
-    setEditingService(service);
-    if (service) {
-      setNewServiceName(service.Service);
-    } else {
-      setNewServiceName('');
-    }
+    console.log('Opening service modal - Current state before:', {
+      isServiceModalOpen,
+      service,
+      newServiceName: newServiceName
+    });
+  
+    // Explicitly set the state
     setIsServiceModalOpen(true);
+    setEditingService(service);
+    setNewServiceName(service ? service.Service : '');
+  
+    console.log('Opening service modal - State after:', {
+      isServiceModalOpen: true,
+      service,
+      newServiceName: service ? service.Service : ''
+    });
   };
 
   return (
@@ -352,12 +373,6 @@ export default function AdminServices() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Manage Services</h1>
           <div className="space-x-4">
-            <button
-              onClick={() => setIsToolModalOpen(true)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-full flex items-center"
-            >
-              <Plus size={20} className="mr-2" /> Manage Tools
-            </button>
             <button
               onClick={() => openModal()}
               className="bg-green-500 text-white px-4 py-2 rounded-full flex items-center"
@@ -413,7 +428,7 @@ export default function AdminServices() {
         </div>
       
       {/* Tools Section */}
-      <div className="mt-16">
+      <div className="container mx-auto p-10 mt-16">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">Manage Tools</h2>
             <button
@@ -455,13 +470,16 @@ export default function AdminServices() {
       {/* Services Section */}
       <div className="container mx-auto p-10 mt-16">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Manage Services</h2>
+          <h2 className="text-2xl font-bold">Manage Machines</h2>
           <button
-            onClick={() => openServiceModal()}
-            className="bg-green-500 text-white px-4 py-2 rounded-full flex items-center"
-          >
-            <Plus size={20} className="mr-2" /> Add New Service
-          </button>
+  onClick={() => {
+    console.log('Open service modal clicked');
+    openServiceModal();
+  }}
+  className="bg-green-500 text-white px-4 py-2 rounded-full flex items-center"
+>
+  <Plus size={20} className="mr-2" /> Add New Service
+</button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -691,55 +709,62 @@ export default function AdminServices() {
                 </form>
               </div>
             )}
-
-             {/* Service Modal */}
-{isServiceModalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-lg p-8 w-full max-w-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">{editingService ? 'Edit' : 'Add'} Service</h2>
-        <button 
-          onClick={() => setIsServiceModalOpen(false)} 
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <X size={24} />
-        </button>
-      </div>
-      <form onSubmit={handleServiceSubmit}>
-        <div className="mb-4">
-          <label htmlFor="serviceName" className="block text-sm font-medium text-gray-700">Service Name</label>
-          <input
-            type="text"
-            id="serviceName"
-            value={newServiceName}
-            onChange={(e) => setNewServiceName(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            required
-          />
-        </div>
-
-        <div className="flex justify-end space-x-2">
-          <button
-            type="submit"
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md"
-          >
-            {editingService ? 'Update' : 'Add'} Service
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsServiceModalOpen(false)}
-            className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
           </div>
         </div>
       )}
+      {isServiceModalOpen === true && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-8 w-full max-w-md">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Add New Service</h2>
+            <button 
+              onClick={() => {
+                console.log('Closing service modal');
+                setIsServiceModalOpen(false);
+              }} 
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <form onSubmit={handleServiceSubmit}>
+            <div className="mb-4">
+              <label htmlFor="serviceName" className="block text-sm font-medium text-gray-700">Service Name</label>
+              <input
+                type="text"
+                id="serviceName"
+                value={newServiceName}
+                onChange={(e) => {
+                  console.log('Service name input changed:', e.target.value);
+                  setNewServiceName(e.target.value);
+                }}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                required
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <button
+                type="submit"
+                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md"
+              >
+                Add Service
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Cancel button clicked');
+                  setIsServiceModalOpen(false);
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )}
     </main>
   );
 }
