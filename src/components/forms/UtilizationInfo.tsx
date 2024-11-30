@@ -2,7 +2,7 @@ import React, { useState, ChangeEvent, useEffect } from 'react';
 import { Plus, Minus, X } from 'lucide-react';
 
 interface FormData {
-  ProductsManufactured: string;
+  ProductsManufactured: string[];
   BulkofCommodity: string;
   Equipment: string;
   Tools: string;
@@ -236,10 +236,10 @@ const ToolsSelector: React.FC<ToolsSelectorProps> = ({
 export default function ProcessInformation({ formData, updateFormData, nextStep, prevStep }: StepProps) {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [touchedFields, setTouchedFields] = useState<Set<keyof FormData>>(new Set());
-  const [previousService, setPreviousService] = useState<string>('');
   const [services, setServices] = useState<{ id: string; Service: string }[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(true);
   const [serviceError, setServiceError] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   useEffect(() => {
     const fetchServices = async () => {
@@ -261,32 +261,15 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     fetchServices();
   }, []);
 
-  useEffect(() => {
-    if (formData.ProductsManufactured === 'Benchmarking') {
-      setPreviousService('Benchmarking');
-      updateFormData('BulkofCommodity', 'NOT APPLICABLE');
-      updateFormData('Equipment', 'NOT APPLICABLE');
-      updateFormData('Tools', 'NOT APPLICABLE');
-    } else if (previousService === 'Benchmarking') {
-      updateFormData('BulkofCommodity', '');
-      updateFormData('Equipment', '');
-      updateFormData('Tools', '');
-      setPreviousService(formData.ProductsManufactured);
-    } else {
-      setPreviousService(formData.ProductsManufactured);
-    }
-  }, [formData.ProductsManufactured]);
-
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     updateFormData(name as keyof FormData, value);
     validateField(name as keyof FormData, value);
   };
 
-  const isFieldDisabled = (fieldName: keyof FormData) => {
-    return formData.ProductsManufactured === 'Benchmarking' && fieldName !== 'ProductsManufactured';
+  const isFieldDisabled = (fieldName: keyof FormData): boolean => {
+    // Disable fields if Benchmarking is selected
+    return formData.ProductsManufactured?.includes('Benchmarking') || false;
   };
 
   const handleBlur = (fieldName: keyof FormData) => {
@@ -296,16 +279,80 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     validateField(fieldName, formData[fieldName]);
   };
 
-  const validateField = (fieldName: keyof FormData, value: string) => {
+  const handleNext = () => {
+    if (validateForm()) {
+      nextStep();
+    }
+  };
+
+  const getInputClassName = (fieldName: keyof FormData) => {
+    const baseClasses = "mt-1 block w-full border rounded-md shadow-sm p-2";
+    const errorClasses = touchedFields.has(fieldName) && errors[fieldName] 
+      ? "border-red-500 focus:ring-red-500 focus:border-red-500" 
+      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500";
+    const disabledClasses = isFieldDisabled(fieldName) ? "bg-gray-100 cursor-not-allowed" : "";
+    return `${baseClasses} ${errorClasses} ${disabledClasses}`;
+  };
+
+  const handleServiceChange = (service: string) => {
+    const currentServices = formData.ProductsManufactured || [];
+    let newServices;
+
+    // Special handling for Benchmarking
+    if (service === 'Benchmarking') {
+      newServices = currentServices.includes(service)
+        ? currentServices.filter(s => s !== service)
+        : [service]; // Only Benchmarking when selected
+    } else {
+      // For other services
+      newServices = currentServices.includes(service)
+        ? currentServices.filter(s => s !== service)
+        : [...currentServices.filter(s => s !== 'Benchmarking'), service];
+    }
+    
+    updateFormData('ProductsManufactured', newServices);
+
+    // Reset dependent fields when services change
+    if (newServices.length === 0 || newServices.includes('Benchmarking')) {
+      updateFormData('Equipment', 'Select equipment');
+      updateFormData('BulkofCommodity', '');
+      updateFormData('Tools', '');
+    }
+
+    validateField('ProductsManufactured', newServices);
+  };
+
+  const isServiceSelected = (service: string) => {
+    return (formData.ProductsManufactured || []).includes(service);
+  };
+
+  const validateField = (fieldName: keyof FormData, value: string | string[]) => {
     let error = '';
 
     if (fieldName === 'ProductsManufactured') {
-      if (!value || value === 'Select service') {
-        error = 'Please select a service';
+      if (!value || (Array.isArray(value) && value.length === 0)) {
+        error = 'Please select at least one service';
       }
-    } else if (!isFieldDisabled(fieldName)) {
-      if (!value || value === 'Select equipment') {
-        error = 'This field is required';
+    }
+
+    // Add validation for other fields when not in Benchmarking mode
+    if (!isFieldDisabled(fieldName)) {
+      switch(fieldName) {
+        case 'Equipment':
+          if (!value || value === 'Select equipment') {
+            error = 'Please select equipment';
+          }
+          break;
+        case 'BulkofCommodity':
+          if (!value) {
+            error = 'This field is required';
+          }
+          break;
+        case 'Tools':
+          if (!value) {
+            error = 'This field is required';
+          }
+          break;
       }
     }
 
@@ -321,12 +368,14 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     const newErrors: Partial<Record<keyof FormData, string>> = {};
     let isValid = true;
 
-    if (!formData.ProductsManufactured || formData.ProductsManufactured === 'Select service') {
-      newErrors.ProductsManufactured = 'Please select a service';
+    if (!formData.ProductsManufactured || formData.ProductsManufactured.length === 0) {
+      newErrors.ProductsManufactured = 'Please select at least one service';
       isValid = false;
     }
 
-    if (formData.ProductsManufactured !== 'Benchmarking') {
+    // Only validate dependent fields if not in Benchmarking mode
+    if (formData.ProductsManufactured && 
+        !formData.ProductsManufactured.includes('Benchmarking')) {
       if (!formData.Equipment || formData.Equipment === 'Select equipment') {
         newErrors.Equipment = 'Please select equipment';
         isValid = false;
@@ -347,74 +396,77 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     return isValid;
   };
 
-  const handleNext = () => {
-    if (validateForm()) {
-      nextStep();
-    }
-  };
-
-  const getInputClassName = (fieldName: keyof FormData) => {
-    const baseClasses = "mt-1 block w-full border rounded-md shadow-sm p-2";
-    const errorClasses = touchedFields.has(fieldName) && errors[fieldName] 
-      ? "border-red-500 focus:ring-red-500 focus:border-red-500" 
-      : "border-gray-300 focus:ring-blue-500 focus:border-blue-500";
-    const disabledClasses = isFieldDisabled(fieldName) ? "bg-gray-100 cursor-not-allowed" : "";
-    return `${baseClasses} ${errorClasses} ${disabledClasses}`;
-  };
-
   return (
-      <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6 mt-12">Utilization Information</h2>
-      
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="ProductsManufactured" className="block text-sm font-medium text-gray-700">
-            Service to be availed<span className="text-red-500">*</span>
-          </label>
-          {isLoadingServices ? (
-            <div className="mt-1 block w-full border rounded-md shadow-sm p-2 bg-gray-100 text-gray-500">
-              Loading services...
-            </div>
-          ) : serviceError ? (
-            <div className="mt-1 block w-full border rounded-md shadow-sm p-2 bg-red-50 text-red-500">
-              {serviceError}
-            </div>
-          ) : (
-            <select
-              id="ProductsManufactured"
-              name="ProductsManufactured"
-              value={formData.ProductsManufactured}
-              onChange={handleInputChange}
-              onBlur={() => handleBlur('ProductsManufactured')}
-              className={getInputClassName('ProductsManufactured')}
-              required
+    <div className="max-w-4xl mx-auto">
+    <h2 className="text-2xl font-semibold mb-6 mt-12">Utilization Information</h2>
+    
+    <div className="grid grid-cols-2 gap-6">
+      <div className="relative">
+        <label className="block text-sm font-medium text-gray-700">
+          Services to be availed<span className="text-red-500">*</span>
+        </label>
+        
+        {isLoadingServices ? (
+          <div className="mt-1 block w-full border rounded-md shadow-sm p-2 bg-gray-100 text-gray-500">
+            Loading services...
+          </div>
+        ) : serviceError ? (
+          <div className="mt-1 block w-full border rounded-md shadow-sm p-2 bg-red-50 text-red-500">
+            {serviceError}
+          </div>
+        ) : (
+          <div>
+            <div 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="mt-1 block w-full border rounded-md shadow-sm p-2 cursor-pointer bg-white"
             >
-              <option value="Select service">Select service</option>
-              {services.map((service) => (
-                <option key={service.id} value={service.Service}>
-                  {service.Service}
-                </option>
-              ))}
-            </select>
-          )}
-          {touchedFields.has('ProductsManufactured') && errors.ProductsManufactured && (
-            <p className="mt-1 text-sm text-red-500">{errors.ProductsManufactured}</p>
-          )}
-        </div>
+              {formData.ProductsManufactured && formData.ProductsManufactured.length > 0
+                ? `${formData.ProductsManufactured.length} service(s) selected`
+                : 'Select services'}
+            </div>
+            
+            {isDropdownOpen && (
+              <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                {services.map((service) => (
+                  <div 
+                    key={service.id} 
+                    className="px-4 py-2 hover:bg-gray-100 flex items-center"
+                    onClick={() => handleServiceChange(service.Service)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isServiceSelected(service.Service)}
+                      onChange={() => handleServiceChange(service.Service)}
+                      className="mr-2"
+                    />
+                    <span>{service.Service}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        
+        {errors.ProductsManufactured && (
+          <p className="mt-1 text-sm text-red-500">{errors.ProductsManufactured}</p>
+        )}
+      </div>
 
-        <div>
+      <div>
           <label htmlFor="Equipment" className="block text-sm font-medium text-gray-700">
-            Equipment<span className="text-red-500">*</span>
+            Equipment{!isFieldDisabled('Equipment') && <span className="text-red-500">*</span>}
           </label>
           <select
             id="Equipment"
             name="Equipment"
             value={formData.Equipment}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('Equipment')}
+            onChange={(e) => {
+              updateFormData('Equipment', e.target.value);
+              validateField('Equipment', e.target.value);
+            }}
             className={getInputClassName('Equipment')}
             disabled={isFieldDisabled('Equipment')}
-            required
+            required={!isFieldDisabled('Equipment')}
           >
             <option value="Select equipment">Select equipment</option>
             <option value="3D Printer">3D Printer</option>
@@ -424,14 +476,15 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
             <option value="Milling Machine">Milling Machine</option>
             <option value="Print & Cut">Print & Cut</option>
           </select>
-          {touchedFields.has('Equipment') && errors.Equipment && (
+          {!isFieldDisabled('Equipment') && errors.Equipment && (
             <p className="mt-1 text-sm text-red-500">{errors.Equipment}</p>
           )}
         </div>
 
         <div>
           <label htmlFor="BulkofCommodity" className="block text-sm font-medium text-gray-700">
-            Bulk of Commodity per Production (in volume or weight)<span className="text-red-500">*</span>
+            Bulk of Commodity per Production (in volume or weight)
+            {!isFieldDisabled('BulkofCommodity') && <span className="text-red-500">*</span>}
           </label>
           <input
             type="text"
@@ -442,27 +495,27 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
             onBlur={() => handleBlur('BulkofCommodity')}
             className={getInputClassName('BulkofCommodity')}
             disabled={isFieldDisabled('BulkofCommodity')}
-            required
+            required={!isFieldDisabled('BulkofCommodity')}
           />
-          {touchedFields.has('BulkofCommodity') && errors.BulkofCommodity && (
+          {!isFieldDisabled('BulkofCommodity') && touchedFields.has('BulkofCommodity') && errors.BulkofCommodity && (
             <p className="mt-1 text-sm text-red-500">{errors.BulkofCommodity}</p>
           )}
         </div>
 
         <div>
           <label htmlFor="Tools" className="block text-sm font-medium text-gray-700">
-            Tools<span className="text-red-500">*</span>
+            Tools{!isFieldDisabled('Tools') && <span className="text-red-500">*</span>}
           </label>
           <ToolsSelector
-        id="Tools"
-        value={formData.Tools}
-        onChange={(value) => updateFormData('Tools', value)}
-        onBlur={() => handleBlur('Tools')}
-        equipment={formData.Equipment}
-        className={getInputClassName('Tools')}
-        disabled={isFieldDisabled('Tools')}
-      />
-          {touchedFields.has('Tools') && errors.Tools && (
+            id="Tools"
+            value={formData.Tools}
+            onChange={(value) => updateFormData('Tools', value)}
+            onBlur={() => handleBlur('Tools')}
+            equipment={formData.Equipment}
+            className={getInputClassName('Tools')}
+            disabled={isFieldDisabled('Tools')}
+          />
+          {!isFieldDisabled('Tools') && touchedFields.has('Tools') && errors.Tools && (
             <p className="mt-1 text-sm text-red-500">{errors.Tools}</p>
           )}
         </div>

@@ -371,7 +371,7 @@ export default function AdminServices() {
       <Navbar />
       <div className="container mx-auto p-10">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Manage Services</h1>
+          <h1 className="text-3xl font-bold">Manage Machines</h1>
           <div className="space-x-4">
             <button
               onClick={() => openModal()}
@@ -470,7 +470,7 @@ export default function AdminServices() {
       {/* Services Section */}
       <div className="container mx-auto p-10 mt-16">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Manage Machines</h2>
+          <h2 className="text-2xl font-bold">Manage Services</h2>
           <button
   onClick={() => {
     console.log('Open service modal clicked');
