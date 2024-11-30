@@ -1,3 +1,4 @@
+// app/api/update-info/route.ts
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
@@ -29,9 +30,61 @@ export async function POST(request: Request) {
       );
     }
 
-    // Handle Personal Information
-    if (type === 'personal') {
-      const updatedInfo = await prisma.clientInfo.upsert({
+    if (type === 'business') {
+      // Handle BusinessInfo creation/update
+      const updatedBusiness = await prisma.businessInfo.upsert({
+        where: {
+          accInfoId: userAccount.id,
+        },
+        update: {
+          CompanyName: data.CompanyName,
+          BusinessOwner: data.BusinessOwner,
+          BusinessPermitNum: data.BusinessPermitNum,
+          TINNum: data.TINNum,
+          CompanyIDNum: data.CompanyIDNum,
+          CompanyEmail: data.CompanyEmail,
+          ContactPerson: data.ContactPerson,
+          Designation: data.Designation,
+          CompanyAddress: data.CompanyAddress,
+          CompanyCity: data.CompanyCity,
+          CompanyProvince: data.CompanyProvince,
+          CompanyZipcode: data.CompanyZipcode ? parseInt(data.CompanyZipcode.toString()) : null,
+          CompanyPhoneNum: data.CompanyPhoneNum,
+          CompanyMobileNum: data.CompanyMobileNum,
+          Manufactured: data.Manufactured,
+          ProductionFrequency: data.ProductionFrequency,
+          Bulk: data.Bulk,
+        },
+        create: {
+          accInfoId: userAccount.id,
+          CompanyName: data.CompanyName,
+          BusinessOwner: data.BusinessOwner,
+          BusinessPermitNum: data.BusinessPermitNum,
+          TINNum: data.TINNum,
+          CompanyIDNum: data.CompanyIDNum,
+          CompanyEmail: data.CompanyEmail,
+          ContactPerson: data.ContactPerson,
+          Designation: data.Designation,
+          CompanyAddress: data.CompanyAddress,
+          CompanyCity: data.CompanyCity,
+          CompanyProvince: data.CompanyProvince,
+          CompanyZipcode: data.CompanyZipcode ? parseInt(data.CompanyZipcode.toString()) : null,
+          CompanyPhoneNum: data.CompanyPhoneNum,
+          CompanyMobileNum: data.CompanyMobileNum,
+          Manufactured: data.Manufactured,
+          ProductionFrequency: data.ProductionFrequency,
+          Bulk: data.Bulk,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        data: updatedBusiness,
+        message: 'Business information updated successfully'
+      });
+    } else if (type === 'personal') {
+      // Handle Personal Information creation/update
+      const updatedClient = await prisma.clientInfo.upsert({
         where: {
           accInfoId: userAccount.id,
         },
@@ -54,12 +107,11 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         success: true,
-        data: updatedInfo,
+        data: updatedClient,
         message: 'Personal information updated successfully'
       });
     }
 
-    // If no valid type is provided
     return NextResponse.json(
       { error: 'Invalid update type' },
       { status: 400 }

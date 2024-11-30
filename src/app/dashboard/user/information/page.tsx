@@ -353,8 +353,9 @@ const DashboardUser = () => {
         <InfoEditModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          currentInfo={accInfo?.ClientInfo}  // Now TypeScript won't complain
-          userId={user?.id ?? ''}  // Using nullish coalescing operator for better null handling
+          currentInfo={isBusinessView ? accInfo?.BusinessInfo : accInfo?.ClientInfo}
+          isBusinessView={isBusinessView}
+          userId={user?.id ?? ''}
         />
 
       </div>
