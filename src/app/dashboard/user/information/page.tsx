@@ -238,48 +238,81 @@ const DashboardUser = () => {
 {/* Information Display */}
 <div className="pt-8">
     {!isBusinessView ? (
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Full Name</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {user?.firstName} {user?.lastName}
-            </p>
+      <div className="space-y-8">
+      {/* Personal Information Section */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Personal Information</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="md:col-span-2">
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Full Name</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {user?.firstName} {user?.lastName}
+              </p>
+            </div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Contact Number</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.ContactNum || "Not provided"}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Address</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.Address || "Not provided"}
+              {loading ? (
+                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+              ) : (
+                accInfo?.ClientInfo?.ContactNum || "Not provided"
+              )}
             </p>
           </div>
         </div>
-        <div className="space-y-4">
+      </div>
+  
+      {/* Address Section */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Address Information</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="md:col-span-2">
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Street Address</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {loading ? (
+                  <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+                ) : (
+                  accInfo?.ClientInfo?.Address || "Not provided"
+                )}
+              </p>
+            </div>
+          </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">City/Municipality</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.City || "Not provided"}
+              {loading ? (
+                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+              ) : (
+                accInfo?.ClientInfo?.City || "Not provided"
+              )}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Province</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.Province || "Not provided"}
+              {loading ? (
+                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+              ) : (
+                accInfo?.ClientInfo?.Province || "Not provided"
+              )}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Zip Code</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.Zipcode || "Not provided"}
+              {loading ? (
+                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+              ) : (
+                accInfo?.ClientInfo?.Zipcode || "Not provided"
+              )}
             </p>
           </div>
         </div>
       </div>
+    </div>
     ) : (
       <div className="space-y-8">
         {/* Company Identity Section */}
