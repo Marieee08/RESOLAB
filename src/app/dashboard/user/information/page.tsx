@@ -3,8 +3,8 @@
 import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { useUser } from "@clerk/nextjs";
-import EditClientModal from "@/components/custom/EditClientModal";
 import { format } from 'date-fns';
+import InfoEditModal from './components/InfoEditModal';
 
 interface ClientInfo {
   ContactNum: string;
@@ -54,24 +54,13 @@ const DashboardUser = () => {
 
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
-  
   const [accInfo, setAccInfo] = useState<AccInfo | null>(null);
-  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
-  const handleInfoUpdate = (updatedData: ClientInfo) => {
-    setAccInfo((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        ClientInfo: updatedData
-      };
-    });
-  };
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -105,13 +94,6 @@ const DashboardUser = () => {
       fetchAllData();
     }
   }, [user, isLoaded]);
-
-  const renderSection = (title: string, content: React.ReactNode) => (
-    <div className="border p-4 rounded shadow-sm bg-white">
-      <h2 className="font-semibold mb-3 text-lg border-b pb-2">{title}</h2>
-      {content}
-    </div>
-  );
 
 
   return (
@@ -256,106 +238,221 @@ const DashboardUser = () => {
 {/* Information Display */}
 <div className="pt-8">
     {!isBusinessView ? (
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Full Name</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {user?.firstName} {user?.lastName}
-            </p>
+      <div className="space-y-8">
+      {/* Personal Information Section */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Personal Information</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="md:col-span-2">
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Full Name</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {user?.firstName} {user?.lastName}
+              </p>
+            </div>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Contact Number</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.ContactNum || "Not provided"}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Address</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.Address || "Not provided"}
+              {loading ? (
+                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+              ) : (
+                accInfo?.ClientInfo?.ContactNum || "Not provided"
+              )}
             </p>
           </div>
         </div>
-        <div className="space-y-4">
+      </div>
+  
+      {/* Address Section */}
+      <div>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Address Information</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="md:col-span-2">
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Street Address</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {loading ? (
+                  <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+                ) : (
+                  accInfo?.ClientInfo?.Address || "Not provided"
+                )}
+              </p>
+            </div>
+          </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">City/Municipality</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.City || "Not provided"}
+              {loading ? (
+                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+              ) : (
+                accInfo?.ClientInfo?.City || "Not provided"
+              )}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Province</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.Province || "Not provided"}
+              {loading ? (
+                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+              ) : (
+                accInfo?.ClientInfo?.Province || "Not provided"
+              )}
             </p>
           </div>
           <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
             <h3 className="text-sm text-gray-500 mb-1">Zip Code</h3>
             <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.ClientInfo?.Zipcode || "Not provided"}
+              {loading ? (
+                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+              ) : (
+                accInfo?.ClientInfo?.Zipcode || "Not provided"
+              )}
             </p>
           </div>
         </div>
       </div>
+    </div>
     ) : (
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Company Name</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.BusinessInfo?.CompanyName || "Not provided"}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Business Owner</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.BusinessInfo?.BusinessOwner || "Not provided"}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">TIN No.</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.BusinessInfo?.TINNum || "Not provided"}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Business Permit No.</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.BusinessInfo?.BusinessPermitNum || "Not provided"}
-            </p>
+      <div className="space-y-8">
+        {/* Company Identity Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Company Identity</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+                <h3 className="text-sm text-gray-500 mb-1">Company Name</h3>
+                <p className="text-lg font-qanelas1 text-gray-800">
+                  {accInfo?.BusinessInfo?.CompanyName || "Not provided"}
+                </p>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Business Owner</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.BusinessOwner || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Company ID Number</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.CompanyIDNum || "Not provided"}
+              </p>
+            </div>
           </div>
         </div>
-        <div className="space-y-4">
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Contact Person</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.BusinessInfo?.ContactPerson || "Not provided"}
-            </p>
+
+        {/* Legal Information Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Legal Information</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Business Permit No.</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.BusinessPermitNum || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">TIN No.</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.TINNum || "Not provided"}
+              </p>
+            </div>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Position/Designation</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.BusinessInfo?.Designation || "Not provided"}
-            </p>
+        </div>
+
+        {/* Address Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Company Address</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+                <h3 className="text-sm text-gray-500 mb-1">Street Address</h3>
+                <p className="text-lg font-qanelas1 text-gray-800">
+                  {accInfo?.BusinessInfo?.CompanyAddress || "Not provided"}
+                </p>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">City</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.CompanyCity || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Province</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.CompanyProvince || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Zipcode</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.CompanyZipcode || "Not provided"}
+              </p>
+            </div>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Company Address</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.BusinessInfo?.CompanyAddress || "Not provided"}
-            </p>
+        </div>
+
+        {/* Contact Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Contact Information</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Contact Person</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.ContactPerson || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Position/Designation</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.Designation || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Company Email</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.CompanyEmail || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Company Phone Number</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.CompanyPhoneNum || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Company Mobile Number</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.CompanyMobileNum || "Not provided"}
+              </p>
+            </div>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Company City</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.BusinessInfo?.CompanyCity || "Not provided"}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Company Province</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {accInfo?.BusinessInfo?.CompanyProvince || "Not provided"}
-            </p>
+        </div>
+
+        {/* Production Details Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Production Information</h3>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Products Manufactured</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.Manufactured || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Production Frequency</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.ProductionFrequency || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Bulk</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {accInfo?.BusinessInfo?.Bulk || "Not provided"}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -368,14 +465,13 @@ const DashboardUser = () => {
         </main>
 
 
-        <EditClientModal
+        <InfoEditModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
-          clientInfo={accInfo?.ClientInfo}
-          onUpdate={handleInfoUpdate}
+          currentInfo={isBusinessView ? accInfo?.BusinessInfo : accInfo?.ClientInfo}
+          isBusinessView={isBusinessView}
+          userId={user?.id ?? ''}
         />
-
-
 
       </div>
     </div>
