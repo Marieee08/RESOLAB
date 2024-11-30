@@ -279,20 +279,20 @@ export default function PersonalInformation({ formData, updateFormData, nextStep
                 <p>{formData.Equipment}</p>
             </div>
             <div className="col-span-2">
-                <h3 className="font-medium">Tools:</h3>
-                {formData.Tools === 'NOT APPLICABLE' ? (
-                    <p>Not Applicable</p>
-                ) : (
-                    <div className="space-y-2">
-                        {parseToolString(formData.Tools).map((tool) => (
-                            <div key={tool.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                                <span>{tool.name}</span>
-                                <span className="text-gray-600">Quantity: {tool.quantity}</span>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+    <h3 className="font-medium">Tools:</h3>
+    {formData.Tools === 'NOT APPLICABLE' ? (
+        <p>Not Applicable</p>
+    ) : (
+        <div className="space-y-2">
+            {parseToolString(formData.Tools).map((tool) => (
+                <div key={tool.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                    <span>{tool.Tool}</span> {/* Changed from tool.name to tool.Tool */}
+                    <span className="text-gray-600">Quantity: {tool.Quantity}</span> {/* Changed from tool.quantity to tool.Quantity */}
+                </div>
+            ))}
+        </div>
+    )}
+</div>
 
             <div className="grid grid-cols-2 gap-6">
             <div className="col-span-2">
