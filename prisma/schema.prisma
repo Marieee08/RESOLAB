@@ -22,6 +22,17 @@ model Machine {
   updatedAt   DateTime @updatedAt
 }
 
+model Tool {
+  id          String   @id @default(cuid())
+  Tool        String
+  Quantity    Int
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  Service     String
+}
+
 // For Primary Account Creation (For All)
 
 model AccInfo {
