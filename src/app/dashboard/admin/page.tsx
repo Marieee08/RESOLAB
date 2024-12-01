@@ -11,7 +11,6 @@ const DashboardAdmin = () => {
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
-  const [blockedDates, setBlockedDates] = useState<Date[]>([]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -85,7 +84,7 @@ const DashboardAdmin = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard-admin" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/dashboard/admin/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                   Profile
                 </Link>
               </li>
