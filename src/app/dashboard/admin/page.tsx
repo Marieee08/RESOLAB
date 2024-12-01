@@ -68,7 +68,12 @@ const DashboardAdmin = () => {
                     </Link>
                   </li>
                   <li className="ml-6">
-                    <Link href="/dashboard/admin/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                    <Link href="/dashboard/admin/machines" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      Machines
+                    </Link>
+                  </li>
+                  <li className="ml-6">
+                    <Link href="/dashboard/admin/users" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
                       Users
                     </Link>
                   </li>
@@ -150,7 +155,7 @@ const DashboardAdmin = () => {
           <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
-          <TestCalendar blockedDates={blockedDates} setBlockedDates={setBlockedDates}/>
+          <TestCalendar />
             <div className="bg-white p-6 rounded-3xl shadow-lg mt-6">
               <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
               <div className="overflow-x-auto">

@@ -19,7 +19,7 @@ interface BlockedDate {
 }
 
 const TestCalendar: React.FC = () => {
-    const [selectedDate, setSelectedDate] = useState<CalendarDate | null>(null);
+  const [selectedDate, setSelectedDate] = useState<CalendarDate | null>(null);
   const [blockedDates, setBlockedDates] = useState<CalendarDate[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [currentMonth, setCurrentMonth] = useState<CalendarDate>(new Date());
@@ -43,6 +43,10 @@ const TestCalendar: React.FC = () => {
       });
     }
   };
+
+  useEffect(() => {
+    fetchBlockedDates();
+  }, []);
 
   const handleBlockDate = async () => {
     if (!selectedDate || isDateBlocked(selectedDate)) return;
@@ -95,26 +99,32 @@ const TestCalendar: React.FC = () => {
 
   const handleUnblockDate = async () => {
     if (!selectedDate) return;
-   
+     
     setIsLoading(true);
     try {
+      // Create a new date at noon to avoid timezone issues, similar to how we handle blocking
+      const dateToUnblock = new Date(
+        selectedDate.getFullYear(),
+        selectedDate.getMonth(),
+        selectedDate.getDate(),
+        12, 0, 0
+      );
+  
       const response = await fetch('/api/blocked-dates', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ date: selectedDate }),
+        body: JSON.stringify({ 
+          date: dateToUnblock.toISOString().split('T')[0] // Send only the date part, consistent with block function
+        }),
       });
-
-
+  
       if (!response.ok) throw new Error('Failed to unblock date');
-
-
-      setBlockedDates(blockedDates.filter(date =>
-        date.getDate() !== selectedDate.getDate() ||
-        date.getMonth() !== selectedDate.getMonth() ||
-        date.getFullYear() !== selectedDate.getFullYear()
-      ));
+  
+      // Use the same date comparison logic as isDateBlocked function
+      setBlockedDates(blockedDates.filter(date => !isSameDay(date, dateToUnblock)));
+      
       toast({
         title: "Success",
         description: "Date unblocked successfully",

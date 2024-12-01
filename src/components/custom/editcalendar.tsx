@@ -1,44 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { format } from 'date-fns';
+import { format, startOfDay } from 'date-fns';
+import { BanIcon } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface BlockedDate {
+  id?: string;
   date: Date;
 }
 
-const EditableCalendar = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [blockedDates, setBlockedDates] = useState<Date[]>([]);
-  const [error, setError] = useState<string>('');
+interface EditableCalendarProps {
+  onDateUnblocked?: (date: Date) => void;
+  onError?: (error: string) => void;
+  externalRef?: React.RefObject<{
+    unblockDate: (date: Date) => Promise<void>;
+    refreshDates: () => Promise<void>;
+  }>;
+}
 
-  useEffect(() => {
-    fetchBlockedDates();
-  }, []);
+const EditableCalendar: React.FC<EditableCalendarProps> = ({
+  onDateUnblocked,
+  onError,
+  externalRef
+}) => {
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
+  const [error, setError] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dateToModify, setDateToModify] = useState<Date | null>(null);
+  const [isUnblocking, setIsUnblocking] = useState(false);
+
+  const handleError = (errorMessage: string) => {
+    setError(errorMessage);
+    onError?.(errorMessage);
+  };
 
   const fetchBlockedDates = async () => {
     try {
       const response = await fetch('/api/blocked-dates');
       const data: BlockedDate[] = await response.json();
-      setBlockedDates(data.map(item => new Date(item.date)));
+      setBlockedDates(data.map(item => ({
+        ...item,
+        date: startOfDay(new Date(item.date))
+      })));
     } catch (error) {
-      setError('Failed to fetch blocked dates');
+      handleError('Failed to fetch blocked dates');
     }
   };
 
-  const handleDateClick = (date: Date | undefined) => {
-    if (!date) return;
+  useEffect(() => {
+    fetchBlockedDates();
+  }, []);
 
-    const dateString = format(date, 'yyyy-MM-dd');
-    const isBlocked = blockedDates.some(
-      (blockedDate) => format(blockedDate, 'yyyy-MM-dd') === dateString
-    );
+  const handleBlockIconClick = (date: Date, isBlocked: boolean) => {
+    const normalizedDate = startOfDay(date);
+    setDateToModify(normalizedDate);
+    setIsUnblocking(isBlocked);
+    setIsModalOpen(true);
+  };
 
-    if (isBlocked) {
-      handleUnblockDate(date);
+  const handleConfirmAction = async () => {
+    if (!dateToModify) return;
+
+    if (isUnblocking) {
+      await handleUnblockDate(dateToModify);
     } else {
-      handleBlockDate(date);
+      await handleBlockDate(dateToModify);
     }
+    setIsModalOpen(false);
   };
 
   const handleBlockDate = async (date: Date) => {
@@ -48,76 +87,139 @@ const EditableCalendar = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ date }),
+        body: JSON.stringify({ 
+          date: format(date, "yyyy-MM-dd'T'00:00:00.000'Z'")
+        }),
       });
 
       if (response.ok) {
-        setBlockedDates([...blockedDates, date]);
+        const newBlockedDate = await response.json();
+        setBlockedDates([...blockedDates, {
+          ...newBlockedDate,
+          date: startOfDay(new Date(newBlockedDate.date))
+        }]);
       } else {
-        setError('Failed to block date');
+        handleError('Failed to block date');
       }
     } catch (error) {
-      setError('Failed to block date');
+      handleError('Failed to block date');
     }
   };
 
   const handleUnblockDate = async (date: Date) => {
     try {
-      const response = await fetch('/api/blocked-dates', {
+      const normalizedDate = startOfDay(date);
+      const dateToUnblock = blockedDates.find(
+        blockedDate => format(blockedDate.date, 'yyyy-MM-dd') === format(normalizedDate, 'yyyy-MM-dd')
+      );
+
+      if (!dateToUnblock?.id) {
+        handleError('No matching blocked date found');
+        return;
+      }
+
+      const response = await fetch(`/api/blocked-dates/${dateToUnblock.id}`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ date }),
       });
 
       if (response.ok) {
         setBlockedDates(
           blockedDates.filter(
             (blockedDate) =>
-              format(blockedDate, 'yyyy-MM-dd') !== format(date, 'yyyy-MM-dd')
+              format(blockedDate.date, 'yyyy-MM-dd') !== format(normalizedDate, 'yyyy-MM-dd')
           )
         );
+        onDateUnblocked?.(normalizedDate);
       } else {
-        setError('Failed to unblock date');
+        handleError('Failed to unblock date');
+        await fetchBlockedDates();
       }
     } catch (error) {
-      setError('Failed to unblock date');
+      handleError('Failed to unblock date');
+      await fetchBlockedDates();
     }
   };
 
+  // Expose methods through ref
+  React.useImperativeHandle(externalRef, () => ({
+    unblockDate: async (date: Date) => {
+      await handleUnblockDate(date);
+    },
+    refreshDates: async () => {
+      await fetchBlockedDates();
+    }
+  }));
+
   return (
-    <div className="max-w-md mx-auto p-4">
-      <div className="mb-4">
+    <div className="space-y-4">
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <Alert>
+        <AlertDescription>
+          Click the block icon next to a date to block/unblock it. Red dates are currently blocked.
+        </AlertDescription>
+      </Alert>
+      
+      <div className="relative">
         <CalendarComponent
           mode="single"
           selected={selectedDate}
-          onSelect={handleDateClick}
           className="rounded-md border"
           modifiers={{
-            blocked: blockedDates
+            blocked: blockedDates.map(bd => bd.date)
           }}
           modifiersStyles={{
-            blocked: { 
-              backgroundColor: 'rgb(239, 68, 68)',
-              color: 'white',
-              cursor: 'pointer'
+            blocked: { backgroundColor: 'rgb(254, 226, 226)', color: 'rgb(185, 28, 28)' }
+          }}
+          components={{
+            DayContent: ({ date }) => {
+              const normalizedDate = startOfDay(date);
+              const dateString = format(normalizedDate, 'yyyy-MM-dd');
+              const isBlocked = blockedDates.some(
+                (blockedDate) => format(blockedDate.date, 'yyyy-MM-dd') === dateString
+              );
+              
+              return (
+                <div className="relative w-full h-full flex items-center justify-center group">
+                  <span>{date.getDate()}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBlockIconClick(date, isBlocked);
+                    }}
+                    className={`absolute right-0 top-0 p-1 opacity-0 group-hover:opacity-100 transition-opacity
+                      ${isBlocked ? 'text-red-600 hover:text-red-700' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    <BanIcon className="w-3 h-3" />
+                  </button>
+                </div>
+              );
             }
           }}
         />
       </div>
 
-      {error && (
-        <Alert variant="destructive" className="mt-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="mt-4">
-        <p className="text-sm text-gray-600">
-          Click on a date to block/unblock it. Red dates are currently blocked.
-        </p>
-      </div>
+      <AlertDialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isUnblocking ? 'Unblock Date' : 'Block Date'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to {isUnblocking ? 'unblock' : 'block'} {dateToModify ? format(dateToModify, 'MMMM d, yyyy') : ''}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAction}>
+              {isUnblocking ? 'Unblock' : 'Block'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
