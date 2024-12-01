@@ -1,16 +1,60 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import EditableCalendar from '@/components/custom/editcalendar';
-import TestCalendar from '@/components/custom/testcalendar';
+import { useUser } from "@clerk/nextjs";
+import ReservationManagement from '@/components/custom/reservationtable';
+import TestCalendar from '@/components/custom/admincalendar';
 import { format } from 'date-fns';
 
+interface Reservation {
+  id: number;
+  RequestDate: Date;
+  UtilReqApproval: boolean | null;
+  ProductsManufactured: string;
+  BulkofCommodity: string;
+  accInfo: {
+    name: string;
+    email: string;
+  };
+  ProcessInfos: Array<{
+    Equipment: string;
+    Tools: string;
+    ToolsQty: number;
+  }>;
+  UtilTimes: Array<{
+    StartTime: Date;
+    EndTime: Date;
+  }>;
+}
 
 const DashboardAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
+  const { user, isLoaded } = useUser();
+  const [userRole, setUserRole] = useState<string>("Loading...");
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (!user) {
+        setUserRole("Not logged in");
+        return;
+      }
+      try {
+        const publicMetadata = user.publicMetadata;
+        const role = publicMetadata.role || "USER";
+        setUserRole(role as string);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+        setUserRole("Error fetching role");
+      }
+    };
+  
+    if (isLoaded) {
+      checkUserRole();
+    }
+  }, [user, isLoaded]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -26,9 +70,19 @@ const DashboardAdmin = () => {
         </div>
         <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
         <div className="flex flex-col items-center py-8">
-        <span className="h-36 w-36 rounded-full bg-gray-300 mb-2"></span>
-          <h2 className="text-white text-xl font-bold">Username</h2>
-          <p className="text-[#5e86ca]">Admin</p>
+            {user?.imageUrl ? (
+              <img 
+                src={user.imageUrl} 
+                alt="Profile" 
+                className="h-36 w-36 rounded-full object-cover mb-2"
+              />
+            ) : (
+              <span className="h-36 w-36 rounded-full bg-gray-600 mb-2"></span>
+            )}
+            <h2 className="text-white text-xl font-bold">
+              {user?.firstName} {user?.lastName}
+            </h2>
+            <p className="text-[#5e86ca]">{userRole}</p>
         </div>
           <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">MENU</h3>
@@ -57,7 +111,7 @@ const DashboardAdmin = () => {
               {orderDropdownOpen && (
                 <>
                   <li className="ml-6">
-                    <Link href="/dashboard/admin" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                    <Link href="/dashboard/admin" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white">
                       General
                     </Link>
                   </li>
@@ -89,7 +143,7 @@ const DashboardAdmin = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard-admin" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/dashboard/admin/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                   Settings
                 </Link>
               </li>
@@ -139,10 +193,20 @@ const DashboardAdmin = () => {
             <div className="flex items-center gap-3 2xsm:gap-7">
               <Link href="#" className="flex items-center gap-4">
                 <span className="hidden text-right lg:block">
-                  <span className="block text-sm font-medium text-black">Ashkinaz Canonoy</span>
-                  <span className="block text-xs">Student</span>
+                  <span className="block text-sm font-medium text-black">
+                    {user?.firstName} {user?.lastName || ''}
+                  </span>
+                  <span className="block text-xs">{userRole}</span>
                 </span>
-                <span className="h-12 w-12 rounded-full bg-gray-300"></span>
+                {user?.imageUrl ? (
+                  <img 
+                    src={user.imageUrl} 
+                    alt="Profile" 
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="h-12 w-12 rounded-full bg-gray-300"></span>
+                )}
               </Link>
             </div>
           </div>
@@ -155,210 +219,8 @@ const DashboardAdmin = () => {
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
           <TestCalendar />
-            <div className="bg-white p-6 rounded-3xl shadow-lg mt-6">
-              <h3 className="text-xl font-semibold mb-4">Recent Orders</h3>
-              <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 rounded-xl">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                        <tr>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-500">
-                                            9/29/24
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                            Sir Rolex Padilla
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                            havemercyonus@example.com
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">Our Beloved Teacher</div>
-                                <div className="text-sm text-gray-500">Please Please</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Pending
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                Admin
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                Tarpaulin Printing
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium">
-                                <a href="#" className="text-indigo-600 hover:text-indigo-900">Approve</a>
-                                <a href="#" className="ml-2 text-red-600 hover:text-red-900">Review</a>
-                            </td>
-                        </tr>
-
-
-
-
-                        <tr>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-500">
-                                            9/29/24
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                            Sir Rolex Padilla
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                            havemercyonus@example.com
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">Our Beloved Teacher</div>
-                                <div className="text-sm text-gray-500">Please Please</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Pending
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                Admin
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                Heat Press
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium">
-                                <a href="#" className="text-indigo-600 hover:text-indigo-900">Approve</a>
-                                <a href="#" className="ml-2 text-red-600 hover:text-red-900">Review</a>
-                            </td>
-                        </tr>
-
-
-
-
-                        <tr>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-500">
-                                            9/29/24
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                            Sir Rolex Padilla
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                            havemercyonus@example.com
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">Our Beloved Teacher</div>
-                                <div className="text-sm text-gray-500">Please Please</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Pending
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                Admin
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                3D Printing
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium">
-                                <a href="#" className="text-indigo-600 hover:text-indigo-900">Approve</a>
-                                <a href="#" className="ml-2 text-red-600 hover:text-red-900">Review</a>
-                            </td>
-                        </tr>
-
-
-
-
-
-
-                        <tr>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-500">
-                                            9/29/24
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                            Sir Rolex Padilla
-                                        </div>
-                                        <div className="text-sm text-gray-500">
-                                            havemercyonus@example.com
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">Our Beloved Teacher</div>
-                                <div className="text-sm text-gray-500">Please Please</div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                    Pending
-                                </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                Admin
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                Laser Cutting
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-sm font-medium">
-                                <a href="#" className="text-indigo-600 hover:text-indigo-900">Approve</a>
-                                <a href="#" className="ml-2 text-red-600 hover:text-red-900">Review</a>
-                            </td>
-                        </tr>
-
-
-                        </tbody>
-            </table>
-              </div>
-            </div>
+          <ReservationManagement/>
+            
           </div>
         </main>
       </div>

@@ -18,7 +18,7 @@ interface BlockedDate {
   date: string;
 }
 
-const TestCalendar: React.FC = () => {
+const AdminCalendar: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<CalendarDate | null>(null);
   const [blockedDates, setBlockedDates] = useState<CalendarDate[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -202,7 +202,7 @@ const TestCalendar: React.FC = () => {
   const days = getDaysInMonth(currentMonth);
   const weekDays: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   return (
-    <div className="calendar">
+    <div className="calendar shadow-lg">
             <div className="calendar-header">
         <h2 className="text-lg font-semibold flex items-center gap-2">
           <Calendar className="h-5 w-5" />
@@ -285,7 +285,8 @@ const TestCalendar: React.FC = () => {
           margin: 0 auto;
           font-family: Arial, sans-serif;
           background-color: #f8f9fa;
-          border-radius: 20px;
+          border-radius: 10px;
+          border: 1px solid #e2e8f0;
           overflow: hidden;
         }
         .calendar-header {
@@ -323,7 +324,7 @@ const TestCalendar: React.FC = () => {
         }
         .calendar-day {
           background-color: white;
-          border-radius: 10px;
+          border-radius: 5px;
           padding: 10px;
           min-height: 100px;
           display: flex;
@@ -385,4 +386,4 @@ const TestCalendar: React.FC = () => {
 };
 
 
-export default TestCalendar;
+export default AdminCalendar;

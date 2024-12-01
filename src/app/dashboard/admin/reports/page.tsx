@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
@@ -17,6 +17,7 @@ import {
   Cell
 } from 'recharts';
 import { format } from 'date-fns';
+import { useUser } from "@clerk/nextjs";
 
 
 const DashboardAdmin = () => {
@@ -24,7 +25,29 @@ const DashboardAdmin = () => {
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
+  const { user, isLoaded } = useUser();
+  const [userRole, setUserRole] = useState<string>("Loading...");
 
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (!user) {
+        setUserRole("Not logged in");
+        return;
+      }
+      try {
+        const publicMetadata = user.publicMetadata;
+        const role = publicMetadata.role || "USER";
+        setUserRole(role as string);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+        setUserRole("Error fetching role");
+      }
+    };
+  
+    if (isLoaded) {
+      checkUserRole();
+    }
+  }, [user, isLoaded]);
 
   const reservationTrendsData = [
     { month: 'Jan', reservations: 40 },
@@ -60,9 +83,19 @@ const DashboardAdmin = () => {
         </div>
         <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
         <div className="flex flex-col items-center py-8">
-        <span className="h-36 w-36 rounded-full bg-gray-300 mb-2"></span>
-          <h2 className="text-white text-xl font-bold">Username</h2>
-          <p className="text-[#5e86ca]">Admin</p>
+            {user?.imageUrl ? (
+              <img 
+                src={user.imageUrl} 
+                alt="Profile" 
+                className="h-36 w-36 rounded-full object-cover mb-2"
+              />
+            ) : (
+              <span className="h-36 w-36 rounded-full bg-gray-600 mb-2"></span>
+            )}
+            <h2 className="text-white text-xl font-bold">
+              {user?.firstName} {user?.lastName}
+            </h2>
+            <p className="text-[#5e86ca]">{userRole}</p>
         </div>
           <div>
             <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-400">MENU</h3>
@@ -101,19 +134,19 @@ const DashboardAdmin = () => {
                     </Link>
                   </li>
                   <li className="ml-6">
-                    <Link href="/dashboard/admin/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                    <Link href="/dashboard/admin/users" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
                       Users
                     </Link>
                   </li>
                 </>
               )}
               <li>
-                <Link href="/dashboard-admin/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border bg-[#1c2a52] border-[#5e86ca]">
+                <Link href="/dashboard/admin/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border bg-[#1c2a52] border-[#5e86ca]">
                   Reports
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard-admin" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/dashboard/admin/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                   Profile
                 </Link>
               </li>
@@ -168,10 +201,20 @@ const DashboardAdmin = () => {
             <div className="flex items-center gap-3 2xsm:gap-7">
               <Link href="#" className="flex items-center gap-4">
                 <span className="hidden text-right lg:block">
-                  <span className="block text-sm font-medium text-black">Ashkinaz Canonoy</span>
-                  <span className="block text-xs">Student</span>
+                  <span className="block text-sm font-medium text-black">
+                    {user?.firstName} {user?.lastName || ''}
+                  </span>
+                  <span className="block text-xs">{userRole}</span>
                 </span>
-                <span className="h-12 w-12 rounded-full bg-gray-300"></span>
+                {user?.imageUrl ? (
+                  <img 
+                    src={user.imageUrl} 
+                    alt="Profile" 
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="h-12 w-12 rounded-full bg-gray-300"></span>
+                )}
               </Link>
             </div>
           </div>
@@ -185,7 +228,7 @@ const DashboardAdmin = () => {
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 mb-4">
              
-             <Card className="bg-white shadow-sm transform hover:scale-105 transition-all duration-300 border border-[#5e86ca]">
+             <Card className="bg-white shadow-sm transform hover:scale-105 transition-all duration-300 hover:border hover:border-[#5e86ca]">
                <CardHeader>
                  <CardTitle>Something</CardTitle>
                </CardHeader>
@@ -198,7 +241,7 @@ const DashboardAdmin = () => {
 
 
 
-             <Card className="bg-white shadow-sm transform hover:scale-105 transition-all duration-300 border border-[#5e86ca]">
+             <Card className="bg-white shadow-sm transform hover:scale-105 transition-all duration-300 hover:border hover:border-[#5e86ca]">
                <CardHeader>
                  <CardTitle>Past Reservations</CardTitle>
                </CardHeader>
@@ -211,7 +254,7 @@ const DashboardAdmin = () => {
 
 
 
-             <Card className="bg-white shadow-sm transform hover:scale-105 transition-all duration-300 border border-[#5e86ca]">
+             <Card className="bg-white shadow-sm transform hover:scale-105 transition-all duration-300 hover:border hover:border-[#5e86ca]">
                <CardHeader>
                  <CardTitle>Something</CardTitle>
                </CardHeader>
@@ -223,7 +266,7 @@ const DashboardAdmin = () => {
            </div>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             {/* Reservation Trends Line Chart */}
-            <Card className="p-4 border border-[#5e86ca]">
+            <Card className="p-4">
               <CardHeader>
                 <CardTitle className="text-[#143370]">Reservation Trends</CardTitle>
                 <p className="text-sm text-[#143370]">A summary of the number of reservations per month</p>
@@ -248,7 +291,7 @@ const DashboardAdmin = () => {
 
 
             {/* Service Breakdown Pie Chart */}
-            <Card className="p-4 border border-[#5e86ca]">
+            <Card className="p-4">
               <CardHeader>
                 <CardTitle className="text-[#143370]">Machine Usage</CardTitle>
                 <p className="text-sm text-[#143370]">A chart of the most commonly availed services</p>
