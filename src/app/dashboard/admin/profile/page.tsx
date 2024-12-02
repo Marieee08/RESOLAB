@@ -5,6 +5,27 @@ import UserManagement from '@/components/custom/usermanagement';
 import { format } from 'date-fns';
 import { useUser } from "@clerk/nextjs";
 
+interface ClientInfo {
+  ContactNum: string;
+  Address: string;
+  City: string;
+  Province: string;
+  Zipcode: number;
+}
+
+interface BusinessInfo {
+  CompanyName: string;
+  BusinessOwner: string;
+  BusinessPermitNum: string;
+  TINNum: string;
+  CompanyEmail: string;
+  ContactPerson: string;
+  Designation: string;
+  CompanyAddress: string;
+  CompanyCity: string;
+  CompanyProvince: string;
+  CompanyZipcode: number;
+}
 
 const DashboardAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -13,6 +34,10 @@ const DashboardAdmin = () => {
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
+  const [isBusinessView, setIsBusinessView] = useState(false);
+  const [clientInfo, setClientInfo] = useState<ClientInfo | null>(null);
+  const [businessInfo, setBusinessInfo] = useState<BusinessInfo | null>(null);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const checkUserRole = async () => {
@@ -34,6 +59,40 @@ const DashboardAdmin = () => {
       checkUserRole();
     }
   }, [user, isLoaded]);
+
+  const fetchUserData = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+
+      // Fetch business info
+      const businessResponse = await fetch(`/api/businessinfo?userId=${user.id}`);
+      if (!businessResponse.ok) {
+        console.warn("Business info fetch status:", businessResponse.status);
+        const errorText = await businessResponse.text();
+        console.warn("Business info error:", errorText);
+        // Optionally, show an error to the user or set default business data
+        setBusinessInfo(null);
+      } else {
+        const businessData = await businessResponse.json();
+        console.log("Business Data:", businessData);
+        if (businessData && Object.keys(businessData).length > 0) {
+          setBusinessInfo(businessData);
+        } else {
+          console.warn("No business info found for the user.");
+          setBusinessInfo(null); // Optionally, set an empty state or default value
+        }
+      }
+
+
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+      // You can also set an error state to show user-friendly messages if needed
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -190,7 +249,152 @@ const DashboardAdmin = () => {
             </div>
           </div>
         </header>
+          <main>
+          <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+          <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Account Information</h2>
+          <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
+         
+          <section className="flex-1">
+          <div className="py-4 border-b border-gray-200">
+            <div className="flex justify-left">
+              <div className="inline-flex bg-white rounded-full p-1 border border-[#5e86ca]">
+                <button
+                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${!isBusinessView ? 'text-blue-800 bg-blue-100 border border-[#5e86ca]' : 'text-gray-600 hover:bg-gray-300'}`}
+                  onClick={() => setIsBusinessView(false)}
+                >
+                  Personal Info
+                </button>
+                <button
+                  className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isBusinessView ? 'text-blue-800 bg-blue-100 border border-[#5e86ca]' : 'text-gray-600 hover:bg-gray-300'}`}
+                  onClick={() => setIsBusinessView(true)}
+                >
+                  Business Info
+                </button>
+              </div>
+              <button
+                  className="ml-4 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 text-blue-800 bg-blue-100 border border-[#5e86ca]">
+                  Edit Information
+                </button>
+              
+            </div>
 
+
+
+
+  {/* Information Display */}
+  <div className="pt-8">
+      {!isBusinessView ? (
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Full Name</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {user?.firstName} {user?.lastName}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Contact Number</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {clientInfo?.ContactNum || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Address</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {clientInfo?.Address || "Not provided"}
+              </p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">City/Municipality</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {clientInfo?.City || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Province</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {clientInfo?.Province || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Zip Code</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {clientInfo?.Zipcode || "Not provided"}
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Company Name</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {businessInfo?.CompanyName || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Business Owner</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {businessInfo?.BusinessOwner || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">TIN No.</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {businessInfo?.TINNum || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Business Permit No.</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {businessInfo?.BusinessPermitNum || "Not provided"}
+              </p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Contact Person</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {businessInfo?.ContactPerson || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Position/Designation</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {businessInfo?.Designation || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Company Address</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {businessInfo?.CompanyAddress || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Company City</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {businessInfo?.CompanyCity || "Not provided"}
+              </p>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border hover:border-[#5e86ca] transform hover:scale-105 transition-all duration-300">
+              <h3 className="text-sm text-gray-500 mb-1">Company Province</h3>
+              <p className="text-lg font-qanelas1 text-gray-800">
+                {businessInfo?.CompanyProvince || "Not provided"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+          </div>
+        </div>
+            </section>
+            </div>
+          </main>
       </div>
     </div>
   );
