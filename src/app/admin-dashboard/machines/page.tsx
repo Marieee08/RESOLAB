@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import UserManagement from '@/components/custom/usermanagement';
+import AdminMachines from '@/components/custom/adminmachines';
 import { format } from 'date-fns';
 import { useUser } from "@clerk/nextjs";
 
@@ -196,6 +196,7 @@ const DashboardAdmin = () => {
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Machine Management</h2>
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
         </div>
+        <AdminMachines/>;
         </main>
       </div>
     </div>
