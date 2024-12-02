@@ -129,17 +129,17 @@ const DashboardUser = () => {
         <h3 className="mb-4 ml-4 text-sm font-semibold text-gray-600">MENU</h3>
         <ul className="mb-6 flex flex-col gap-1.5">
           <li>
-            <Link href="/dashboard/user" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-[#0d172c] border border-transparent hover:text-blue-800 hover:bg-blue-100 hover:border-[#5e86ca]">
+            <Link href="/user-dashboard" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-[#0d172c] border border-transparent hover:text-blue-800 hover:bg-blue-100 hover:border-[#5e86ca]">
               Orders
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/user/information" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-blue-800 bg-blue-100 border border-[#5e86ca]">
+            <Link href="/user-dashboard/information" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-blue-800 bg-blue-100 border border-[#5e86ca]">
               Information
             </Link>
           </li>
           <li>
-            <Link href="/dashboard/user/settings" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-[#0d172c] border border-transparent hover:text-blue-800 hover:bg-blue-100 hover:border-[#5e86ca]">
+            <Link href="/user-dashboard/settings" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-[#0d172c] border border-transparent hover:text-blue-800 hover:bg-blue-100 hover:border-[#5e86ca]">
               Settings
             </Link>
           </li>
@@ -205,114 +205,114 @@ const DashboardUser = () => {
         </header>
 
 
-        <main>
-          <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+      <main>
+        <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Account Information</h2>
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
          
-        <section className="flex-1">
-        <div className="py-4 border-b border-gray-200">
-          <div className="flex justify-left">
-            <div className="inline-flex bg-white rounded-full p-1 border border-[#5e86ca]">
-              <button
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${!isBusinessView ? 'text-blue-800 bg-blue-100 border border-[#5e86ca]' : 'text-gray-600 hover:bg-gray-300'}`}
-                onClick={() => setIsBusinessView(false)}
-              >
-                Personal Info
-              </button>
-              <button
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isBusinessView ? 'text-blue-800 bg-blue-100 border border-[#5e86ca]' : 'text-gray-600 hover:bg-gray-300'}`}
-                onClick={() => setIsBusinessView(true)}
-              >
-                Business Info
-              </button>
-            </div>
-            <button
-              onClick={() => setIsEditModalOpen(true)}
-              className="ml-4 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 text-blue-800 bg-blue-100 border border-[#5e86ca]">
-              Edit Information
-            </button>
-          </div>
+          <section className="flex-1">
+            <div className="py-4 border-b border-gray-200">
+              <div className="flex justify-left">
+                <div className="inline-flex bg-white rounded-full p-1 border border-[#5e86ca]">
+                  <button
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${!isBusinessView ? 'text-blue-800 bg-blue-100 border border-[#5e86ca]' : 'text-gray-600 hover:bg-gray-300'}`}
+                    onClick={() => setIsBusinessView(false)}
+                  >
+                    Personal Info
+                  </button>
+                  <button
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${isBusinessView ? 'text-blue-800 bg-blue-100 border border-[#5e86ca]' : 'text-gray-600 hover:bg-gray-300'}`}
+                    onClick={() => setIsBusinessView(true)}
+                  >
+                    Business Info
+                  </button>
+                </div>
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="ml-4 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 text-blue-800 bg-blue-100 border border-[#5e86ca]">
+                  Edit Information
+                </button>
+              </div>
 
 
 {/* Information Display */}
 <div className="pt-8">
     {!isBusinessView ? (
       <div className="space-y-8">
-      {/* Personal Information Section */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">Personal Information</h3>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="md:col-span-2">
-            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-              <h3 className="text-sm text-gray-500 mb-1">Full Name</h3>
-              <p className="text-lg font-qanelas1 text-gray-800">
-                {user?.firstName} {user?.lastName}
-              </p>
+        {/* Personal Information Section */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Personal Information</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+                <h3 className="text-sm text-gray-500 mb-1">Full Name</h3>
+                <div className="text-lg font-qanelas1 text-gray-800">
+                  {user?.firstName} {user?.lastName}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Contact Number</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {loading ? (
-                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
-              ) : (
-                accInfo?.ClientInfo?.ContactNum || "Not provided"
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-  
-      {/* Address Section */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">Address Information</h3>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="md:col-span-2">
             <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-              <h3 className="text-sm text-gray-500 mb-1">Street Address</h3>
-              <p className="text-lg font-qanelas1 text-gray-800">
+              <h3 className="text-sm text-gray-500 mb-1">Contact Number</h3>
+              <div className="text-lg font-qanelas1 text-gray-800">
                 {loading ? (
                   <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
                 ) : (
-                  accInfo?.ClientInfo?.Address || "Not provided"
+                  accInfo?.ClientInfo?.ContactNum || "Not provided"
                 )}
-              </p>
+              </div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">City/Municipality</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {loading ? (
-                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
-              ) : (
-                accInfo?.ClientInfo?.City || "Not provided"
-              )}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Province</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {loading ? (
-                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
-              ) : (
-                accInfo?.ClientInfo?.Province || "Not provided"
-              )}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-            <h3 className="text-sm text-gray-500 mb-1">Zip Code</h3>
-            <p className="text-lg font-qanelas1 text-gray-800">
-              {loading ? (
-                <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
-              ) : (
-                accInfo?.ClientInfo?.Zipcode || "Not provided"
-              )}
-            </p>
+        </div>
+    
+      {/* Address Section */}
+      <div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">Address Information</h3>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+                <h3 className="text-sm text-gray-500 mb-1">Street Address</h3>
+                <div className="text-lg font-qanelas1 text-gray-800">
+                  {loading ? (
+                    <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+                  ) : (
+                    accInfo?.ClientInfo?.Address || "Not provided"
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">City/Municipality</h3>
+              <div className="text-lg font-qanelas1 text-gray-800">
+                {loading ? (
+                  <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+                ) : (
+                  accInfo?.ClientInfo?.City || "Not provided"
+                )}
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Province</h3>
+              <div className="text-lg font-qanelas1 text-gray-800">
+                {loading ? (
+                  <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+                ) : (
+                  accInfo?.ClientInfo?.Province || "Not provided"
+                )}
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
+              <h3 className="text-sm text-gray-500 mb-1">Zip Code</h3>
+              <div className="text-lg font-qanelas1 text-gray-800">
+                {loading ? (
+                  <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
+                ) : (
+                  accInfo?.ClientInfo?.Zipcode || "Not provided"
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     ) : (
       <div className="space-y-8">
         {/* Company Identity Section */}
