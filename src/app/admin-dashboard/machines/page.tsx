@@ -2,6 +2,7 @@
   import React, { useState, useEffect } from 'react';
   import Link from 'next/link';
   import AdminMachines from '@/components/custom/adminmachines';
+  import AdminTools from '@/components/custom/admintools';
   import { format } from 'date-fns';
   import { useUser } from "@clerk/nextjs";
   import { MoreVertical, Edit, Trash2, Mail } from 'lucide-react';
@@ -264,7 +265,7 @@
             <div>Services Content</div>
           </TabsContent>
           <TabsContent value="tools">
-            <div>Tools Content</div>
+            <AdminTools/>
           </TabsContent>
         </Tabs>
       </div>
