@@ -299,7 +299,7 @@ export default function AdminServices() {
 return (
   <main className="min-h-screen">
    
-     <div className="container mx-auto p-10">
+     <div className="container mx-auto">
        <div className="flex justify-between items-center mb-6">
          <button
            onClick={() => openModal()}

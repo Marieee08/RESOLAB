@@ -4,7 +4,47 @@ import Link from 'next/link';
 import AdminMachines from '@/components/custom/adminmachines';
 import { format } from 'date-fns';
 import { useUser } from "@clerk/nextjs";
+import { MoreVertical, Edit, Trash2, Mail } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  type: 'msme' | 'student' | 'admin' | 'cashier';
+  permissions: string[];
+};
+
+const users: User[] = [
+  // Add your user data here
+];
+
+const getPermissionColor = (permission: string): string => {
+  switch (permission) {
+    case 'ADMIN':
+      return 'bg-red-100 text-red-800';
+    case 'WRITE':
+      return 'bg-blue-100 text-blue-800';
+    case 'READ':
+      return 'bg-green-100 text-green-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
 
 const DashboardAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -34,6 +74,64 @@ const DashboardAdmin = () => {
       checkUserRole();
     }
   }, [user, isLoaded]);
+
+  const handleEditPermissions = (userId: string) => {
+    console.log(`Editing permissions for user ${userId}`);
+    // Implement actual permission editing logic
+  };
+
+  const UserTable = ({ users }: { users: User[] }) => (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Permissions</TableHead>
+          <TableHead className="w-24">Action</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {users.map((user) => (
+          <TableRow key={user.id}>
+            <TableCell className="font-medium">{user.name}</TableCell>
+            <TableCell>{user.email}</TableCell>
+            <TableCell>
+              <div className="flex gap-2 flex-wrap">
+                {user.permissions.map((permission, index) => (
+                  <span
+                    key={index}
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getPermissionColor(permission)}`}
+                  >
+                    {permission}
+                  </span>
+                ))}
+              </div>
+            </TableCell>
+            <TableCell>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="p-2 hover:bg-gray-100 rounded-full">
+                  <MoreVertical className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleEditPermissions(user.id)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Permissions
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleDeleteAccount(user.id)}>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete Account
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleContact(user.id)}>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Contact
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -196,7 +294,29 @@ const DashboardAdmin = () => {
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Machine Management</h2>
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
         </div>
-        <AdminMachines/>;
+        <div className="p-4 bg-white rounded-lg shadow-sm">
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="machines">Machines</TabsTrigger>
+          <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsTrigger value="tools">Tools</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="machines">
+          <AdminMachines/>
+          <UserTable users={users} />
+        </TabsContent>
+        <TabsContent value="msme">
+          <UserTable users={users.filter(user => user.type === 'msme')} />
+        </TabsContent>
+        <TabsContent value="services">
+          <UserTable users={users.filter(user => user.type === 'student')} />
+        </TabsContent>
+        <TabsContent value="tools">
+          <UserTable users={users.filter(user => user.type === 'admin')} />
+        </TabsContent>
+      </Tabs>
+    </div>
         </main>
       </div>
     </div>
@@ -205,3 +325,4 @@ const DashboardAdmin = () => {
 
 
 export default DashboardAdmin;
+
