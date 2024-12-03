@@ -1,5 +1,6 @@
 import { Plus, Edit, Trash2, X } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
+import React, { useState, useEffect } from 'react';
 
 interface Machine {
   id: string;
@@ -20,9 +21,9 @@ export default function AdminServices() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  //useEffect(() => {
-  //  fetchMachines();
-  //}, []);
+  useEffect(() => {
+    fetchMachines();
+  }, []);
 
   const fetchMachines = async () => {
     try {
@@ -32,9 +33,13 @@ export default function AdminServices() {
         setMachines(data);
       } else {
         console.error('Failed to fetch machines');
+        // Optionally, show an error message to the user
+        alert('Failed to load machines. Please refresh or contact support.');
       }
     } catch (error) {
       console.error('Error fetching machines:', error);
+      // Optionally, show an error message to the user
+      alert('An error occurred while fetching machines. Please try again later.');
     }
   };
 
@@ -455,7 +460,4 @@ return (
    </main>
  );
 }
-
-
-import React, { useState } from 'react';
 
