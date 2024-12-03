@@ -41,6 +41,7 @@ interface FormData {
  BulkofCommodity: string;
  Equipment: string;
  Tools: string;
+ ToolsQty: number;
 }
 
 
@@ -61,6 +62,7 @@ export default function Schedule() {
    BulkofCommodity: '',
    Equipment: '',
    Tools: '',
+   ToolsQty: 0,
  });
 
 
@@ -84,7 +86,11 @@ export default function Schedule() {
        case 2:
          return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
        case 3:
-         return <ReviewSubmit formData={formData} prevStep={prevStep} />;
+         return <ReviewSubmit formData={formData} prevStep={prevStep} updateFormData={function (field: keyof FormData, value: string | number | { date: Date; startTime: string | null; endTime: string | null; }[]): void {
+           throw new Error('Function not implemented.');
+         } } nextStep={function (): void {
+           throw new Error('Function not implemented.');
+         } } />;
        default:
          return (
            <DateTimeSelection

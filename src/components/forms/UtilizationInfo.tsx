@@ -27,6 +27,7 @@ interface ToolsSelectorProps {
   onBlur: () => void;
   disabled?: boolean;
   className?: string;
+  id?: string;
 }
 
 const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSelectorProps) => {
