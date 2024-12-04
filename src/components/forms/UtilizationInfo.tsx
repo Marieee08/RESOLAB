@@ -15,6 +15,19 @@ interface StepProps {
   prevStep: () => void;
 }
 
+const serviceEquipmentMap: { [key: string]: string } = {
+  'Benchmarking': 'NOT APPLICABLE',
+  '2D CNC Milling': 'Milling Machine',
+  '3D CNC Milling': 'Milling Machine',
+  '3D Printing': '3D Printer',
+  'CNC Wood Routing': 'CNC Wood Router',
+  'Heat Pressing': 'Heat Press',
+  'Large Format Printing': 'Print & Cut',
+  'Laser Cutting & Engraving': 'CO2 Laser Cutter & Engraver',
+  'Laser Printing': 'Print & Cut',
+  'Lathe Machining': 'Lathe Machine'
+};
+
 interface ToolItem {
   id: string;
   name: string;
@@ -177,18 +190,22 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
   const [previousService, setPreviousService] = useState<string>('');
   
   useEffect(() => {
-    if (formData.ProductsManufactured === 'Benchmarking') {
+    const selectedService = formData.ProductsManufactured;
+    const mappedEquipment = serviceEquipmentMap[selectedService] || '';
+    
+    if (selectedService === 'Benchmarking') {
       setPreviousService('Benchmarking');
       updateFormData('BulkofCommodity', 'NOT APPLICABLE');
-      updateFormData('Equipment', 'NOT APPLICABLE');
+      updateFormData('Equipment', mappedEquipment);
       updateFormData('Tools', 'NOT APPLICABLE');
     } else if (previousService === 'Benchmarking') {
       updateFormData('BulkofCommodity', '');
-      updateFormData('Equipment', '');
+      updateFormData('Equipment', mappedEquipment);
       updateFormData('Tools', '');
-      setPreviousService(formData.ProductsManufactured);
+      setPreviousService(selectedService);
     } else {
-      setPreviousService(formData.ProductsManufactured);
+      updateFormData('Equipment', mappedEquipment);
+      setPreviousService(selectedService);
     }
   }, [formData.ProductsManufactured]);
 
@@ -199,6 +216,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     updateFormData(name as keyof FormData, value);
     validateField(name as keyof FormData, value);
   };
+
 
   const isFieldDisabled = (fieldName: keyof FormData) => {
     return formData.ProductsManufactured === 'Benchmarking' && fieldName !== 'ProductsManufactured';
@@ -309,33 +327,6 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
           </select>
           {touchedFields.has('ProductsManufactured') && errors.ProductsManufactured && (
             <p className="mt-1 text-sm text-red-500">{errors.ProductsManufactured}</p>
-          )}
-        </div>
-
-        <div>
-          <label htmlFor="Equipment" className="block text-sm font-medium text-gray-700">
-            Equipment<span className="text-red-500">*</span>
-          </label>
-          <select
-            id="Equipment"
-            name="Equipment"
-            value={formData.Equipment}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('Equipment')}
-            className={getInputClassName('Equipment')}
-            disabled={isFieldDisabled('Equipment')}
-            required
-          >
-            <option value="Select equipment">Select equipment</option>
-            <option value="3D Printer">3D Printer</option>
-            <option value="CNC Wood Router">CNC Wood Router</option>
-            <option value="CO2 Laser Cutter & Engraver">CO2 Laser Cutter & Engraver</option>
-            <option value="Lathe Machine">Lathe Machine</option>
-            <option value="Milling Machine">Milling Machine</option>
-            <option value="Print & Cut">Print & Cut</option>
-          </select>
-          {touchedFields.has('Equipment') && errors.Equipment && (
-            <p className="mt-1 text-sm text-red-500">{errors.Equipment}</p>
           )}
         </div>
 
