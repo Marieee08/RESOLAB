@@ -2,8 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, X, Minus } from 'lucide-react';
-import { Switch } from "@/components/ui/switch";
-import Navbar from '@/components/custom/navbar';
 
 interface Tool {
     id: string;
