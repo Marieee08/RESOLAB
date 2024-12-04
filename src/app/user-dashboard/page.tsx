@@ -151,6 +151,13 @@ const renderSection = (title: string, fields: { label: string, value: any }[]) =
                   </svg>
                 </button>
               </li>
+              {orderDropdownOpen && (
+                <li className="ml-6">
+                  <Link href="/user-dashboard/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-600 hover:text-[#0d172c]">
+                    History
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link href="/user-dashboard/information" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-[#0d172c] border border-transparent hover:text-blue-800 hover:bg-blue-100 hover:border-[#5e86ca]">
                   Information

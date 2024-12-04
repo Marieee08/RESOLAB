@@ -31,7 +31,7 @@ export default function Home() {
           computer-controlled tools that cover several different length scales and various materials with the aim to <span className="font-poppins2">make "almost anything".</span>
         </p>
         <div className="flex flex-col md:flex-row gap-4 items-end md:items-center">
-          <a href="/services/user" className="border border-[#5e86ca] bg-[#193d83] text-white font-qanelas1 text-lg py-1 px-6 rounded-md hover:bg-[#2f61c2] transition duration-300 ml-auto">
+          <a href="/user-services" className="border border-[#5e86ca] bg-[#193d83] text-white font-qanelas1 text-lg py-1 px-6 rounded-md hover:bg-[#2f61c2] transition duration-300 ml-auto">
             Get Started
           </a>
           <a href="https://www.facebook.com/fablabeasternvisayas" className="text-[#1c62b5] font-qanelas1 text-lg py-1 px-6 rounded-md transition-all duration-300 flex items-center justify-end transform hover:scale-105">
@@ -87,48 +87,48 @@ export default function Home() {
       </div>
     </section>
 
-<div className="w-full overflow-hidden mt-2 pb-4">
-  <div className="inline-flex flex-nowrap">
-    <ul x-ref="slides" className="flex items-center animate-infinite-scroll">
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-        <li key={num} className="relative bg-white p-3 shadow-lg transform transition-transform hover:scale-105 mx-2 rounded-lg">  {/* Added mx-2 for horizontal margin */}
-          <div className="w-64 h-64 relative">
-            <img 
-              src={`/images/slider/${num}.jpg`} 
-              alt={`Slide ${num}`} 
-              className="w-full h-full object-cover rounded-md" 
-            />
-          </div>
-          <div className="h-10 bg-white flex items-center justify-center">
-            <div className="w-16 h-1 bg-gray-200 rounded"></div>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <div className="w-full overflow-hidden mt-2 pb-4">
+      <div className="inline-flex flex-nowrap">
+        <ul x-ref="slides" className="flex items-center animate-infinite-scroll">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+            <li key={num} className="relative bg-white p-3 shadow-lg transform transition-transform hover:scale-105 mx-2 rounded-lg">  {/* Added mx-2 for horizontal margin */}
+              <div className="w-64 h-64 relative">
+                <img 
+                  src={`/images/slider/${num}.jpg`} 
+                  alt={`Slide ${num}`} 
+                  className="w-full h-full object-cover rounded-md" 
+                />
+              </div>
+              <div className="h-10 bg-white flex items-center justify-center">
+                <div className="w-16 h-1 bg-gray-200 rounded"></div>
+              </div>
+            </li>
+          ))}
+        </ul>
 
-    <ul x-ref="logos" className="flex items-center animate-infinite-scroll">
-      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
-        <li key={num} className="relative bg-white p-3 shadow-lg transform transition-transform hover:scale-105 mx-2 rounded-lg"> {/* Added mx-2 for horizontal margin */}
-          <div className="w-64 h-64 relative">
-            <img 
-              src={`/images/slider/${num}.jpg`} 
-              alt={`Slide ${num}`} 
-              className="w-full h-full object-cover rounded-md" 
-            />
-          </div>
-          <div className="h-10 bg-white flex items-center justify-center">
-            <div className="w-16 h-1 bg-gray-200 rounded"></div>
-          </div>
-        </li>
-      ))}
-    </ul>
-  </div>
-</div>
+        <ul x-ref="logos" className="flex items-center animate-infinite-scroll">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+            <li key={num} className="relative bg-white p-3 shadow-lg transform transition-transform hover:scale-105 mx-2 rounded-lg"> {/* Added mx-2 for horizontal margin */}
+              <div className="w-64 h-64 relative">
+                <img 
+                  src={`/images/slider/${num}.jpg`} 
+                  alt={`Slide ${num}`} 
+                  className="w-full h-full object-cover rounded-md" 
+                />
+              </div>
+              <div className="h-10 bg-white flex items-center justify-center">
+                <div className="w-16 h-1 bg-gray-200 rounded"></div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
 
-<section id="machines" className="p-10 pt-20 pl-20 pr-20 pb-auto">
-<p className="inline-block text-[#193d83] font-medium text-md ml-auto mb-2">
+    <section id="machines" className="p-10 pt-20 pl-20 pr-20 pb-auto">
+        <p className="inline-block text-[#193d83] font-medium text-md ml-auto mb-2">
           Here's what we can offer!</p>
-        <h2 className="text-3xl font-bold mb-2 text-left font-qanelas2">Machines and Services</h2>
+          <h2 className="text-3xl font-bold mb-2 text-left font-qanelas2">Machines and Services</h2>
         <p className="text-lg mb-8 text-left font-poppins1 text-[#605e63]">Our FabLab is equipped with state-of-the-art tools and resources to support a wide range of projects and initiatives.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-auto ">
           
@@ -185,9 +185,9 @@ export default function Home() {
             <a href="/services#" className="border border-[#5e86ca] bg-[#193d83] text-white font-qanelas1 text-lg py-1 px-6 rounded-md hover:bg-[#2f61c2] transition duration-300 ml-auto">Services</a>
           </div>
         </div>
-      </section>
+    </section>
 
-<section id="about" className="bg-white py-20">
+    <section id="about" className="bg-white py-20">
         <div className="container mx-auto px-6 md:px-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left Column - Content */}
@@ -248,7 +248,8 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+    </section>
+    
     </main>
   );
 }
