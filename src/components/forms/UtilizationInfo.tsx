@@ -259,21 +259,6 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
       isValid = false;
     }
 
-    if (formData.ProductsManufactured !== 'Benchmarking') {
-      if (!formData.Equipment || formData.Equipment === 'Select equipment') {
-        newErrors.Equipment = 'Please select equipment';
-        isValid = false;
-      }
-      if (!formData.BulkofCommodity) {
-        newErrors.BulkofCommodity = 'This field is required';
-        isValid = false;
-      }
-      if (!formData.Tools) {
-        newErrors.Tools = 'This field is required';
-        isValid = false;
-      }
-    }
-
     setErrors(newErrors);
     const allFields = new Set(Object.keys(formData) as Array<keyof FormData>);
     setTouchedFields(allFields);

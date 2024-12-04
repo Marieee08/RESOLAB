@@ -31,8 +31,8 @@ interface FormData {
    startTime: string | null;
    endTime: string | null;
  }[];
- syncTimes: boolean; // Add this field to persist sync state
- unifiedStartTime: string | null; // Add this field to persist unified start time
+ syncTimes: boolean; 
+ unifiedStartTime: string | null; 
  unifiedEndTime: string | null;
 
 
@@ -468,24 +468,24 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
 
 
 function TimePicker({
- label,
- value,
- onChange,
- startTime,
- isEndTime = false,
- required = true
-}: {
- label: string;
- value: string | null;
- onChange: (time: string) => void;
- startTime?: string | null;
- isEndTime?: boolean;
- required?: boolean;
-}) {
- const isFirstSelection = React.useRef(true);
- const [showError, setShowError] = React.useState(false);
- const [hasAttemptedSubmit, setHasAttemptedSubmit] = React.useState(false);
-
+  label,
+  value,
+  onChange,
+  startTime,
+  isEndTime = false,
+  required = true
+ }: {
+  label: string;
+  value: string | null;
+  onChange: (time: string) => void;
+  startTime?: string | null;
+  isEndTime?: boolean;
+  required?: boolean;
+ }) {
+  const isFirstSelection = React.useRef(true);
+  const [showError, setShowError] = React.useState(false);
+  const [hasAttemptedSubmit, setHasAttemptedSubmit] = React.useState(false);
+ 
 
   // Listen for validation attempts from parent
   React.useEffect(() => {
@@ -586,50 +586,53 @@ function TimePicker({
  }, [isEndTime, startTime]);
 
 
+
  const handleHourChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-   const newHour = e.target.value;
-   setLocalHour(newHour);
-  
-   if (newHour !== '--' && localMinute !== '--') {
-     const formattedTime = formatTime(newHour, localMinute);
-     setIsInvalid(validateTimes(formattedTime));
-     onChange(formattedTime);
-     if (hasAttemptedSubmit) {
-       setShowError(false);
-     }
-   } else if (newHour === '--') {
-     setIsInvalid(false);
-     onChange('--:-- AM');
-     if (hasAttemptedSubmit) {
-       setShowError(true);
-     }
-   }
-  
-   isFirstSelection.current = false;
- };
+  const newHour = e.target.value;
+  setLocalHour(newHour);
+ 
+  if (newHour !== '--') {
+    // Automatically set minutes to '00' when hour is selected
+    setLocalMinute('00');
+    const formattedTime = formatTime(newHour, '00');
+    setIsInvalid(validateTimes(formattedTime));
+    onChange(formattedTime);
+    if (hasAttemptedSubmit) {
+      setShowError(false);
+    }
+  } else {
+    setIsInvalid(false);
+    onChange('--:-- AM');
+    if (hasAttemptedSubmit) {
+      setShowError(true);
+    }
+  }
+ 
+  isFirstSelection.current = false;
+};
 
 
- const handleMinuteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-   const newMinute = e.target.value;
-   setLocalMinute(newMinute);
-  
-   if (localHour !== '--' && newMinute !== '--') {
-     const formattedTime = formatTime(localHour, newMinute);
-     setIsInvalid(validateTimes(formattedTime));
-     onChange(formattedTime);
-     if (hasAttemptedSubmit) {
-       setShowError(false);
-     }
-   } else if (newMinute === '--') {
-     setIsInvalid(false);
-     onChange('--:-- AM');
-     if (hasAttemptedSubmit) {
-       setShowError(true);
-     }
-   }
-  
-   isFirstSelection.current = false;
- };
+const handleMinuteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const newMinute = e.target.value;
+  setLocalMinute(newMinute);
+ 
+  if (localHour !== '--' && newMinute !== '--') {
+    const formattedTime = formatTime(localHour, newMinute);
+    setIsInvalid(validateTimes(formattedTime));
+    onChange(formattedTime);
+    if (hasAttemptedSubmit) {
+      setShowError(false);
+    }
+  } else if (newMinute === '--') {
+    setIsInvalid(false);
+    onChange('--:-- AM');
+    if (hasAttemptedSubmit) {
+      setShowError(true);
+    }
+  }
+ 
+  isFirstSelection.current = false;
+};
 
 
  // Sync with parent value changes
