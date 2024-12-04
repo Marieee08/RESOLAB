@@ -1,31 +1,10 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useUser } from "@clerk/nextjs";
-import ReservationManagement from '@/components/custom/reservationtable';
-import TestCalendar from '@/components/custom/admincalendar';
+import UserManagement from '@/components/custom/usermanagement';
 import { format } from 'date-fns';
+import { useUser } from "@clerk/nextjs";
 
-interface Reservation {
-  id: number;
-  RequestDate: Date;
-  UtilReqApproval: boolean | null;
-  ProductsManufactured: string;
-  BulkofCommodity: string;
-  accInfo: {
-    name: string;
-    email: string;
-  };
-  ProcessInfos: Array<{
-    Equipment: string;
-    Tools: string;
-    ToolsQty: number;
-  }>;
-  UtilTimes: Array<{
-    StartTime: Date;
-    EndTime: Date;
-  }>;
-}
 
 const DashboardAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -111,7 +90,7 @@ const DashboardAdmin = () => {
               {orderDropdownOpen && (
                 <>
                   <li className="ml-6">
-                    <Link href="/admin-dashboard" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white">
+                    <Link href="/admin-dashboard" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
                       General
                     </Link>
                   </li>
@@ -126,24 +105,24 @@ const DashboardAdmin = () => {
                     </Link>
                   </li>
                   <li className="ml-6">
-                    <Link href="/admin-dashboard/users" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                    <Link href="/admin-dashboard/users" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white">
                       Users
                     </Link>
                   </li>
                 </>
               )}
               <li>
-                <Link href="/dashboard/admin/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/admin-dashboard/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                   Reports
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/admin/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/admin-dashboard/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                   Profile
                 </Link>
               </li>
               <li>
-                <Link href="/dashboard/admin/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/admin-dashboard" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                   Settings
                 </Link>
               </li>
@@ -190,7 +169,7 @@ const DashboardAdmin = () => {
                 />
               </form>
             </div>
-            <div className="flex items-center gap-3 2xsm:gap-7">
+              <div className="flex items-center gap-3 2xsm:gap-7">
               <Link href="#" className="flex items-center gap-4">
                 <span className="hidden text-right lg:block">
                   <span className="block text-sm font-medium text-black">
@@ -212,16 +191,14 @@ const DashboardAdmin = () => {
           </div>
         </header>
 
-
-        {/* Main */}
         <main>
-          <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-          <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
+        <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+          <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">User Management</h2>
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
-          <TestCalendar />
-          <ReservationManagement/>
-            
+          <div className="shadow-lg">
+          <UserManagement/>
           </div>
+        </div>
         </main>
       </div>
     </div>
