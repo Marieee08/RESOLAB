@@ -146,7 +146,7 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
         throw new Error('Failed to submit reservation');
       }
 
-      router.push('/dashboard/user');
+      router.push('/user-dashboard');
       
     } catch (err) {
       console.error('Submission error:', err);
