@@ -3,6 +3,7 @@
   import Link from 'next/link';
   import AdminMachines from '@/components/custom/adminmachines';
   import AdminTools from '@/components/custom/admintools';
+  import AdminServices from '@/components/custom/adminservices';
   import { format } from 'date-fns';
   import { useUser } from "@clerk/nextjs";
   import { MoreVertical, Edit, Trash2, Mail } from 'lucide-react';
@@ -144,39 +145,39 @@
                 {orderDropdownOpen && (
                   <>
                     <li className="ml-6">
-                      <Link href="/dashboard/admin" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      <Link href="/admin-dashboard" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
                         General
                       </Link>
                     </li>
                     <li className="ml-6">
-                      <Link href="/dashboard/admin/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      <Link href="/admin-dashboard/history" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
                         History
                       </Link>
                     </li>
                     <li className="ml-6">
-                      <Link href="/dashboard/admin/machines" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white">
+                      <Link href="/admin-dashboard/machines" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white">
                         Machines
                       </Link>
                     </li>
                     <li className="ml-6">
-                      <Link href="/dashboard/admin/users" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
+                      <Link href="/admin-dashboard/users" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
                         Users
                       </Link>
                     </li>
                   </>
                 )}
                 <li>
-                  <Link href="/dashboard/admin/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                  <Link href="/admin-dashboard/reports" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                     Reports
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard/admin/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                  <Link href="/admin-dashboard/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                     Profile
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard-admin" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                  <Link href="/admin-dashboard" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                     Settings
                   </Link>
                 </li>
@@ -262,7 +263,7 @@
             <AdminMachines/>
           </TabsContent>
           <TabsContent value="services">
-            <div>Services Content</div>
+            <AdminServices/>
           </TabsContent>
           <TabsContent value="tools">
             <AdminTools/>
