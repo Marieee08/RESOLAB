@@ -217,7 +217,7 @@ export default function AdminServices() {
     e.preventDefault();
   
     try {
-      let imageUrl = formData.image;
+      let imageUrl = formData.Image;
       
       // Upload image if a new file is selected
       if (imageFile) {

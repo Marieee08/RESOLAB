@@ -117,7 +117,7 @@ export default function AdminServices() {
       const handleToolInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setToolFormData({
-          ...toolFormData, 
+          ...setToolFormData, 
           [name]: name === 'Quantity' ? parseInt(value) || 0 : value,
         });
       }; 
@@ -289,3 +289,7 @@ export default function AdminServices() {
     );
 }
 
+
+function setToolFormData(arg0: any) {
+  throw new Error('Function not implemented.');
+}
