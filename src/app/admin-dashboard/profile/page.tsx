@@ -1,40 +1,19 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useUser } from "@clerk/nextjs";
-import ReservationManagement from '@/components/custom/reservationtable';
-import TestCalendar from '@/components/custom/admincalendar';
+import UserManagement from '@/components/custom/usermanagement';
 import { format } from 'date-fns';
+import { useUser } from "@clerk/nextjs";
 
-interface Reservation {
-  id: number;
-  RequestDate: Date;
-  UtilReqApproval: boolean | null;
-  ProductsManufactured: string;
-  BulkofCommodity: string;
-  accInfo: {
-    name: string;
-    email: string;
-  };
-  ProcessInfos: Array<{
-    Equipment: string;
-    Tools: string;
-    ToolsQty: number;
-  }>;
-  UtilTimes: Array<{
-    StartTime: Date;
-    EndTime: Date;
-  }>;
-}
 
 const DashboardAdmin = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const today = new Date();
-  const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
-
+  const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
+  
   useEffect(() => {
     const checkUserRole = async () => {
       if (!user) {
@@ -90,7 +69,7 @@ const DashboardAdmin = () => {
               <li>
                 <button
                   onClick={() => setOrderDropdownOpen(!orderDropdownOpen)}
-                  className="group relative flex w-full items-center justify-between gap-2.5 rounded-full py-2 px-4 font-medium text-white border bg-[#1c2a52] border-[#5e86ca]"
+                  className="group relative flex w-full items-center justify-between gap-2.5 rounded-full py-2 px-4 font-medium text-white hover:bg-[#1c2a52] hover:border hover:border-[#5e86ca]"
                 >
                   <span>Orders</span>
                   {/* Dropdown arrow */}
@@ -111,7 +90,7 @@ const DashboardAdmin = () => {
               {orderDropdownOpen && (
                 <>
                   <li className="ml-6">
-                    <Link href="/admin-dashboard" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white">
+                    <Link href="/admin-dashboard" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-gray-400 hover:text-white">
                       General
                     </Link>
                   </li>
@@ -138,12 +117,12 @@ const DashboardAdmin = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/admin-dashboard/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/admin-dashboard/profile" className="group relative flex w-full items-center justify-between gap-2.5 rounded-full py-2 px-4 font-medium text-white border bg-[#1c2a52] border-[#5e86ca]">
                   Profile
                 </Link>
               </li>
               <li>
-                <Link href="/admin-dashboard/profile" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
+                <Link href="/admin-dashboard" className="group relative flex items-center gap-2.5 rounded-full py-2 px-4 font-medium text-white border border-transparent hover:bg-[#1c2a52] hover:border-[#5e86ca]">
                   Settings
                 </Link>
               </li>
@@ -174,7 +153,7 @@ const DashboardAdmin = () => {
             <Link href="/" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Home
             </Link>
-            <Link href="/admin-services" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+            <Link href="/services/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Services
             </Link>
             <Link href="/contact" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
@@ -212,17 +191,6 @@ const DashboardAdmin = () => {
           </div>
         </header>
 
-
-        {/* Main */}
-        <main>
-          <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-          <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
-          <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
-          <TestCalendar />
-          <ReservationManagement/>
-            
-          </div>
-        </main>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import Link from 'next/link';
 
 interface ToolItem {
   id: string;
@@ -68,7 +69,7 @@ interface ReviewSubmitProps {
   nextStep: () => void;
 }
 
-const parseToolString = (toolString: string): ToolItem[] => {
+const parseToolString = (toolString: string): Tool[] => {
   if (!toolString || toolString === 'NOT APPLICABLE') return [];
   try {
     return JSON.parse(toolString);
@@ -146,7 +147,7 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
         throw new Error('Failed to submit reservation');
       }
 
-      router.push('/dashboard/user');
+      router.push('/user-dashboard');
       
     } catch (err) {
       console.error('Submission error:', err);
@@ -250,37 +251,38 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
           </div>
         )}
 
-        {renderSection('Utilization Information',
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <p className="text-sm text-gray-600">Products to be Manufactured</p>
-              <p className="mt-1">{formData.ProductsManufactured || 'Not provided'}</p>
+{renderSection('Utilization Information',
+  <div className="grid grid-cols-2 gap-4">
+    <div className="col-span-2">
+      <p className="text-sm text-gray-600">Products to be Manufactured</p>
+      <p className="mt-1">{formData.ProductsManufactured || 'Not provided'}</p>
+    </div>
+    <div className="col-span-2">
+      <p className="text-sm text-gray-600">Bulk of Commodity</p>
+      <p className="mt-1">{formData.BulkofCommodity || 'Not provided'}</p>
+    </div>
+    <div className="col-span-2">
+      <p className="text-sm text-gray-600">Tools</p>
+      {parseToolString(formData.Tools).length > 0 ? (
+        <div className="mt-2 space-y-2">
+          {parseToolString(formData.Tools).map((tool) => (
+            <div 
+              key={tool.id} 
+              className="flex items-center justify-between bg-gray-50 p-2 rounded"
+            >
+              <span className="flex-grow">{tool.Tool}</span>
+              <span className="text-gray-600">
+                Quantity: {tool.Quantity}
+              </span>
             </div>
-            <div className="col-span-2">
-              <p className="text-sm text-gray-600">Bulk of Commodity</p>
-              <p className="mt-1">{formData.BulkofCommodity || 'Not provided'}</p>
-            </div>
-            <div className="col-span-2">
-              <p className="text-sm text-gray-600">Equipment</p>
-              <p className="mt-1">{formData.Equipment || 'Not provided'}</p>
-            </div>
-            <div className="col-span-2">
-              <p className="text-sm text-gray-600">Tools</p>
-              {parseToolString(formData.Tools).length > 0 ? (
-                <div className="mt-2 space-y-1">
-                  {parseToolString(formData.Tools).map((tool, index) => (
-                    <div key={index} className="bg-gray-50 p-2 rounded">
-                      <span>{tool.name}</span>
-                      <span className="ml-2 text-gray-600">Quantity: {tool.quantity}</span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="mt-1">No tools selected</p>
-              )}
-            </div>
-          </div>
-        )}
+          ))}
+        </div>
+      ) : (
+        <p className="mt-1">No tools selected</p>
+      )}
+    </div>
+  </div>
+)}
 
         {error && (
           <Alert variant="destructive" className="mt-4">
