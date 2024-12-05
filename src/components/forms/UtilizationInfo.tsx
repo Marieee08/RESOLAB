@@ -1,10 +1,11 @@
+//UtilizationInfo
+
 import React, { useState, ChangeEvent, useEffect } from 'react';
 import { Plus, Minus, X } from 'lucide-react';
 
 interface FormData {
-  ProductsManufactured: string;
+  ProductsManufactured: string[];
   BulkofCommodity: string;
-  Equipment: string;
   Tools: string;
 }
 
@@ -15,23 +16,10 @@ interface StepProps {
   prevStep: () => void;
 }
 
-const serviceEquipmentMap: { [key: string]: string } = {
-  'Benchmarking': 'NOT APPLICABLE',
-  '2D CNC Milling': 'Milling Machine',
-  '3D CNC Milling': 'Milling Machine',
-  '3D Printing': '3D Printer',
-  'CNC Wood Routing': 'CNC Wood Router',
-  'Heat Pressing': 'Heat Press',
-  'Large Format Printing': 'Print & Cut',
-  'Laser Cutting & Engraving': 'CO2 Laser Cutter & Engraver',
-  'Laser Printing': 'Print & Cut',
-  'Lathe Machining': 'Lathe Machine'
-};
-
-interface ToolItem {
+interface Tool {
   id: string;
-  name: string;
-  quantity: number;
+  Tool: string;
+  Quantity: number;
 }
 
 interface ToolsSelectorProps {
@@ -42,21 +30,18 @@ interface ToolsSelectorProps {
   className?: string;
 }
 
-const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSelectorProps) => {
-  const availableTools = [
-    "Cutting Tool",
-    "End Mill",
-    "Drill Bit",
-    "Face Mill",
-    "Boring Bar",
-    "Threading Tool",
-    "Reamer",
-    "Collet",
-    "Tool Holder",
-    "Measuring Tool"
-  ];
+const ToolsSelector: React.FC<ToolsSelectorProps> = ({ 
+  value, 
+  onChange, 
+  onBlur, 
+  disabled, 
+  className 
+}) => {
+  const [availableTools, setAvailableTools] = useState<Tool[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const parseToolString = (str: string): ToolItem[] => {
+  const parseToolString = (str: string): Tool[] => {
     if (!str || str === 'NOT APPLICABLE') return [];
     try {
       return JSON.parse(str);
@@ -65,21 +50,51 @@ const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSe
     }
   };
 
-  const [selectedTools, setSelectedTools] = useState<ToolItem[]>(parseToolString(value));
+  const [selectedTools, setSelectedTools] = useState<Tool[]>(parseToolString(value));
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const updateParentValue = (tools: ToolItem[]) => {
+  useEffect(() => {
+    const fetchTools = async () => {
+      // Skip fetching if disabled
+      if (disabled) {
+        setAvailableTools([]);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch('/api/tools');
+        if (!response.ok) {
+          throw new Error('Failed to fetch tools');
+        }
+        const data = await response.json();
+        setAvailableTools(data);
+      } catch (err) {
+        setError('Failed to fetch tools. Please try again.');
+        console.error('Tools fetch error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTools();
+  }, [disabled]);
+
+  const updateParentValue = (tools: Tool[]) => {
     const toolString = tools.length > 0 ? JSON.stringify(tools) : '';
     onChange(toolString);
   };
 
-  const addTool = (toolName: string) => {
-    const existingTool = selectedTools.find(tool => tool.name === toolName);
-    if (!existingTool) {
-      const newTool: ToolItem = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: toolName,
-        quantity: 1
+  const addTool = (tool: Tool) => {
+    const existingToolIndex = selectedTools.findIndex(t => t.Tool === tool.Tool);
+    
+    if (existingToolIndex === -1) {
+      const newTool: Tool = {
+        id: tool.id,
+        Tool: tool.Tool,
+        Quantity: 1
       };
       const updatedTools = [...selectedTools, newTool];
       setSelectedTools(updatedTools);
@@ -97,58 +112,78 @@ const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSe
   const updateQuantity = (toolId: string, delta: number) => {
     const updatedTools = selectedTools.map(tool => {
       if (tool.id === toolId) {
-        const newQuantity = Math.max(1, tool.quantity + delta);
-        return { ...tool, quantity: newQuantity };
+        // Find the corresponding available tool to get its max quantity
+        const availableTool = availableTools.find(t => t.id === toolId);
+        const maxQuantity = availableTool ? availableTool.Quantity : 1;
+        
+        // Calculate new quantity, ensuring it's between 1 and maxQuantity
+        const newQuantity = Math.max(
+          1, 
+          Math.min(tool.Quantity + delta, maxQuantity)
+        );
+
+        return { ...tool, Quantity: newQuantity };
       }
       return tool;
     });
+
     setSelectedTools(updatedTools);
     updateParentValue(updatedTools);
   };
 
   return (
     <div className="relative">
-      <div 
-        className={`min-h-[120px] p-4 border rounded-md ${
-          disabled ? 'bg-gray-100' : 'bg-white'
-        } ${className}`}
-      >
+    <div 
+      className={`min-h-[120px] p-4 border rounded-md ${
+        disabled ? 'bg-gray-100' : 'bg-white'
+      } ${className}`}
+    >
         {selectedTools.length === 0 ? (
-          <div className="text-gray-500 text-sm">No tools selected</div>
+          <div className="text-gray-500 text-sm">
+            {isLoading ? 'Loading tools...' : 'No tools selected'}
+          </div>
         ) : (
           <div className="space-y-2">
-            {selectedTools.map(tool => (
-              <div key={tool.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                <span className="flex-grow">{tool.name}</span>
-                <div className="flex items-center space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(tool.id, -1)}
-                    className="p-1 hover:bg-gray-200 rounded"
-                    disabled={disabled}
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span className="w-8 text-center">{tool.quantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => updateQuantity(tool.id, 1)}
-                    className="p-1 hover:bg-gray-200 rounded"
-                    disabled={disabled}
-                  >
-                    <Plus size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => removeTool(tool.id)}
-                    className="p-1 hover:bg-gray-200 rounded text-red-500"
-                    disabled={disabled}
-                  >
-                    <X size={16} />
-                  </button>
+            {selectedTools.map(tool => {
+              // Find the corresponding available tool to get its max quantity
+              const availableTool = availableTools.find(t => t.id === tool.id);
+              const maxQuantity = availableTool ? availableTool.Quantity : 1;
+
+              return (
+                <div key={tool.id} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                  <span className="flex-grow">{tool.Tool}</span>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(tool.id, -1)}
+                      className="p-1 hover:bg-gray-200 rounded"
+                      disabled={disabled}
+                    >
+                      <Minus size={16} />
+                    </button>
+                    <span className="w-8 text-center">
+                      {tool.Quantity} / {maxQuantity}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(tool.id, 1)}
+                      className="p-1 hover:bg-gray-200 rounded"
+                      disabled={disabled || tool.Quantity >= maxQuantity}
+                    >
+                      <Plus size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeTool(tool.id)}
+                      className="p-1 hover:bg-gray-200 rounded text-red-500"
+                      disabled={disabled}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
         
@@ -157,26 +192,38 @@ const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSe
             type="button"
             onClick={() => setShowDropdown(!showDropdown)}
             className="mt-2 px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+            disabled={isLoading || availableTools.length === 0}
           >
             Add Tool
           </button>
         )}
 
+        {error && (
+          <div className="text-red-500 text-sm mt-2">{error}</div>
+        )}
+
         {showDropdown && !disabled && (
           <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg">
-            <div className="max-h-48 overflow-y-auto">
-              {availableTools
-                .filter(tool => !selectedTools.some(st => st.name === tool))
-                .map(tool => (
-                  <div
-                    key={tool}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => addTool(tool)}
-                  >
-                    {tool}
-                  </div>
-                ))}
-            </div>
+            {isLoading ? (
+              <div className="p-4 text-center text-gray-500">Loading tools...</div>
+            ) : (
+              <div className="max-h-48 overflow-y-auto">
+                {availableTools
+                  .filter(tool => !selectedTools.some(st => st.Tool === tool.Tool))
+                  .map(tool => (
+                    <div
+                      key={tool.id}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      onClick={() => addTool(tool)}
+                    >
+                      {tool.Tool}
+                    </div>
+                  ))}
+                {availableTools.filter(tool => !selectedTools.some(st => st.Tool === tool.Tool)).length === 0 && (
+                  <div className="p-4 text-center text-gray-500">No additional tools available</div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -187,39 +234,40 @@ const ToolsSelector = ({ value, onChange, onBlur, disabled, className }: ToolsSe
 export default function ProcessInformation({ formData, updateFormData, nextStep, prevStep }: StepProps) {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [touchedFields, setTouchedFields] = useState<Set<keyof FormData>>(new Set());
-  const [previousService, setPreviousService] = useState<string>('');
+  const [services, setServices] = useState<{ id: string; Service: string }[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(true);
+  const [serviceError, setServiceError] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   
   useEffect(() => {
-    const selectedService = formData.ProductsManufactured;
-    const mappedEquipment = serviceEquipmentMap[selectedService] || '';
-    
-    if (selectedService === 'Benchmarking') {
-      setPreviousService('Benchmarking');
-      updateFormData('BulkofCommodity', 'NOT APPLICABLE');
-      updateFormData('Equipment', mappedEquipment);
-      updateFormData('Tools', 'NOT APPLICABLE');
-    } else if (previousService === 'Benchmarking') {
-      updateFormData('BulkofCommodity', '');
-      updateFormData('Equipment', mappedEquipment);
-      updateFormData('Tools', '');
-      setPreviousService(selectedService);
-    } else {
-      updateFormData('Equipment', mappedEquipment);
-      setPreviousService(selectedService);
-    }
-  }, [formData.ProductsManufactured]);
+    const fetchServices = async () => {
+      try {
+        const response = await fetch('/api/services');
+        if (!response.ok) {
+          throw new Error('Failed to fetch services');
+        }
+        const data = await response.json();
+        setServices(data);
+        setIsLoadingServices(false);
+      } catch (err) {
+        console.error('Services fetch error:', err);
+        setServiceError('Failed to load services. Please try again.');
+        setIsLoadingServices(false);
+      }
+    };
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+    fetchServices();
+  }, []);
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     updateFormData(name as keyof FormData, value);
     validateField(name as keyof FormData, value);
   };
 
-
-  const isFieldDisabled = (fieldName: keyof FormData) => {
-    return formData.ProductsManufactured === 'Benchmarking' && fieldName !== 'ProductsManufactured';
+  const isFieldDisabled = (fieldName: keyof FormData): boolean => {
+    // Disable fields if Benchmarking is selected
+    return formData.ProductsManufactured?.includes('Benchmarking') || false;
   };
 
   const handleBlur = (fieldName: keyof FormData) => {
@@ -227,42 +275,6 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     newTouchedFields.add(fieldName);
     setTouchedFields(newTouchedFields);
     validateField(fieldName, formData[fieldName]);
-  };
-
-  const validateField = (fieldName: keyof FormData, value: string) => {
-    let error = '';
-
-    if (fieldName === 'ProductsManufactured') {
-      if (!value || value === 'Select service') {
-        error = 'Please select a service';
-      }
-    } else if (!isFieldDisabled(fieldName)) {
-      if (!value || value === 'Select equipment') {
-        error = 'This field is required';
-      }
-    }
-
-    setErrors(prev => ({
-      ...prev,
-      [fieldName]: error
-    }));
-
-    return !error;
-  };
-
-  const validateForm = () => {
-    const newErrors: Partial<Record<keyof FormData, string>> = {};
-    let isValid = true;
-
-    if (!formData.ProductsManufactured || formData.ProductsManufactured === 'Select service') {
-      newErrors.ProductsManufactured = 'Please select a service';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    const allFields = new Set(Object.keys(formData) as Array<keyof FormData>);
-    setTouchedFields(allFields);
-    return isValid;
   };
 
   const handleNext = () => {
@@ -280,44 +292,158 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
     return `${baseClasses} ${errorClasses} ${disabledClasses}`;
   };
 
+  const handleServiceChange = (service: string) => {
+    const currentServices = formData.ProductsManufactured || [];
+    let newServices;
+
+    // Special handling for Benchmarking
+    if (service === 'Benchmarking') {
+      newServices = currentServices.includes(service)
+        ? currentServices.filter(s => s !== service)
+        : [service]; // Only Benchmarking when selected
+    } else {
+      // For other services
+      newServices = currentServices.includes(service)
+        ? currentServices.filter(s => s !== service)
+        : [...currentServices.filter(s => s !== 'Benchmarking'), service];
+    }
+    
+    updateFormData('ProductsManufactured', newServices);
+
+    // Reset dependent fields when services change
+    if (newServices.length === 0 || newServices.includes('Benchmarking')) {
+      updateFormData('BulkofCommodity', '');
+      updateFormData('Tools', '');
+    }
+
+    validateField('ProductsManufactured', newServices);
+  };
+
+  const isServiceSelected = (service: string) => {
+    return (formData.ProductsManufactured || []).includes(service);
+  };
+
+  const validateField = (fieldName: keyof FormData, value: string | string[]) => {
+    let error = '';
+
+    if (fieldName === 'ProductsManufactured') {
+      if (!value || (Array.isArray(value) && value.length === 0)) {
+        error = 'Please select at least one service';
+      }
+    }
+
+    // Add validation for other fields when not in Benchmarking mode
+    if (!isFieldDisabled(fieldName)) {
+      switch(fieldName) {
+        case 'BulkofCommodity':
+          if (!value) {
+            error = 'This field is required';
+          }
+          break;
+        case 'Tools':
+          if (!value) {
+            error = 'This field is required';
+          }
+          break;
+      }
+    }
+
+    setErrors(prev => ({
+      ...prev,
+      [fieldName]: error
+    }));
+
+    return !error;
+  };
+
+  const validateForm = () => {
+    const newErrors: Partial<Record<keyof FormData, string>> = {};
+    let isValid = true;
+
+    if (!formData.ProductsManufactured || formData.ProductsManufactured.length === 0) {
+      newErrors.ProductsManufactured = 'Please select at least one service';
+      isValid = false;
+    }
+
+    // Only validate dependent fields if not in Benchmarking mode
+    if (formData.ProductsManufactured && 
+        !formData.ProductsManufactured.includes('Benchmarking')) {
+      if (!formData.BulkofCommodity) {
+        newErrors.BulkofCommodity = 'This field is required';
+        isValid = false;
+      }
+      if (!formData.Tools) {
+        newErrors.Tools = 'This field is required';
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    const allFields = new Set(Object.keys(formData) as Array<keyof FormData>);
+    setTouchedFields(allFields);
+    return isValid;
+  };
+
   return (
     <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6 mt-12">Utilization Information</h2>
-      
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="ProductsManufactured" className="block text-sm font-medium text-gray-700">
-            Service to be availed<span className="text-red-500">*</span>
-          </label>
-          <select
-            id="ProductsManufactured"
-            name="ProductsManufactured"
-            value={formData.ProductsManufactured}
-            onChange={handleInputChange}
-            onBlur={() => handleBlur('ProductsManufactured')}
-            className={getInputClassName('ProductsManufactured')}
-            required
-          >
-            <option value="Select service">Select service</option>
-            <option value="Benchmarking">Benchmarking</option>
-            <option value="2D CNC Milling">2D CNC Milling</option>
-            <option value="3D CNC Milling">3D CNC Milling</option>
-            <option value="3D Printing">3D Printing</option>
-            <option value="CNC Wood Routing">CNC Wood Routing</option>
-            <option value="Heat Pressing">Heat Pressing</option>
-            <option value="Large Format Printing">Large Format Printing</option>
-            <option value="Laser Cutting & Engraving">Laser Cutting & Engraving</option>
-            <option value="Laser Printing">Laser Printing</option>
-            <option value="Lathe Machining">Lathe Machining</option>
-          </select>
-          {touchedFields.has('ProductsManufactured') && errors.ProductsManufactured && (
-            <p className="mt-1 text-sm text-red-500">{errors.ProductsManufactured}</p>
-          )}
-        </div>
+    <h2 className="text-2xl font-semibold mb-6 mt-12">Utilization Information</h2>
+    
+    <div className="grid grid-cols-2 gap-6">
+      <div className="relative">
+        <label className="block text-sm font-medium text-gray-700">
+          Services to be availed<span className="text-red-500">*</span>
+        </label>
+        
+        {isLoadingServices ? (
+          <div className="mt-1 block w-full border rounded-md shadow-sm p-2 bg-gray-100 text-gray-500">
+            Loading services...
+          </div>
+        ) : serviceError ? (
+          <div className="mt-1 block w-full border rounded-md shadow-sm p-2 bg-red-50 text-red-500">
+            {serviceError}
+          </div>
+        ) : (
+          <div>
+            <div 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="mt-1 block w-full border rounded-md shadow-sm p-2 cursor-pointer bg-white"
+            >
+              {formData.ProductsManufactured && formData.ProductsManufactured.length > 0
+                ? `${formData.ProductsManufactured.length} service(s) selected`
+                : 'Select services'}
+            </div>
+            
+            {isDropdownOpen && (
+              <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                {services.map((service) => (
+                  <div 
+                    key={service.id} 
+                    className="px-4 py-2 hover:bg-gray-100 flex items-center"
+                    onClick={() => handleServiceChange(service.Service)}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isServiceSelected(service.Service)}
+                      onChange={() => handleServiceChange(service.Service)}
+                      className="mr-2"
+                    />
+                    <span>{service.Service}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        
+        {errors.ProductsManufactured && (
+          <p className="mt-1 text-sm text-red-500">{errors.ProductsManufactured}</p>
+        )}
+      </div>
 
         <div>
           <label htmlFor="BulkofCommodity" className="block text-sm font-medium text-gray-700">
-            Bulk of Commodity per Production (in volume or weight)<span className="text-red-500">*</span>
+            Bulk of Commodity per Production (in volume or weight)
+            {!isFieldDisabled('BulkofCommodity') && <span className="text-red-500">*</span>}
           </label>
           <input
             type="text"
@@ -328,16 +454,16 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
             onBlur={() => handleBlur('BulkofCommodity')}
             className={getInputClassName('BulkofCommodity')}
             disabled={isFieldDisabled('BulkofCommodity')}
-            required
+            required={!isFieldDisabled('BulkofCommodity')}
           />
-          {touchedFields.has('BulkofCommodity') && errors.BulkofCommodity && (
+          {!isFieldDisabled('BulkofCommodity') && touchedFields.has('BulkofCommodity') && errors.BulkofCommodity && (
             <p className="mt-1 text-sm text-red-500">{errors.BulkofCommodity}</p>
           )}
         </div>
 
         <div>
           <label htmlFor="Tools" className="block text-sm font-medium text-gray-700">
-            Tools<span className="text-red-500">*</span>
+            Tools{!isFieldDisabled('Tools') && <span className="text-red-500">*</span>}
           </label>
           <ToolsSelector
             id="Tools"
@@ -347,7 +473,7 @@ export default function ProcessInformation({ formData, updateFormData, nextStep,
             className={getInputClassName('Tools')}
             disabled={isFieldDisabled('Tools')}
           />
-          {touchedFields.has('Tools') && errors.Tools && (
+          {!isFieldDisabled('Tools') && touchedFields.has('Tools') && errors.Tools && (
             <p className="mt-1 text-sm text-red-500">{errors.Tools}</p>
           )}
         </div>
