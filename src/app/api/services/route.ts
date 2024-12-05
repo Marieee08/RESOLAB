@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     const newService = await prisma.service.create({
       data: {
         Service: body.Service,
-        Equipment: body.Equipment || null,
+        machineId: body.machineId || null, // Use machineId
         Costs: body.Costs || null
       }
     })

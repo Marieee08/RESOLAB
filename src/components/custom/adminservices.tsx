@@ -71,7 +71,8 @@ export default function AdminServices() {
         try {
             const serviceData = {
                 Service: newServiceName.trim(),
-                Equipment: selectedMachine || null,
+                // Change this to match the Prisma schema
+                machineId: selectedMachine || null, // Use machineId instead of Equipment
                 Costs: serviceCosts ? parseFloat(serviceCosts) : null
             };
     
@@ -146,7 +147,7 @@ export default function AdminServices() {
     // Helper function to get machine name by ID
     const getMachineName = (machineId: string) => {
         const machine = machines.find(m => m.id === machineId);
-        return machine ? machine.Machine : 'Unknown Machine';
+        return machine ? machine.Machine : 'No Equipment';
     };
 
     return (
@@ -167,9 +168,9 @@ export default function AdminServices() {
                         <div key={service.id} className="bg-white rounded-lg shadow-md p-6">
                             <div className="flex flex-col mb-4">
                                 <h3 className="text-xl font-semibold">{service.Service}</h3>
-                                {service.Equipment && (
+                                {service.machineId && (
                                     <span className="text-sm text-gray-500 mt-2">
-                                        Equipment: {getMachineName(service.Equipment)}
+                                        Equipment: {getMachineName(service.machineId)}
                                     </span>
                                 )}
                                 {service.Costs !== null && service.Costs !== undefined && (

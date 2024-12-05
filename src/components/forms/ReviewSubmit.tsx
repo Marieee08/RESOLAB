@@ -254,7 +254,7 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
 {renderSection('Utilization Information',
   <div className="grid grid-cols-2 gap-4">
     <div className="col-span-2">
-      <p className="text-sm text-gray-600">Products to be Manufactured</p>
+      <p className="text-sm text-gray-600">Services Availed</p>
       <p className="mt-1">{formData.ProductsManufactured || 'Not provided'}</p>
     </div>
     <div className="col-span-2">

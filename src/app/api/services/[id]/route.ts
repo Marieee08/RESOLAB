@@ -20,7 +20,7 @@ export async function PUT(
       where: { id },
       data: {
         Service: body.Service,
-        Equipment: body.Equipment || null,
+        machineId: body.machineId || null, // Use machineId
         Costs: body.Costs || null
       }
     })

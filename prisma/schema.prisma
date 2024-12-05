@@ -18,6 +18,7 @@ model Machine {
   Desc        String
   Link        String?
   isAvailable Boolean  @default(true)
+  Services    Service[]        @relation(name: "MachineToService") //One-to-many
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -31,8 +32,9 @@ model Tool {
 model Service {
   id              String   @id @default(cuid())
   Service         String
-  Equipment       String?
   Costs           Decimal?
+  machineId    String? //Foreign key for one-to-many relationship
+  machine      Machine? @relation(name: "MachineToService", fields: [machineId], references: [id], onDelete: Cascade)
 }
 
 /// For Primary Account Creation (For All)
