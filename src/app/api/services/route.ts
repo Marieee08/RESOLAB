@@ -1,5 +1,4 @@
-//api/services/ route.ts
-
+// api/services/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 
@@ -24,7 +23,11 @@ export async function POST(request: NextRequest) {
     }
 
     const newService = await prisma.service.create({
-      data: { Service: body.Service }
+      data: {
+        Service: body.Service,
+        Equipment: body.Equipment || null,
+        Costs: body.Costs || null
+      }
     })
 
     return NextResponse.json(newService, { status: 201 })
