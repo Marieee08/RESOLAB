@@ -162,7 +162,7 @@ const ToolsSelector: React.FC<ToolsSelectorProps> = ({
                       <Minus size={16} />
                     </button>
                     <span className="w-8 text-center">
-                      {tool.Quantity} / {maxQuantity}
+                      {tool.Quantity}
                     </span>
                     <button
                       type="button"
