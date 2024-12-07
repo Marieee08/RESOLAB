@@ -1,4 +1,4 @@
-//api/services/[id]/route.ts
+// api/services/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 
@@ -18,7 +18,11 @@ export async function PUT(
 
     const updatedService = await prisma.service.update({
       where: { id },
-      data: { Service: body.Service }
+      data: {
+        Service: body.Service,
+        machineId: body.machineId || null, // Use machineId
+        Costs: body.Costs || null
+      }
     })
 
     return NextResponse.json(updatedService)

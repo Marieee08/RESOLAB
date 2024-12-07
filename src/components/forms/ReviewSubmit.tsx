@@ -254,8 +254,21 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
 {renderSection('Utilization Information',
   <div className="grid grid-cols-2 gap-4">
     <div className="col-span-2">
-      <p className="text-sm text-gray-600">Products to be Manufactured</p>
-      <p className="mt-1">{formData.ProductsManufactured || 'Not provided'}</p>
+      <p className="text-sm text-gray-600">Services Availed</p>
+      {Array.isArray(formData.ProductsManufactured) ? (
+        <div className="mt-1 flex flex-wrap gap-2">
+          {formData.ProductsManufactured.map((service, index) => (
+            <span 
+              key={index} 
+              className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm"
+            >
+              {service}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-1">{formData.ProductsManufactured || 'Not provided'}</p>
+      )}
     </div>
     <div className="col-span-2">
       <p className="text-sm text-gray-600">Bulk of Commodity</p>

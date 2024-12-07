@@ -2,6 +2,11 @@ import { Plus, Edit, Trash2, X } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import React, { useState, useEffect } from 'react';
 
+interface Service {
+  id?: string;
+  Service: string;
+}
+
 interface Machine {
   id: string;
   Machine: string;
@@ -9,6 +14,8 @@ interface Machine {
   Desc: string;
   Link?: string;
   isAvailable: boolean;
+  Costs?: number;
+  Services: Service[];
 }
 
 export default function AdminServices() {
@@ -16,7 +23,9 @@ export default function AdminServices() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMachine, setEditingMachine] = useState<Machine | null>(null);
   const [formData, setFormData] = useState<Partial<Machine>>({
-    isAvailable: true
+    isAvailable: true,
+    Costs: 0,
+    Services: [{ Service: '' }]
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -113,7 +122,11 @@ export default function AdminServices() {
         image: machine.Image || '',
         description: machine.Desc || '',
         videoUrl: machine.Link || '',
-        isAvailable: machine.isAvailable
+        isAvailable: machine.isAvailable,
+        Costs: machine.Costs || 0,
+        Services: machine.Services?.length 
+          ? machine.Services 
+          : [{ Service: '' }]
       });
       
       // Set the image preview to the current machine's image
@@ -127,7 +140,9 @@ export default function AdminServices() {
         image: '',
         description: '',
         videoUrl: '',
-        isAvailable: true
+        isAvailable: true,
+        Costs: 0,
+        Services: [{ Service: '' }]
       });
       
       // Reset image preview and file for a new machine
@@ -148,6 +163,24 @@ export default function AdminServices() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleServiceChange = (index: number, value: string) => {
+    const updatedServices = [...(formData.Services || [])];
+    updatedServices[index] = { Service: value };
+    setFormData({ ...formData, Services: updatedServices });
+  };
+
+  const addServiceField = () => {
+    setFormData(prev => ({
+      ...prev, 
+      Services: [...(prev.Services || []), { Service: '' }]
+    }));
+  };
+
+  const removeServiceField = (index: number) => {
+    const updatedServices = formData.Services?.filter((_, i) => i !== index) || [];
+    setFormData({ ...formData, Services: updatedServices });
   };
 
   const handleImageUpload = async () => {
@@ -231,20 +264,27 @@ export default function AdminServices() {
         imageUrl = editingMachine.Image;
       }
   
+      // Filter out empty services
+      const filteredServices = formData.Services?.filter(
+        service => service.Service.trim() !== ''
+      ) || [];
+  
       const machinePayload = {
         Machine: formData.name,
         Image: imageUrl,
         Desc: formData.description,
         Link: formData.videoUrl || '',
         isAvailable: formData.isAvailable ?? true,
-        oldImagePath: editingMachine ? editingMachine.Image : null // Add old image path
+        Costs: formData.Costs || 0,
+        Services: filteredServices,
+        oldImagePath: editingMachine ? editingMachine.Image : null
       };
   
       console.log('Sending payload:', JSON.stringify(machinePayload, null, 2));
   
       let response;
 
-       if (editingMachine) {
+      if (editingMachine) {
         response = await fetch(`/api/machines/${editingMachine.id}`, {
           method: 'PUT',
           headers: { 
@@ -301,163 +341,238 @@ export default function AdminServices() {
     }
   };
 
-return (
-  <main className="min-h-screen">
-   
-     <div className="container mx-auto">
-       <div className="flex justify-between items-center mb-6">
-         <button
-           onClick={() => openModal()}
-           className="bg-blue-500 text-white px-4 py-2 rounded-full flex items-center"
-         >
-           <Plus size={20} className="mr-2" /> Add New Machine
-         </button>
-       </div>
-
-
-
-
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-         {machines.map(machine => (
-           <div key={machine.id} className="bg-white rounded-lg shadow-md p-6">
-           <div className="flex justify-between items-center mb-4">
-             <h2 className="text-xl font-semibold">{machine.Machine}</h2>
-             <div className="flex items-center space-x-2">
-               <span className={`text-sm ${machine.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
-                 {machine.isAvailable ? 'Available' : 'Unavailable'}
-               </span>
-               <Switch
-                 checked={machine.isAvailable}
-                 onCheckedChange={() => toggleAvailability(machine.id, machine.isAvailable)}
-                 className="data-[state=checked]:bg-green-500"
-               />
-             </div>
-           </div>
-             <img src={machine.Image} alt={machine.Machine} className="w-full h-48 object-cover rounded-md mb-4" />
-             <p className="text-gray-600 mb-4">
-               {machine.Desc.length > 100 ? `${machine.Desc.substring(0, 100)}...` : machine.Desc}
-             </p>
-             {machine.Link && (
-               <a href={machine.Link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline mb-4 block">
-                 Watch Video
-               </a>
-             )}
-             <div className="flex justify-end space-x-2">
-               <button
-                 onClick={() => openModal(machine)}
-                 className="bg-blue-500 text-white p-2 rounded-full"
-               >
-                 <Edit size={20} />
-               </button>
-               <button
-  onClick={() => deleteMachine(machine.id)}
-  className="bg-red-500 text-white p-2 rounded-full"
->
-  <Trash2 size={20} />
-</button>
-             </div>
-           </div>
-         ))}
-       </div>
-     </div>
-
-
-
-
-     {isModalOpen && (
-       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-         <div className="bg-white rounded-lg p-8 w-full max-w-md">
-           <div className="flex justify-between items-center mb-4">
-             <h2 className="text-2xl font-bold">{editingMachine ? 'Edit' : 'Add'} Machine</h2>
-             <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
-               <X size={24} />
-             </button>
-           </div>
-           <form onSubmit={handleSubmit}>
-           <div className="mb-4">
-             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-             <input
-  type="text"
-  id="name"
-  name="name"
-  value={formData.name || ''}
-  onChange={handleInputChange}
-  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-  required
-/>
-           </div>
-
-
-
-
-           <div className="mb-4">
-             <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-             <textarea
-               id="description"
-               name="description"
-               value={formData.description || ''}
-               onChange={handleInputChange}
-               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-               rows={3}
-               required
-             ></textarea>
-           </div>
-
-
-
-
-           <div className="mb-4">
-        <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-          {imageFile ? 'Change Image' : 'Upload Image'}
-        </label>
-        <input
-          type="file"
-          id="image"
-          name="image"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="mt-1 block w-full"
-        />
-        {imagePreview && (
-          <img 
-            src={imagePreview} 
-            alt="Preview" 
-            className="mt-2 w-full h-48 object-cover rounded-md" 
-          />
+  return (
+    <main className="min-h-screen">
+      <div className="container mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => openModal()}
+            className="bg-blue-500 text-white px-4 py-2 rounded-full flex items-center"
+          >
+            <Plus size={20} className="mr-2" /> Add New Machine
+          </button>
+        </div>
+  
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {machines.map(machine => (
+            <div key={machine.id} className="bg-white rounded-lg shadow-md p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">{machine.Machine}</h2>
+                <div className="flex items-center space-x-2">
+                  <span className={`text-sm ${machine.isAvailable ? 'text-green-600' : 'text-red-600'}`}>
+                    {machine.isAvailable ? 'Available' : 'Unavailable'}
+                  </span>
+                  <Switch
+                    checked={machine.isAvailable}
+                    onCheckedChange={() => toggleAvailability(machine.id, machine.isAvailable)}
+                    className="data-[state=checked]:bg-green-500"
+                  />
+                </div>
+              </div>
+              <img 
+                src={machine.Image} 
+                alt={machine.Machine} 
+                className="w-full h-48 object-cover rounded-md mb-4" 
+              />
+              <p className="text-gray-600 mb-4">
+                {machine.Desc.length > 100 ? `${machine.Desc.substring(0, 100)}...` : machine.Desc}
+              </p>
+              
+              {/* Display Costs */}
+              {machine.Costs && (
+                <div className="mb-4">
+                  <strong className="text-gray-700">Cost: </strong>
+                  <span className="text-green-600">${machine.Costs.toFixed(2)}</span>
+                </div>
+              )}
+              
+              {/* Display Services */}
+              {machine.Services && machine.Services.length > 0 && (
+                <div className="mb-4">
+                  <strong className="text-gray-700 block mb-2">Services:</strong>
+                  <ul className="list-disc list-inside text-gray-600">
+                    {machine.Services.map((service, index) => (
+                      <li key={index}>{service.Service}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {machine.Link && (
+                <a 
+                  href={machine.Link} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-blue-500 hover:underline mb-4 block"
+                >
+                  Watch Video
+                </a>
+              )}
+              
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => openModal(machine)}
+                  className="bg-blue-500 text-white p-2 rounded-full"
+                >
+                  <Edit size={20} />
+                </button>
+                <button
+                  onClick={() => deleteMachine(machine.id)}
+                  className="bg-red-500 text-white p-2 rounded-full"
+                >
+                  <Trash2 size={20} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+  
+        {/* Modal for Add/Edit Machine */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-8 w-full max-w-md">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">{editingMachine ? 'Edit' : 'Add'} Machine</h2>
+                <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <form onSubmit={handleSubmit}>
+                {/* Name Input */}
+                <div className="mb-4">
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name || ''}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    required
+                  />
+                </div>
+  
+                {/* Description Input */}
+                <div className="mb-4">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description || ''}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                    rows={3}
+                    required
+                  ></textarea>
+                </div>
+  
+                {/* Image Upload */}
+                <div className="mb-4">
+                  <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+                    {imageFile ? 'Change Image' : 'Upload Image'}
+                  </label>
+                  <input
+                    type="file"
+                    id="image"
+                    name="image"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="mt-1 block w-full"
+                  />
+                  {imagePreview && (
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="mt-2 w-full h-48 object-cover rounded-md" 
+                    />
+                  )}
+                </div>
+  
+                {/* Costs Input */}
+                <div className="mb-4">
+                  <label htmlFor="Costs" className="block text-sm font-medium text-gray-700">
+                    Cost ($)
+                  </label>
+                  <input
+                    type="number"
+                    id="Costs"
+                    name="Costs"
+                    step="0.01"
+                    min="0"
+                    value={formData.Costs || 0}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                  />
+                </div>
+  
+                {/* Services Input */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Services
+                  </label>
+                  {formData.Services?.map((service, index) => (
+                    <div key={index} className="flex items-center space-x-2 mb-2">
+                      <input
+                        type="text"
+                        value={service.Service}
+                        onChange={(e) => handleServiceChange(index, e.target.value)}
+                        placeholder="Enter service"
+                        className="flex-grow rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                      />
+                      {index > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => removeServiceField(index)}
+                          className="bg-red-500 text-white p-2 rounded-full"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={addServiceField}
+                    className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md flex items-center"
+                  >
+                    <Plus size={16} className="mr-2" /> Add Service
+                  </button>
+                </div>
+  
+                {/* Video URL Input */}
+                <div className="mb-4">
+                  <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700">
+                    YouTube Video URL
+                  </label>
+                  <input
+                    type="text"
+                    id="videoUrl"
+                    name="videoUrl"
+                    value={formData.videoUrl || ''}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                  />
+                </div>
+  
+                {/* Submit Button */}
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  >
+                    {editingMachine ? 'Update' : 'Add'} Machine
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
-      </div>
-
-
-
-
-           <div className="mb-4">
-             <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700">YouTube Video URL</label>
-             <input
-               type="text"
-               id="videoUrl"
-               name="videoUrl"
-               value={formData.videoUrl || ''}
-               onChange={handleInputChange}
-               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-             />
-           </div>
-
-
-
-
-           <div className="flex justify-end">
-             <button
-               type="submit"
-               className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-             >
-               {editingMachine ? 'Update' : 'Add'} Machine
-             </button>
-           </div>
-           </form>
-         </div>
-       </div>
-     )}
-   </main>
- );
+        </div>
+      </main>
+  );
 }
-

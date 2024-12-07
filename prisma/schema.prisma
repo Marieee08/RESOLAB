@@ -20,6 +20,8 @@ model Machine {
   isAvailable Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  Costs           Decimal?
+  Services    Service[]        @relation(name: "MachineToService") //One-to-many
 }
 
 model Tool {
@@ -29,8 +31,10 @@ model Tool {
 }
 
 model Service {
-  id          String   @id @default(cuid())
-  Service     String
+  id              String   @id @default(cuid())
+  Service         String
+  machineId    String? //Foreign key for one-to-many relationship
+  machine      Machine? @relation(name: "MachineToService", fields: [machineId], references: [id], onDelete: Cascade)
 }
 
 /// For Primary Account Creation (For All)
@@ -89,6 +93,7 @@ model BusinessInfo {
 
 model UtilReq {
   id                   Int                  @id @default(autoincrement())
+  Status               String               @default("Pending")
   ProductsManufactured String? //THIS ONE
   BulkofCommodity      String? //THIS ONE
   ProcessInfos         ProcessInfo[]        @relation(name: "UtilReqToProcessInfo") //One-to-many
@@ -112,11 +117,20 @@ model UtilReq {
 
 model ProcessInfo {
   id           Int      @id @default(autoincrement())
-  Equipment    String?
+  AvailedServices         AvailedService[]        @relation(name: "ProcessInfoToAvailedService") //One-to-many
   Tools        String?
   ToolsQty     Int?
   utilReqId    Int? //Foreign key for one-to-many relationship
   utilReq      UtilReq? @relation(name: "UtilReqToProcessInfo", fields: [utilReqId], references: [id])
+}
+
+model AvailedService {
+  id              String   @id @default(cuid())
+  ServiceAvail         String
+  EquipmentAvail       String
+  CostsAvail           Decimal?
+  processInfoId        Int? //Foreign key for one-to-many relationship
+  processInfo          ProcessInfo? @relation(name: "ProcessInfoToAvailedService", fields: [processInfoId], references: [id])
 }
 
 // Also parrt of Utilization Request
