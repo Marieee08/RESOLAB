@@ -71,9 +71,8 @@ export default function AdminServices() {
         try {
             const serviceData = {
                 Service: newServiceName.trim(),
-                // Change this to match the Prisma schema
-                machineId: selectedMachine || null, // Use machineId instead of Equipment
-                Costs: serviceCosts ? parseFloat(serviceCosts) : null
+                machineId: selectedMachine === 'not-applicable' ? null : selectedMachine,
+                Costs: selectedMachine === 'not-applicable' ? null : (serviceCosts ? parseFloat(serviceCosts) : null)
             };
     
             const response = editingService 
@@ -145,9 +144,10 @@ export default function AdminServices() {
     };
 
     // Helper function to get machine name by ID
-    const getMachineName = (machineId: string) => {
+    const getMachineName = (machineId: string | null) => {
+        if (machineId === null) return 'Not Applicable';
         const machine = machines.find(m => m.id === machineId);
-        return machine ? machine.Machine : 'No Equipment';
+        return machine ? machine.Machine : 'Not Applicable';
     };
 
     return (
@@ -168,11 +168,11 @@ export default function AdminServices() {
                         <div key={service.id} className="bg-white rounded-lg shadow-md p-6">
                             <div className="flex flex-col mb-4">
                                 <h3 className="text-xl font-semibold">{service.Service}</h3>
-                                {service.machineId && (
-                                    <span className="text-sm text-gray-500 mt-2">
-                                        Equipment: {getMachineName(service.machineId)}
-                                    </span>
-                                )}
+                                <span className="text-sm text-gray-500 mt-2">
+    {getMachineName(service.machineId) !== 'Not Applicable' 
+        ? `Equipment: ${getMachineName(service.machineId)}` 
+        : 'Not Applicable'}
+</span>
                                 {service.Costs !== null && service.Costs !== undefined && (
                                     <span className="text-sm text-gray-500 mt-1">
                                         Cost: PHP {Number(service.Costs).toFixed(2)}/hour
@@ -237,35 +237,38 @@ export default function AdminServices() {
                                     Select Equipment
                                 </label>
                                 <select
-                                    id="machineSelect"
-                                    value={selectedMachine}
-                                    onChange={(e) => setSelectedMachine(e.target.value)}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                >
-                                    <option value="">No Equipment Selected</option>
-                                    {machines.map((machine) => (
-                                        <option key={machine.id} value={machine.id}>
-                                            {machine.Machine}
-                                        </option>
-                                    ))}
-                                </select>
+    id="machineSelect"
+    value={selectedMachine}
+    onChange={(e) => setSelectedMachine(e.target.value)}
+    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+>
+    <option value="">No Equipment Selected</option>
+    <option value="not-applicable">Not Applicable</option>
+    {machines.map((machine) => (
+        <option key={machine.id} value={machine.id}>
+            {machine.Machine}
+        </option>
+    ))}
+</select>
                             </div>
 
                             <div className="mb-4">
-                                <label htmlFor="serviceCosts" className="block text-sm font-medium text-gray-700">
-                                    Service Costs
-                                </label>
-                                <input
-                                    type="number"
-                                    id="serviceCosts"
-                                    value={serviceCosts}
-                                    onChange={(e) => setServiceCosts(e.target.value)}
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="Enter service cost"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                                />
-                            </div>
+    <label htmlFor="serviceCosts" className="block text-sm font-medium text-gray-700">
+        Service Costs
+    </label>
+    <input
+        type="number"
+        id="serviceCosts"
+        value={serviceCosts}
+        onChange={(e) => setServiceCosts(e.target.value)}
+        step="0.01"
+        min="0"
+        disabled={selectedMachine === 'not-applicable'}
+        placeholder="Enter service cost"
+        className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 
+            ${selectedMachine === 'not-applicable' ? 'bg-gray-200 cursor-not-allowed' : ''}`}
+    />
+</div>
 
                             <div className="flex justify-end space-x-2">
                                 <button
