@@ -18,9 +18,10 @@ model Machine {
   Desc        String
   Link        String?
   isAvailable Boolean  @default(true)
-  Services    Service[]        @relation(name: "MachineToService") //One-to-many
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  Costs           Decimal?
+  Services    Service[]        @relation(name: "MachineToService") //One-to-many
 }
 
 model Tool {
@@ -32,7 +33,6 @@ model Tool {
 model Service {
   id              String   @id @default(cuid())
   Service         String
-  Costs           Decimal?
   machineId    String? //Foreign key for one-to-many relationship
   machine      Machine? @relation(name: "MachineToService", fields: [machineId], references: [id], onDelete: Cascade)
 }
@@ -93,6 +93,7 @@ model BusinessInfo {
 
 model UtilReq {
   id                   Int                  @id @default(autoincrement())
+  Status               String               @default("Pending")
   ProductsManufactured String? //THIS ONE
   BulkofCommodity      String? //THIS ONE
   ProcessInfos         ProcessInfo[]        @relation(name: "UtilReqToProcessInfo") //One-to-many
