@@ -267,25 +267,23 @@ export default function AdminServices() {
       // Filter out empty services
       const filteredServices = formData.Services?.filter(
         service => service.Service.trim() !== ''
-      ) || [];
+      ).map(service => ({
+        Service: service.Service
+      })) || [];
   
       const machinePayload = {
+        ...(editingMachine ? { id: editingMachine.id } : {}), // Include ID for updates
         Machine: formData.name,
         Image: imageUrl,
         Desc: formData.description,
-        Link: formData.videoUrl || '',
+        Link: formData.videoUrl || null,
         isAvailable: formData.isAvailable ?? true,
-        Costs: formData.Costs || 0,
-        Services: filteredServices,
-        oldImagePath: editingMachine ? editingMachine.Image : null
+        Costs: formData.Costs || null,
       };
   
-      console.log('Sending payload:', JSON.stringify(machinePayload, null, 2));
-  
       let response;
-
       if (editingMachine) {
-        response = await fetch(`/api/machines/${editingMachine.id}`, {
+        response = await fetch(`/api/machines`, {
           method: 'PUT',
           headers: { 
             'Content-Type': 'application/json' 
@@ -302,42 +300,50 @@ export default function AdminServices() {
         });
       }
   
-      // Log the raw response details
-      console.log('Response status:', response.status);
-      
-      // Parse the response text first
-      const responseText = await response.text();
-      console.log('Full Response text:', responseText);
+      // Parse response
+      const result = await response.json();
   
-      // Check if the response is OK
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}, message: ${responseText}`);
+        throw new Error(result.error || 'Failed to save machine');
       }
   
-      // Parse the response
-      const updatedMachine = responseText ? JSON.parse(responseText) : null;
-      
+      // If services exist, we'll handle them separately
+      if (filteredServices.length > 0) {
+        // If editing a machine, delete existing services first
+        if (editingMachine) {
+          await fetch(`/api/services?machineId=${result.id}`, {
+            method: 'DELETE'
+          });
+        }
+  
+        // Add new services
+        for (const service of filteredServices) {
+          await fetch('/api/services', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({
+              Service: service.Service,
+              machineId: result.id
+            })
+          });
+        }
+      }
+  
+      // Update local state
       if (editingMachine) {
-        setMachines(machines.map((m) => 
-          m.id === updatedMachine.id ? updatedMachine : m
+        setMachines(machines.map(m => 
+          m.id === result.id ? result : m
         ));
       } else {
-        setMachines([...machines, updatedMachine]);
+        setMachines([...machines, result]);
       }
-      
-      closeModal();
   
+      closeModal();
     } catch (error) {
-      // Comprehensive error logging
       console.error('Submission ERROR:', error);
-      
-      if (error instanceof SyntaxError) {
-        alert('Error parsing server response. Please check the server logs.');
-      } else if (error instanceof Error) {
-        alert(`Error: ${error.message}`);
-      } else {
-        alert('An unexpected error occurred');
-      }
+      alert(`Error: ${error.message}`);
     }
   };
 
