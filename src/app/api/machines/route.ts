@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
         Image: body.Image,
         Desc: body.Desc,
         Link: body.Link || null,
-        isAvailable: body.isAvailable ?? true
+        isAvailable: body.isAvailable ?? true,
+        Costs: body.Costs ? new Prisma.Decimal(body.Costs) : null // Convert to Decimal
       }
     });
 
@@ -87,15 +88,23 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const includeServices = searchParams.get('includeServices') === 'true';
+
   try {
-    console.log('Fetching machines...');
-    const machines = await prisma.machine.findMany();
-    console.log('Machines fetched:', machines);
-    return NextResponse.json(machines);
-  }
-  catch (error) {
-    console.error('Error fetching machines:', error);
-    return NextResponse.error();
+    const machines = await prisma.machine.findMany({
+      include: {
+        // Only include services if the parameter is set
+        Services: includeServices ? true : false
+      }
+    });
+
+    return NextResponse.json(machines, { status: 200 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Unable to fetch machines', details: error.message }, 
+      { status: 500 }
+    );
   }
 }

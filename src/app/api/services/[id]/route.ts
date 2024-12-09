@@ -1,10 +1,10 @@
-// pages/api/services/[id].ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Extract the service ID from the query
   const { id } = req.query;
 
   // Ensure id is a string
@@ -12,14 +12,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Invalid service ID' });
   }
 
+  // Handle different HTTP methods
   switch (req.method) {
     case 'PUT':
       return await updateService(req, res, id);
     case 'DELETE':
       return await deleteService(req, res, id);
     default:
+      // Explicitly set allowed methods
       res.setHeader('Allow', ['PUT', 'DELETE']);
-      return res.status(405).end(`Method ${req.method} Not Allowed`);
+      return res.status(405).json({ 
+        error: `Method ${req.method} Not Allowed`,
+        allowedMethods: ['PUT', 'DELETE']
+      });
   }
 }
 

@@ -36,18 +36,16 @@ export default function AdminServices() {
 
   const fetchMachines = async () => {
     try {
-      const response = await fetch('/api/machines');
+      const response = await fetch('/api/machines?includeServices=true');
       if (response.ok) {
         const data = await response.json();
         setMachines(data);
       } else {
         console.error('Failed to fetch machines');
-        // Optionally, show an error message to the user
         alert('Failed to load machines. Please refresh or contact support.');
       }
     } catch (error) {
       console.error('Error fetching machines:', error);
-      // Optionally, show an error message to the user
       alert('An error occurred while fetching machines. Please try again later.');
     }
   };
@@ -123,7 +121,7 @@ export default function AdminServices() {
         description: machine.Desc || '',
         videoUrl: machine.Link || '',
         isAvailable: machine.isAvailable,
-        Costs: machine.Costs || 0,
+        Costs: machine.Costs !== null ? parseFloat(machine.Costs.toString()) : 0,
         Services: machine.Services?.length 
           ? machine.Services 
           : [{ Service: '' }]
@@ -167,7 +165,7 @@ export default function AdminServices() {
 
   const handleServiceChange = (index: number, value: string) => {
     const updatedServices = [...(formData.Services || [])];
-    updatedServices[index] = { Service: value };
+    updatedServices[index] = { Service: value.trim() };
     setFormData({ ...formData, Services: updatedServices });
   };
 
@@ -250,100 +248,130 @@ export default function AdminServices() {
     e.preventDefault();
   
     try {
-      let imageUrl = formData.Image;
-      
-      // Upload image if a new file is selected
+      // Image upload logic
+      let imageUrl = imagePreview; // Use existing image if no new upload
       if (imageFile) {
         imageUrl = await handleImageUpload();
+        
+        // If image upload fails, stop submission
         if (!imageUrl) {
-          alert('Failed to upload image');
+          alert('Image upload failed. Please try again.');
           return;
         }
-      } else if (editingMachine) {
-        // If no new file is uploaded and we're editing, keep the existing image
-        imageUrl = editingMachine.Image;
       }
   
-      // Filter out empty services
-      const filteredServices = formData.Services?.filter(
-        service => service.Service.trim() !== ''
-      ).map(service => ({
-        Service: service.Service
-      })) || [];
-  
       const machinePayload = {
-        ...(editingMachine ? { id: editingMachine.id } : {}), // Include ID for updates
+        ...(editingMachine ? { id: editingMachine.id } : {}),
         Machine: formData.name,
-        Image: imageUrl,
+        Image: imageUrl || '', 
         Desc: formData.description,
         Link: formData.videoUrl || null,
         isAvailable: formData.isAvailable ?? true,
-        Costs: formData.Costs || null,
+        Costs: formData.Costs ? parseFloat(formData.Costs) : null, // Ensure numeric conversion
       };
   
       let response;
-      if (editingMachine) {
-        response = await fetch(`/api/machines`, {
-          method: 'PUT',
-          headers: { 
-            'Content-Type': 'application/json' 
-          },
-          body: JSON.stringify(machinePayload)
-        });
-      } else {
-        response = await fetch('/api/machines', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json' 
-          },
-          body: JSON.stringify(machinePayload)
-        });
-      }
-  
-      // Parse response
-      const result = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to save machine');
-      }
-  
-      // If services exist, we'll handle them separately
-      if (filteredServices.length > 0) {
-        // If editing a machine, delete existing services first
+      try {
         if (editingMachine) {
-          await fetch(`/api/services?machineId=${result.id}`, {
-            method: 'DELETE'
+          response = await fetch(`/api/machines`, {
+            method: 'PUT',
+            headers: { 
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify(machinePayload)
           });
-        }
-  
-        // Add new services
-        for (const service of filteredServices) {
-          await fetch('/api/services', {
+        } else {
+          response = await fetch('/api/machines', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json' 
             },
-            body: JSON.stringify({
-              Service: service.Service,
-              machineId: result.id
-            })
+            body: JSON.stringify(machinePayload)
           });
         }
-      }
   
-      // Update local state
-      if (editingMachine) {
-        setMachines(machines.map(m => 
-          m.id === result.id ? result : m
-        ));
-      } else {
-        setMachines([...machines, result]);
-      }
+        // More detailed error handling
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Machine save error:', {
+            status: response.status,
+            statusText: response.statusText,
+            errorBody: errorText
+          });
+          throw new Error(`Failed to save machine: ${errorText}`);
+        }
   
-      closeModal();
-    } catch (error) {
-      console.error('Submission ERROR:', error);
-      alert(`Error: ${error.message}`);
+        const result = await response.json();
+        const machineId = result.id;
+  
+        // Services handling
+        const filteredServices = formData.Services?.filter(
+          service => service.Service.trim() !== ''
+        ) || [];
+  
+        // Delete existing services
+        try {
+          await fetch(`/api/services?machineId=${machineId}`, {
+            method: 'DELETE'
+          });
+        } catch (deleteError) {
+          console.warn('Failed to delete existing services', deleteError);
+        }
+  
+        // Add new services
+        for (const service of filteredServices) {
+          try {
+            const serviceResponse = await fetch('/api/services', {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json' 
+              },
+              body: JSON.stringify({
+                Service: service.Service.trim(),
+                machineId: machineId
+              })
+            });
+  
+            if (!serviceResponse.ok) {
+              const errorText = await serviceResponse.text();
+              console.error('Service creation error:', {
+                service,
+                status: serviceResponse.status,
+                errorText
+              });
+            }
+          } catch (serviceError) {
+            console.error('Unexpected service creation error:', {
+              service,
+              error: serviceError
+            });
+          }
+        }
+  
+        // Update local state
+        setMachines(prevMachines => {
+          if (editingMachine) {
+            return prevMachines.map(m => 
+              m.id === result.id 
+                ? { 
+                    ...result, 
+                    Services: filteredServices.map(s => ({ Service: s.Service })) 
+                  } 
+                : m
+            );
+          } else {
+            return [...prevMachines, result];
+          }
+        });
+  
+        closeModal();
+      } catch (saveError) {
+        console.error('Machine save process error:', saveError);
+        alert(`Error saving machine: ${saveError.message}`);
+      }
+    } catch (mainError) {
+      console.error('Main submission error:', mainError);
+      alert(`An unexpected error occurred: ${mainError.message}`);
     }
   };
 
@@ -385,24 +413,29 @@ export default function AdminServices() {
               </p>
               
               {/* Display Costs */}
-              {machine.Costs && (
-                <div className="mb-4">
-                  <strong className="text-gray-700">Cost: </strong>
-                  <span className="text-green-600">${machine.Costs.toFixed(2)}</span>
-                </div>
-              )}
+              {machine.Costs !== null && machine.Costs !== undefined && (
+  <div className="mb-4">
+    <strong className="text-gray-700">Cost: </strong>
+    <span className="text-green-600">
+      ${Number(machine.Costs).toLocaleString('en-US', {
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2
+      })}
+    </span>
+  </div>
+)}
               
               {/* Display Services */}
               {machine.Services && machine.Services.length > 0 && (
-                <div className="mb-4">
-                  <strong className="text-gray-700 block mb-2">Services:</strong>
-                  <ul className="list-disc list-inside text-gray-600">
-                    {machine.Services.map((service, index) => (
-                      <li key={index}>{service.Service}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+  <div className="mb-4">
+    <strong className="text-gray-700 block mb-2">Services:</strong>
+    <ul className="list-disc list-inside text-gray-600">
+      {machine.Services.map((service, index) => (
+        <li key={index}>{service.Service}</li>
+      ))}
+    </ul>
+  </div>
+)}
               
               {machine.Link && (
                 <a 
