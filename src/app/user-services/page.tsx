@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from "next/link";
-import PricingTable from '@/components/custom/pricetable';
+import PricingTable from '@/components/admin-functions/price-table';
 import Navbar from '@/components/custom/navbar';
 import { AlertCircle, Clock, BadgeX, X } from 'lucide-react';
 

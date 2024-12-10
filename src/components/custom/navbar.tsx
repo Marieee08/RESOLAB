@@ -102,9 +102,6 @@ const Navbar = () => {
               Contact
             </Link>
 
-            <Link href="/student-dashboard" className={linkClassName} style={{color: textColor}} >
-              Student Dashboard
-            </Link>
           </div>
         </div>
 
