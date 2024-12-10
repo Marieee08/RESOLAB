@@ -31,8 +31,8 @@ const Navbar = () => {
   useEffect(() => {
     if (isLoaded && user) {
       const path = window.location.pathname;
-      if (path.includes('/dashboard/admin') && userRole !== 'ADMIN') {
-        router.push('/dashboard/user');
+      if (path.includes('/admin-dashboard') && userRole !== 'ADMIN') {
+        router.push('/user-dashboard');
       }
     }
   }, [isLoaded, user, userRole, router]);
@@ -69,7 +69,7 @@ const Navbar = () => {
             </Link>
 
             <SignedOut>
-              <Link href="/services/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+              <Link href="/user-services" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
                 Services
               </Link>
             </SignedOut>
@@ -142,17 +142,14 @@ const Navbar = () => {
           <Link href="/" className="block font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
             Home
           </Link>
-          <Link href="/dashboard" className="block font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+          <Link href="/user-dashboard" className="block font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
             Dashboard
           </Link>
-          <Link href="/services" className="block font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+          <Link href="/user-services" className="block font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
             Services
           </Link>
           <Link href="/contact" className="block font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
             Contact
-          </Link>
-          <Link href="/dashboard-admin" className="block font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
-            Admin
           </Link>
         </div>
         

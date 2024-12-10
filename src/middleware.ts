@@ -4,12 +4,22 @@ import { NextResponse } from "next/server";
 
 export default authMiddleware({
   afterAuth(auth, req) {
-    if (!auth.userId && req.nextUrl.pathname.startsWith('/services/user/schedule')) {
-      const signInUrl = new URL('/sign-in', req.url);
-      return NextResponse.redirect(signInUrl);
+    // If not signed in and trying to access protected routes, redirect to sign-in
+    if (!auth.userId) {
+      const protectedPaths = [
+        '/user-dashboard',
+        '/user-services',
+        '/admin-dashboard',
+        '/cashier-dashboard'
+      ];
+
+      if (protectedPaths.some(path => req.nextUrl.pathname.startsWith(path))) {
+        const signInUrl = new URL('/sign-in', req.url);
+        signInUrl.searchParams.set('redirect_url', req.url);
+        return NextResponse.redirect(signInUrl);
+      }
     }
 
-    const role = auth.sessionClaims?.metadata?.role as string;
     return NextResponse.next();
   },
 
@@ -19,7 +29,9 @@ export default authMiddleware({
     '/sign-in/(.*)',
     '/sign-up',
     '/sign-up/(.*)',
-    '/contact'
+    '/contact',
+    '/api/new-user',
+    '/api/auth/check-roles'
   ],
 });
 
