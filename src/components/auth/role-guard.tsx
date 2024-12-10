@@ -1,9 +1,20 @@
-// components/auth/RoleGuard.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+
+// Define the structure of our cache
+type RoleCache = {
+  role: string;
+  timestamp: number;
+};
+
+// How long the cache should last (5 minutes)
+const CACHE_DURATION = 5 * 60 * 1000;
+
+// Create a variable to store our cache
+let roleCache: RoleCache | null = null;
 
 interface RoleGuardProps {
   children: React.ReactNode;
@@ -23,8 +34,24 @@ export default function RoleGuard({ children, allowedRoles }: RoleGuardProps) {
       }
 
       try {
-        const response = await fetch('/api/auth/check-roles');
-        const { role } = await response.json();
+        let role: string;
+
+        // Check if cache exists and is still valid
+        if (roleCache && (Date.now() - roleCache.timestamp) < CACHE_DURATION) {
+          console.log('Using cached role:', roleCache.role);
+          role = roleCache.role;
+        } else {
+          console.log('Fetching fresh role from API');
+          const response = await fetch('/api/auth/check-roles');
+          const data = await response.json();
+          role = data.role;
+
+          // Save to cache
+          roleCache = {
+            role,
+            timestamp: Date.now()
+          };
+        }
 
         // If user isn't authorized for this page, redirect to their appropriate dashboard
         if (!allowedRoles.includes(role)) {
