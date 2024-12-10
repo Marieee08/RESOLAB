@@ -2,9 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useUser } from "@clerk/nextjs";
-import ReservationManagement from '@/components/custom/reservationtable';
-import TestCalendar from '@/components/custom/admincalendar';
+import ReservationManagement from '@/components/admin/reservation-table';
+import TestCalendar from '@/components/admin-functions/admin-calendar';
 import { format } from 'date-fns';
+import RoleGuard from '@/components/auth/role-guard';
 
 interface Reservation {
   id: number;
@@ -57,6 +58,7 @@ const DashboardAdmin = () => {
   }, [user, isLoaded]);
 
   return (
+    <RoleGuard allowedRoles={['ADMIN']}>
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
       {/* Sidebar */}
       <aside className={`absolute left-0 top-0 z-50 flex h-screen w-72 flex-col overflow-y-hidden bg-[#0d172c] duration-300 ease-linear lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
@@ -225,6 +227,7 @@ const DashboardAdmin = () => {
         </main>
       </div>
     </div>
+    </RoleGuard>
   );
 };
 

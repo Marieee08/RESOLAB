@@ -20,16 +20,16 @@ export async function GET() {
 
   try {
     // Try to find existing user
-    let dbUser = await prisma.accInfo.findUnique({  // Changed from user to accInfo
+    let dbUser = await prisma.accInfo.findUnique({ 
       where: { clerkId: user.id },
     });
 
     // If user doesn't exist, create them
     if (!dbUser) {
-      dbUser = await prisma.accInfo.create({  // Changed from user to accInfo
+      dbUser = await prisma.accInfo.create({ 
         data: {
           clerkId: user.id,
-          Name: `${user.firstName} ${user.lastName}`,  // Combined name to match your schema
+          Name: `${user.firstName} ${user.lastName}`, 
           email: user.emailAddresses[0].emailAddress,
           // Role will default to "USER" as specified in your schema
         },

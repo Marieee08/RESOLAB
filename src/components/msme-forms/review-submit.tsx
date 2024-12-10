@@ -127,7 +127,7 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
 
       const token = await getToken();
       
-      const response = await fetch('/api/reservations', {
+      const response = await fetch('/api/user/create-reservation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

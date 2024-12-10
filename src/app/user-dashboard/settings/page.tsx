@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import Navbar from '@/components/custom/navbar';
 import { format } from 'date-fns';
+import DeleteAccountButton from "@/components/auth/delete-account";
 
 
 const DashboardUser = () => {
@@ -110,7 +111,14 @@ const DashboardUser = () => {
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
          
         <section className="flex-1">
-
+            <div className="mt-10">
+              <div className="p-4 border border-red-200 rounded bg-red-50">
+                <p className="text-gray-700 mb-4">
+                  Once you delete your account, there is no going back. Please be certain.
+                </p>
+                <DeleteAccountButton />
+              </div>
+            </div>
 
           </section>
           </div>

@@ -43,7 +43,7 @@ model AccInfo {
   clerkId         String           @unique
   Name            String
   email           String           @unique 
-  Role            String           @default("USER")
+  Role            String           @default("MSME")
   ClientInfo      ClientInfo?      @relation(name: "AccInfoToClientInfo")
   BusinessInfo    BusinessInfo?    @relation(name: "AccInfoToBusinessInfo")
   UtilReqs        UtilReq[]        @relation(name: "AccInfoToUtilReq")
@@ -67,6 +67,7 @@ model ClientInfo {
 
 model BusinessInfo {
   id                  Int     @id @default(autoincrement())
+  isNotBusinessOwner  Boolean  @default(false)
   CompanyName         String?
   BusinessOwner       String?
   BusinessPermitNum   String?

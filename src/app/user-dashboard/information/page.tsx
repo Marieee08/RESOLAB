@@ -33,6 +33,7 @@ interface BusinessInfo {
   Manufactured: string | null;
   ProductionFrequency: string | null;
   Bulk: string | null;
+  isNotBusinessOwner?: boolean;
 }
 
 interface AccInfo {
@@ -46,7 +47,6 @@ interface AccInfo {
 }
 
 
-
 const DashboardUser = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isBusinessView, setIsBusinessView] = useState(false);
@@ -58,6 +58,15 @@ const DashboardUser = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  const [isNotBusinessOwner, setIsNotBusinessOwner] = useState(false);
+  useEffect(() => {
+    if (accInfo?.BusinessInfo?.isNotBusinessOwner !== undefined) {
+      setIsNotBusinessOwner(accInfo.BusinessInfo.isNotBusinessOwner);
+    }
+  }, [accInfo]);
+
+  
+
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
@@ -94,6 +103,63 @@ const DashboardUser = () => {
       fetchAllData();
     }
   }, [user, isLoaded]);
+
+  const handleCheckboxChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.checked;
+    setIsNotBusinessOwner(newValue);
+    
+    try {
+      const response = await fetch('/api/user/update-info', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?.id,
+          type: 'business',
+          data: {
+            isNotBusinessOwner: newValue,
+            // If checked, set all business fields to "Not applicable"
+            ...(newValue ? {
+              CompanyName: "Not applicable",
+              BusinessOwner: "Not applicable",
+              BusinessPermitNum: "Not applicable",
+              TINNum: "Not applicable",
+              CompanyIDNum: "Not applicable",
+              CompanyEmail: "Not applicable",
+              ContactPerson: "Not applicable",
+              Designation: "Not applicable",
+              CompanyAddress: "Not applicable",
+              CompanyCity: "Not applicable",
+              CompanyProvince: "Not applicable",
+              CompanyZipcode: null,
+              CompanyPhoneNum: "Not applicable",
+              CompanyMobileNum: "Not applicable",
+              Manufactured: "Not applicable",
+              ProductionFrequency: "Not applicable",
+              Bulk: "Not applicable"
+            } : {})
+          }
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to update business owner status');
+      }
+  
+      // After successful update, fetch fresh data
+      const refreshResponse = await fetch(`/api/account/${user?.id}`);
+      if (!refreshResponse.ok) {
+        throw new Error('Failed to refresh data');
+      }
+      const refreshedData = await refreshResponse.json();
+      setAccInfo(refreshedData);
+  
+    } catch (error) {
+      console.error('Error updating business owner status:', error);
+      setIsNotBusinessOwner(!newValue); // Revert on error
+    }
+  };
 
 
   return (
@@ -227,6 +293,18 @@ const DashboardUser = () => {
                     Business Info
                   </button>
                 </div>
+                {isBusinessView && (
+                  <label className="flex items-center ml-4 text-sm text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={isNotBusinessOwner}
+                          onChange={handleCheckboxChange}
+                          className="form-checkbox h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                        />
+                    <span className="ml-2">I do not own/operate a business</span>
+                  </label>
+               )}
+
                 <button
                   onClick={() => setIsEditModalOpen(true)}
                   className="ml-4 px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 text-blue-800 bg-blue-100 border border-[#5e86ca]">
@@ -471,6 +549,7 @@ const DashboardUser = () => {
           currentInfo={isBusinessView ? accInfo?.BusinessInfo : accInfo?.ClientInfo}
           isBusinessView={isBusinessView}
           userId={user?.id ?? ''}
+          isNotBusinessOwner={isNotBusinessOwner} 
         />
 
       </div>

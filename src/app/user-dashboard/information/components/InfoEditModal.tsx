@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from 'react';
 
 interface ClientInfo {
@@ -28,6 +26,7 @@ interface BusinessInfo {
   Manufactured: string | null;
   ProductionFrequency: string | null;
   Bulk: string | null;
+  isNotBusinessOwner?: boolean;
 }
 
 interface InfoEditModalProps {
@@ -36,6 +35,7 @@ interface InfoEditModalProps {
   currentInfo: ClientInfo | BusinessInfo | null | undefined;
   isBusinessView: boolean;
   userId: string;
+  isNotBusinessOwner?: boolean;
 }
 
 const InfoEditModal = ({ 
@@ -43,9 +43,10 @@ const InfoEditModal = ({
   onClose, 
   currentInfo, 
   isBusinessView,
-  userId 
+  userId,
+  isNotBusinessOwner = false 
 }: InfoEditModalProps) => {
-    const [formData, setFormData] = useState<any>(currentInfo || null);(currentInfo || null);
+  const [formData, setFormData] = useState<any>(currentInfo || null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -56,7 +57,7 @@ const InfoEditModal = ({
     const { name, value } = e.target;
     setFormData((prev: any) => ({
       ...prev!,
-      [name]: value === '' ? null : value
+      [name]: value === '' ? "Not applicable" : value
     }));
   };
 
@@ -65,7 +66,11 @@ const InfoEditModal = ({
     setLoading(true);
 
     try {
-      const response = await fetch('/api/update-info', {
+      const dataToSubmit = isBusinessView && isNotBusinessOwner
+        ? { isNotBusinessOwner: true }
+        : formData;
+
+      const response = await fetch('/api/user/update-info', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -73,7 +78,7 @@ const InfoEditModal = ({
         body: JSON.stringify({
           userId,
           type: isBusinessView ? 'business' : 'personal',
-          data: formData
+          data: dataToSubmit
         }),
       });
 
@@ -110,221 +115,229 @@ const InfoEditModal = ({
         <form onSubmit={handleSubmit} className="space-y-8">
           {isBusinessView ? (
             <>
-              {/* Company Identity Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700">Company Identity</h3>
-                <div className="grid gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Company Name *</label>
-                    <input
-                      required
-                      type="text"
-                      name="CompanyName"
-                      value={formData?.['CompanyName'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Business Owner *</label>
-                    <input
-                      required
-                      type="text"
-                      name="BusinessOwner"
-                      value={formData?.['BusinessOwner'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Company ID Number</label>
-                    <input
-                      type="text"
-                      name="CompanyIDNum"
-                      value={formData?.['CompanyIDNum'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
-                  </div>
+              {isNotBusinessOwner ? (
+                <div className="bg-gray-50 p-6 rounded-lg text-center">
+                  <p className="text-gray-600">Business information not applicable</p>
                 </div>
-              </div>
-  
-              {/* Legal Information Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700">Legal Information</h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Business Permit Number *</label>
-                    <input
-                      required
-                      type="text"
-                      name="BusinessPermitNum"
-                      value={formData?.['BusinessPermitNum'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">TIN Number *</label>
-                    <input
-                      required
-                      type="text"
-                      name="TINNum"
-                      value={formData?.['TINNum'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
-                  </div>
-                </div>
-              </div>
-  
-              {/* Address Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700">Company Address</h3>
-                <div className="grid gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Street Address</label>
-                    <input
-                      type="text"
-                      name="CompanyAddress"
-                      value={formData?.['CompanyAddress'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">City</label>
-                      <input
-                        type="text"
-                        name="CompanyCity"
-                        value={formData?.['CompanyCity'] || ''}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Province</label>
-                      <input
-                        type="text"
-                        name="CompanyProvince"
-                        value={formData?.['CompanyProvince'] || ''}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Zipcode</label>
-                      <input
-                        type="number"
-                        name="CompanyZipcode"
-                        value={formData?.['CompanyZipcode'] || ''}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                      />
+              ) : (
+                <>
+                  {/* Company Identity Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700">Company Identity</h3>
+                    <div className="grid gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Company Name *</label>
+                        <input
+                          required
+                          type="text"
+                          name="CompanyName"
+                          value={formData?.['CompanyName'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Business Owner *</label>
+                        <input
+                          required
+                          type="text"
+                          name="BusinessOwner"
+                          value={formData?.['BusinessOwner'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Company ID Number</label>
+                        <input
+                          type="text"
+                          name="CompanyIDNum"
+                          value={formData?.['CompanyIDNum'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-  
-              {/* Contact Information Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700">Contact Information</h3>
-                <div className="grid gap-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Contact Person *</label>
-                      <input
-                        required
-                        type="text"
-                        name="ContactPerson"
-                        value={formData?.['ContactPerson'] || ''}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Designation</label>
-                      <input
-                        type="text"
-                        name="Designation"
-                        value={formData?.['Designation'] || ''}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Company Email</label>
-                    <input
-                      type="email"
-                      name="CompanyEmail"
-                      value={formData?.['CompanyEmail'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Phone Number</label>
-                      <input
-                        type="text"
-                        name="CompanyPhoneNum"
-                        value={formData?.['CompanyPhoneNum'] || ''}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Mobile Number</label>
-                      <input
-                        type="text"
-                        name="CompanyMobileNum"
-                        value={formData?.['CompanyMobileNum'] || ''}
-                        onChange={handleChange}
-                        className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                      />
+    
+                  {/* Legal Information Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700">Legal Information</h3>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Business Permit Number *</label>
+                        <input
+                          required
+                          type="text"
+                          name="BusinessPermitNum"
+                          value={formData?.['BusinessPermitNum'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">TIN Number *</label>
+                        <input
+                          required
+                          type="text"
+                          name="TINNum"
+                          value={formData?.['TINNum'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-  
-              {/* Production Information Section */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-700">Production Information</h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Products Manufactured</label>
-                    <input
-                      type="text"
-                      name="Manufactured"
-                      value={formData?.['Manufactured'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
+    
+                  {/* Address Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700">Company Address</h3>
+                    <div className="grid gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Street Address</label>
+                        <input
+                          type="text"
+                          name="CompanyAddress"
+                          value={formData?.['CompanyAddress'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">City</label>
+                          <input
+                            type="text"
+                            name="CompanyCity"
+                            value={formData?.['CompanyCity'] || ''}
+                            onChange={handleChange}
+                            className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Province</label>
+                          <input
+                            type="text"
+                            name="CompanyProvince"
+                            value={formData?.['CompanyProvince'] || ''}
+                            onChange={handleChange}
+                            className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Zipcode</label>
+                          <input
+                            type="number"
+                            name="CompanyZipcode"
+                            value={formData?.['CompanyZipcode'] || ''}
+                            onChange={handleChange}
+                            className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Production Frequency</label>
-                    <input
-                      type="text"
-                      name="ProductionFrequency"
-                      value={formData?.['ProductionFrequency'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
+    
+                  {/* Contact Information Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700">Contact Information</h3>
+                    <div className="grid gap-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Contact Person *</label>
+                          <input
+                            required
+                            type="text"
+                            name="ContactPerson"
+                            value={formData?.['ContactPerson'] || ''}
+                            onChange={handleChange}
+                            className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Designation</label>
+                          <input
+                            type="text"
+                            name="Designation"
+                            value={formData?.['Designation'] || ''}
+                            onChange={handleChange}
+                            className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Company Email</label>
+                        <input
+                          type="email"
+                          name="CompanyEmail"
+                          value={formData?.['CompanyEmail'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Phone Number</label>
+                          <input
+                            type="text"
+                            name="CompanyPhoneNum"
+                            value={formData?.['CompanyPhoneNum'] || ''}
+                            onChange={handleChange}
+                            className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium mb-1">Mobile Number</label>
+                          <input
+                            type="text"
+                            name="CompanyMobileNum"
+                            value={formData?.['CompanyMobileNum'] || ''}
+                            onChange={handleChange}
+                            className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Bulk</label>
-                    <input
-                      type="text"
-                      name="Bulk"
-                      value={formData?.['Bulk'] || ''}
-                      onChange={handleChange}
-                      className="w-full p-2 border border-[#5e86ca] rounded-lg"
-                    />
+    
+                  {/* Production Information Section */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700">Production Information</h3>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Products Manufactured</label>
+                        <input
+                          type="text"
+                          name="Manufactured"
+                          value={formData?.['Manufactured'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Production Frequency</label>
+                        <input
+                          type="text"
+                          name="ProductionFrequency"
+                          value={formData?.['ProductionFrequency'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-1">Bulk</label>
+                        <input
+                          type="text"
+                          name="Bulk"
+                          value={formData?.['Bulk'] || ''}
+                          onChange={handleChange}
+                          className="w-full p-2 border border-[#5e86ca] rounded-lg"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </>
           ) : (
             // Personal Information Form
