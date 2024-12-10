@@ -10,8 +10,7 @@ type RoleCache = {
   timestamp: number;
 };
 
-// How long the cache should last (5 minutes)
-const CACHE_DURATION = 5 * 60 * 1000;
+const CACHE_DURATION = 30 * 60 * 1000;  // 30 minutes
 
 // Create a variable to store our cache
 let roleCache: RoleCache | null = null;

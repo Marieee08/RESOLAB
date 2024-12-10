@@ -8,7 +8,7 @@ export default authMiddleware({
     if (!auth.userId) {
       const protectedPaths = [
         '/user-dashboard',
-        '/user-services',
+        '/user-services/schedule',
         '/admin-dashboard',
         '/cashier-dashboard'
       ];
