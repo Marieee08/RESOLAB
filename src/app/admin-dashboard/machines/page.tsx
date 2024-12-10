@@ -3,7 +3,6 @@
   import Link from 'next/link';
   import AdminMachines from '@/components/custom/adminmachines';
   import AdminTools from '@/components/custom/admintools';
-  import AdminServices from '@/components/custom/adminservices';
   import { format } from 'date-fns';
   import { useUser } from "@clerk/nextjs";
   import { MoreVertical, Edit, Trash2, Mail } from 'lucide-react';
@@ -255,15 +254,11 @@
         <Tabs defaultValue="machines" className="w-full">
           <TabsList className="mb-4">
             <TabsTrigger value="machines">Machines</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
             <TabsTrigger value="tools">Tools</TabsTrigger>
           </TabsList>
 
           <TabsContent value="machines">
             <AdminMachines/>
-          </TabsContent>
-          <TabsContent value="services">
-            <AdminServices/>
           </TabsContent>
           <TabsContent value="tools">
             <AdminTools/>

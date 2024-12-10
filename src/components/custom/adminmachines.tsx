@@ -542,7 +542,7 @@ setMachines(prevMachines => {
         {/* Costs Input */}
         <div>
           <label htmlFor="Costs" className="block text-sm font-medium text-gray-700">
-            Cost ($)
+            Cost (PHP)
           </label>
           <input
             type="number"
