@@ -40,7 +40,7 @@ export async function GET() {
     return new NextResponse(null, {
       status: 302,
       headers: {
-        Location: '/dashboard',
+        Location: '/user-dashboard',
       },
     });
   } catch (error) {
