@@ -267,13 +267,15 @@ export default function AdminServices() {
         Desc: formData.description,
         Link: formData.videoUrl || null,
         isAvailable: formData.isAvailable ?? true,
-        Costs: formData.Costs ? parseFloat(formData.Costs) : null, // Ensure numeric conversion
+        Costs: formData.Costs ? parseFloat(formData.Costs) : null,
+        oldImagePath: editingMachine ? editingMachine.Image : undefined // Add this for image deletion
       };
   
       let response;
       try {
+        // Use different endpoint for PUT/POST
         if (editingMachine) {
-          response = await fetch(`/api/machines`, {
+          response = await fetch(`/api/machines/${editingMachine.id}`, {
             method: 'PUT',
             headers: { 
               'Content-Type': 'application/json' 
@@ -309,64 +311,42 @@ export default function AdminServices() {
           service => service.Service.trim() !== ''
         ) || [];
   
-        // Delete existing services
-        try {
-          await fetch(`/api/services?machineId=${machineId}`, {
-            method: 'DELETE'
-          });
-        } catch (deleteError) {
-          console.warn('Failed to delete existing services', deleteError);
-        }
+        // Bulk delete and recreate services
+        await fetch(`/api/services?machineId=${machineId}`, {
+          method: 'DELETE'
+        });
   
-        // Add new services
         for (const service of filteredServices) {
-          try {
-            const serviceResponse = await fetch('/api/services', {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json' 
-              },
-              body: JSON.stringify({
-                Service: service.Service.trim(),
-                machineId: machineId
-              })
-            });
-  
-            if (!serviceResponse.ok) {
-              const errorText = await serviceResponse.text();
-              console.error('Service creation error:', {
-                service,
-                status: serviceResponse.status,
-                errorText
-              });
-            }
-          } catch (serviceError) {
-            console.error('Unexpected service creation error:', {
-              service,
-              error: serviceError
-            });
-          }
+          await fetch('/api/services', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({
+              Service: service.Service.trim(),
+              machineId: machineId
+            })
+          });
         }
   
         // Update local state
-setMachines(prevMachines => {
-  if (editingMachine) {
-    return prevMachines.map(m => 
-      m.id === result.id 
-        ? { 
-            ...result, 
-            Services: filteredServices.map(s => ({ Service: s.Service })) 
-          } 
-        : m
-    );
-  } else {
-    // For a new machine, create a complete machine object with services
-    return [...prevMachines, {
-      ...result,
-      Services: filteredServices.map(s => ({ Service: s.Service }))
-    }];
-  }
-});
+        setMachines(prevMachines => {
+          if (editingMachine) {
+            return prevMachines.map(m => 
+              m.id === result.id 
+                ? { 
+                    ...result, 
+                    Services: filteredServices.map(s => ({ Service: s.Service })) 
+                  } 
+                : m
+            );
+          } else {
+            return [...prevMachines, {
+              ...result,
+              Services: filteredServices.map(s => ({ Service: s.Service }))
+            }];
+          }
+        });
   
         closeModal();
       } catch (saveError) {
