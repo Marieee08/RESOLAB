@@ -26,41 +26,42 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { Service, machineId } = body;
+    
+    console.log('Received service creation request:', body);
 
-    // Validation
-    if (!Service || Service.trim() === '') {
+    // Validate required fields
+    if (!body.Service || !body.machineId) {
       return NextResponse.json(
-        { error: 'Service name is required' }, 
+        { error: 'Service name and machineId are required' }, 
         { status: 400 }
       );
     }
 
-    // Optional machine existence check
-    if (machineId) {
-      const machine = await prisma.machine.findUnique({
-        where: { id: machineId }
-      });
-
-      if (!machine) {
-        return NextResponse.json(
-          { error: 'Machine not found' }, 
-          { status: 404 }
-        );
-      }
-    }
-
+    // Create service
     const newService = await prisma.service.create({
       data: {
-        Service: Service.trim(),
-        machineId: machineId || undefined
+        Service: body.Service.trim(),
+        machineId: body.machineId
       }
     });
 
-    return NextResponse.json(newService, { status: 201 });
+    console.log('Created service:', newService);
+
+    return NextResponse.json(newService, { 
+      status: 201,
+      headers: { 'Content-Type': 'application/json' }
+    });
   } catch (error) {
+    console.error('Service Creation Error:', error);
+    
     return NextResponse.json(
-      { error: 'Unable to create service', details: error.message }, 
+      { 
+        error: 'Failed to create service',
+        details: error instanceof Error ? {
+          message: error.message,
+          name: error.name
+        } : 'Unknown error'
+      }, 
       { status: 500 }
     );
   }

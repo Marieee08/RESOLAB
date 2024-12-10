@@ -349,20 +349,24 @@ export default function AdminServices() {
         }
   
         // Update local state
-        setMachines(prevMachines => {
-          if (editingMachine) {
-            return prevMachines.map(m => 
-              m.id === result.id 
-                ? { 
-                    ...result, 
-                    Services: filteredServices.map(s => ({ Service: s.Service })) 
-                  } 
-                : m
-            );
-          } else {
-            return [...prevMachines, result];
-          }
-        });
+setMachines(prevMachines => {
+  if (editingMachine) {
+    return prevMachines.map(m => 
+      m.id === result.id 
+        ? { 
+            ...result, 
+            Services: filteredServices.map(s => ({ Service: s.Service })) 
+          } 
+        : m
+    );
+  } else {
+    // For a new machine, create a complete machine object with services
+    return [...prevMachines, {
+      ...result,
+      Services: filteredServices.map(s => ({ Service: s.Service }))
+    }];
+  }
+});
   
         closeModal();
       } catch (saveError) {
@@ -417,7 +421,7 @@ export default function AdminServices() {
   <div className="mb-4">
     <strong className="text-gray-700">Cost: </strong>
     <span className="text-green-600">
-      ${Number(machine.Costs).toLocaleString('en-US', {
+      PHP {Number(machine.Costs).toLocaleString('en-US', {
         minimumFractionDigits: 2, 
         maximumFractionDigits: 2
       })}
@@ -468,149 +472,152 @@ export default function AdminServices() {
   
         {/* Modal for Add/Edit Machine */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-8 w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">{editingMachine ? 'Edit' : 'Add'} Machine</h2>
-                <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
-                  <X size={24} />
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-lg p-8 w-full max-w-md max-h-[90vh] overflow-y-auto relative">
+      <div className="sticky top-0 bg-white z-10 flex justify-between items-center mb-4 pb-2 border-b">
+        <h2 className="text-2xl font-bold">{editingMachine ? 'Edit' : 'Add'} Machine</h2>
+        <button 
+          onClick={closeModal} 
+          className="text-gray-500 hover:text-gray-700 absolute top-0 right-0"
+        >
+          <X size={24} />
+        </button>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Name Input */}
+        <div>
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            Name
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            required
+          />
+        </div>
+
+        {/* Description Input */}
+        <div>
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            Description
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            rows={3}
+            required
+          ></textarea>
+        </div>
+
+        {/* Image Upload */}
+        <div>
+          <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+            {imageFile ? 'Change Image' : 'Upload Image'}
+          </label>
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="mt-1 block w-full"
+          />
+          {imagePreview && (
+            <img 
+              src={imagePreview} 
+              alt="Preview" 
+              className="mt-2 w-full h-48 object-cover rounded-md" 
+            />
+          )}
+        </div>
+
+        {/* Costs Input */}
+        <div>
+          <label htmlFor="Costs" className="block text-sm font-medium text-gray-700">
+            Cost ($)
+          </label>
+          <input
+            type="number"
+            id="Costs"
+            name="Costs"
+            step="0.01"
+            min="0"
+            value={formData.Costs || 0}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          />
+        </div>
+
+        {/* Services Input */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Services
+          </label>
+          {formData.Services?.map((service, index) => (
+            <div key={index} className="flex items-center space-x-2 mb-2">
+              <input
+                type="text"
+                value={service.Service}
+                onChange={(e) => handleServiceChange(index, e.target.value)}
+                placeholder="Enter service"
+                className="flex-grow rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              />
+              {index > 0 && (
+                <button
+                  type="button"
+                  onClick={() => removeServiceField(index)}
+                  className="bg-red-500 text-white p-2 rounded-full"
+                >
+                  <X size={16} />
                 </button>
-              </div>
-              
-              <form onSubmit={handleSubmit}>
-                {/* Name Input */}
-                <div className="mb-4">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name || ''}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    required
-                  />
-                </div>
-  
-                {/* Description Input */}
-                <div className="mb-4">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description || ''}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    rows={3}
-                    required
-                  ></textarea>
-                </div>
-  
-                {/* Image Upload */}
-                <div className="mb-4">
-                  <label htmlFor="image" className="block text-sm font-medium text-gray-700">
-                    {imageFile ? 'Change Image' : 'Upload Image'}
-                  </label>
-                  <input
-                    type="file"
-                    id="image"
-                    name="image"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="mt-1 block w-full"
-                  />
-                  {imagePreview && (
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview" 
-                      className="mt-2 w-full h-48 object-cover rounded-md" 
-                    />
-                  )}
-                </div>
-  
-                {/* Costs Input */}
-                <div className="mb-4">
-                  <label htmlFor="Costs" className="block text-sm font-medium text-gray-700">
-                    Cost ($)
-                  </label>
-                  <input
-                    type="number"
-                    id="Costs"
-                    name="Costs"
-                    step="0.01"
-                    min="0"
-                    value={formData.Costs || 0}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
-                </div>
-  
-                {/* Services Input */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Services
-                  </label>
-                  {formData.Services?.map((service, index) => (
-                    <div key={index} className="flex items-center space-x-2 mb-2">
-                      <input
-                        type="text"
-                        value={service.Service}
-                        onChange={(e) => handleServiceChange(index, e.target.value)}
-                        placeholder="Enter service"
-                        className="flex-grow rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                      />
-                      {index > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => removeServiceField(index)}
-                          className="bg-red-500 text-white p-2 rounded-full"
-                        >
-                          <X size={16} />
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={addServiceField}
-                    className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md flex items-center"
-                  >
-                    <Plus size={16} className="mr-2" /> Add Service
-                  </button>
-                </div>
-  
-                {/* Video URL Input */}
-                <div className="mb-4">
-                  <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700">
-                    YouTube Video URL
-                  </label>
-                  <input
-                    type="text"
-                    id="videoUrl"
-                    name="videoUrl"
-                    value={formData.videoUrl || ''}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                  />
-                </div>
-  
-                {/* Submit Button */}
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                  >
-                    {editingMachine ? 'Update' : 'Add'} Machine
-                  </button>
-                </div>
-              </form>
+              )}
             </div>
-          </div>
-        )}
+          ))}
+          <button
+            type="button"
+            onClick={addServiceField}
+            className="mt-2 bg-green-500 text-white px-4 py-2 rounded-md flex items-center"
+          >
+            <Plus size={16} className="mr-2" /> Add Service
+          </button>
+        </div>
+
+        {/* Video URL Input */}
+        <div>
+          <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700">
+            YouTube Video URL
+          </label>
+          <input
+            type="text"
+            id="videoUrl"
+            name="videoUrl"
+            value={formData.videoUrl || ''}
+            onChange={handleInputChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+          />
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex justify-end mt-4">
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          >
+            {editingMachine ? 'Update' : 'Add'} Machine
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
         </div>
       </main>
   );
