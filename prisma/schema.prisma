@@ -67,6 +67,7 @@ model ClientInfo {
 
 model BusinessInfo {
   id                  Int     @id @default(autoincrement())
+  isNotBusinessOwner  Boolean  @default(false)
   CompanyName         String?
   BusinessOwner       String?
   BusinessPermitNum   String?

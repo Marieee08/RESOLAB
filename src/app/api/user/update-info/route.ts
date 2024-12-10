@@ -1,7 +1,13 @@
-// app/api/update-info/route.ts
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+
+const processField = (value: any) => {
+  if (value === '' || value === null || value === undefined) {
+    return "Not applicable";
+  }
+  return value;
+};
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +22,6 @@ export async function POST(request: Request) {
 
     const { type, data } = await request.json();
 
-    // Find the user's account
     const userAccount = await prisma.accInfo.findFirst({
       where: {
         clerkId: userId,
@@ -31,49 +36,128 @@ export async function POST(request: Request) {
     }
 
     if (type === 'business') {
-      // Handle BusinessInfo creation/update
+      // Handle isNotBusinessOwner flag separately
+      if (typeof data.isNotBusinessOwner === 'boolean') {
+        const updatedBusiness = await prisma.businessInfo.upsert({
+          where: {
+            accInfoId: userAccount.id,
+          },
+          update: {
+            isNotBusinessOwner: data.isNotBusinessOwner,
+            ...(data.isNotBusinessOwner ? {
+              // When checking the box, set everything to "Not applicable"
+              CompanyName: "Not applicable",
+              BusinessOwner: "Not applicable",
+              BusinessPermitNum: "Not applicable",
+              TINNum: "Not applicable",
+              CompanyIDNum: "Not applicable",
+              CompanyEmail: "Not applicable",
+              ContactPerson: "Not applicable",
+              Designation: "Not applicable",
+              CompanyAddress: "Not applicable",
+              CompanyCity: "Not applicable",
+              CompanyProvince: "Not applicable",
+              CompanyZipcode: null,
+              CompanyPhoneNum: "Not applicable",
+              CompanyMobileNum: "Not applicable",
+              Manufactured: "Not applicable",
+              ProductionFrequency: "Not applicable",
+              Bulk: "Not applicable"
+            } : {
+              // When unchecking the box, reset everything to null
+              CompanyName: null,
+              BusinessOwner: null,
+              BusinessPermitNum: null,
+              TINNum: null,
+              CompanyIDNum: null,
+              CompanyEmail: null,
+              ContactPerson: null,
+              Designation: null,
+              CompanyAddress: null,
+              CompanyCity: null,
+              CompanyProvince: null,
+              CompanyZipcode: null,
+              CompanyPhoneNum: null,
+              CompanyMobileNum: null,
+              Manufactured: null,
+              ProductionFrequency: null,
+              Bulk: null
+            })
+          },
+          create: {
+            accInfoId: userAccount.id,
+            isNotBusinessOwner: data.isNotBusinessOwner,
+            CompanyName: data.isNotBusinessOwner ? "Not applicable" : null,
+            BusinessOwner: data.isNotBusinessOwner ? "Not applicable" : null,
+            BusinessPermitNum: data.isNotBusinessOwner ? "Not applicable" : null,
+            TINNum: data.isNotBusinessOwner ? "Not applicable" : null,
+            CompanyIDNum: data.isNotBusinessOwner ? "Not applicable" : null,
+            CompanyEmail: data.isNotBusinessOwner ? "Not applicable" : null,
+            ContactPerson: data.isNotBusinessOwner ? "Not applicable" : null,
+            Designation: data.isNotBusinessOwner ? "Not applicable" : null,
+            CompanyAddress: data.isNotBusinessOwner ? "Not applicable" : null,
+            CompanyCity: data.isNotBusinessOwner ? "Not applicable" : null,
+            CompanyProvince: data.isNotBusinessOwner ? "Not applicable" : null,
+            CompanyZipcode: null,
+            CompanyPhoneNum: data.isNotBusinessOwner ? "Not applicable" : null,
+            CompanyMobileNum: data.isNotBusinessOwner ? "Not applicable" : null,
+            Manufactured: data.isNotBusinessOwner ? "Not applicable" : null,
+            ProductionFrequency: data.isNotBusinessOwner ? "Not applicable" : null,
+            Bulk: data.isNotBusinessOwner ? "Not applicable" : null,
+          },
+        });
+      
+        return NextResponse.json({
+          success: true,
+          data: updatedBusiness,
+          message: 'Business owner status updated successfully'
+        });
+      }
+
       const updatedBusiness = await prisma.businessInfo.upsert({
         where: {
           accInfoId: userAccount.id,
         },
         update: {
-          CompanyName: data.CompanyName,
-          BusinessOwner: data.BusinessOwner,
-          BusinessPermitNum: data.BusinessPermitNum,
-          TINNum: data.TINNum,
-          CompanyIDNum: data.CompanyIDNum,
-          CompanyEmail: data.CompanyEmail,
-          ContactPerson: data.ContactPerson,
-          Designation: data.Designation,
-          CompanyAddress: data.CompanyAddress,
-          CompanyCity: data.CompanyCity,
-          CompanyProvince: data.CompanyProvince,
+          CompanyName: processField(data.CompanyName),
+          BusinessOwner: processField(data.BusinessOwner),
+          BusinessPermitNum: processField(data.BusinessPermitNum),
+          TINNum: processField(data.TINNum),
+          CompanyIDNum: processField(data.CompanyIDNum),
+          CompanyEmail: processField(data.CompanyEmail),
+          ContactPerson: processField(data.ContactPerson),
+          Designation: processField(data.Designation),
+          CompanyAddress: processField(data.CompanyAddress),
+          CompanyCity: processField(data.CompanyCity),
+          CompanyProvince: processField(data.CompanyProvince),
           CompanyZipcode: data.CompanyZipcode ? parseInt(data.CompanyZipcode.toString()) : null,
-          CompanyPhoneNum: data.CompanyPhoneNum,
-          CompanyMobileNum: data.CompanyMobileNum,
-          Manufactured: data.Manufactured,
-          ProductionFrequency: data.ProductionFrequency,
-          Bulk: data.Bulk,
+          CompanyPhoneNum: processField(data.CompanyPhoneNum),
+          CompanyMobileNum: processField(data.CompanyMobileNum),
+          Manufactured: processField(data.Manufactured),
+          ProductionFrequency: processField(data.ProductionFrequency),
+          Bulk: processField(data.Bulk),
+          isNotBusinessOwner: data.isNotBusinessOwner ?? false,
         },
         create: {
           accInfoId: userAccount.id,
-          CompanyName: data.CompanyName,
-          BusinessOwner: data.BusinessOwner,
-          BusinessPermitNum: data.BusinessPermitNum,
-          TINNum: data.TINNum,
-          CompanyIDNum: data.CompanyIDNum,
-          CompanyEmail: data.CompanyEmail,
-          ContactPerson: data.ContactPerson,
-          Designation: data.Designation,
-          CompanyAddress: data.CompanyAddress,
-          CompanyCity: data.CompanyCity,
-          CompanyProvince: data.CompanyProvince,
+          CompanyName: processField(data.CompanyName),
+          BusinessOwner: processField(data.BusinessOwner),
+          BusinessPermitNum: processField(data.BusinessPermitNum),
+          TINNum: processField(data.TINNum),
+          CompanyIDNum: processField(data.CompanyIDNum),
+          CompanyEmail: processField(data.CompanyEmail),
+          ContactPerson: processField(data.ContactPerson),
+          Designation: processField(data.Designation),
+          CompanyAddress: processField(data.CompanyAddress),
+          CompanyCity: processField(data.CompanyCity),
+          CompanyProvince: processField(data.CompanyProvince),
           CompanyZipcode: data.CompanyZipcode ? parseInt(data.CompanyZipcode.toString()) : null,
-          CompanyPhoneNum: data.CompanyPhoneNum,
-          CompanyMobileNum: data.CompanyMobileNum,
-          Manufactured: data.Manufactured,
-          ProductionFrequency: data.ProductionFrequency,
-          Bulk: data.Bulk,
+          CompanyPhoneNum: processField(data.CompanyPhoneNum),
+          CompanyMobileNum: processField(data.CompanyMobileNum),
+          Manufactured: processField(data.Manufactured),
+          ProductionFrequency: processField(data.ProductionFrequency),
+          Bulk: processField(data.Bulk),
+          isNotBusinessOwner: data.isNotBusinessOwner ?? false,
         },
       });
 
@@ -83,24 +167,23 @@ export async function POST(request: Request) {
         message: 'Business information updated successfully'
       });
     } else if (type === 'personal') {
-      // Handle Personal Information creation/update
       const updatedClient = await prisma.clientInfo.upsert({
         where: {
           accInfoId: userAccount.id,
         },
         update: {
-          ContactNum: data.ContactNum,
-          Address: data.Address,
-          City: data.City,
-          Province: data.Province,
+          ContactNum: processField(data.ContactNum),
+          Address: processField(data.Address),
+          City: processField(data.City),
+          Province: processField(data.Province),
           Zipcode: data.Zipcode ? parseInt(data.Zipcode.toString()) : null,
         },
         create: {
           accInfoId: userAccount.id,
-          ContactNum: data.ContactNum,
-          Address: data.Address,
-          City: data.City,
-          Province: data.Province,
+          ContactNum: processField(data.ContactNum),
+          Address: processField(data.Address),
+          City: processField(data.City),
+          Province: processField(data.Province),
           Zipcode: data.Zipcode ? parseInt(data.Zipcode.toString()) : null,
         },
       });
