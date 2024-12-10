@@ -1,8 +1,8 @@
 "use client";
   import React, { useState, useEffect } from 'react';
   import Link from 'next/link';
-  import AdminMachines from '@/components/custom/adminmachines';
-  import AdminTools from '@/components/custom/admintools';
+  import AdminMachines from '@/components/admin-functions/admin-machines';
+  import AdminTools from '@/components/admin-functions/admin-tools';
   import { format } from 'date-fns';
   import { useUser } from "@clerk/nextjs";
   import { MoreVertical, Edit, Trash2, Mail } from 'lucide-react';

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import ReservationHistory from '@/components/custom/reservationhistory';
+import ReservationHistory from '@/components/admin/reservation-history';
 import { format } from 'date-fns';
 import { useUser } from "@clerk/nextjs";
 import RoleGuard from '@/components/auth/role-guard';

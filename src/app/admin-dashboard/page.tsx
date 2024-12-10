@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useUser } from "@clerk/nextjs";
-import ReservationManagement from '@/components/custom/reservationtable';
-import TestCalendar from '@/components/custom/admincalendar';
+import ReservationManagement from '@/components/admin/reservation-table';
+import TestCalendar from '@/components/admin-functions/admin-calendar';
 import { format } from 'date-fns';
 import RoleGuard from '@/components/auth/role-guard';
 

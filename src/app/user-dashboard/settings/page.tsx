@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import Navbar from '@/components/custom/navbar';
 import { format } from 'date-fns';
-import DeleteAccountButton from "@/components/custom/delete-account";
+import DeleteAccountButton from "@/components/auth/delete-account";
 
 
 const DashboardUser = () => {

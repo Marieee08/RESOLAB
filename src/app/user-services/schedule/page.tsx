@@ -3,10 +3,10 @@
 
 import React, { useState } from 'react';
 import { Calendar } from '@/components/ui/calendar';
-import ProgressBar from '@/components/custom/progress-bar';
+import ProgressBar from '@/components/msme-forms/progress-bar';
 import Navbar from '@/components/custom/navbar';
-import ProcessInformation from '@/components/forms/UtilizationInfo';
-import ReviewSubmit from '@/components/forms/ReviewSubmit';
+import ProcessInformation from '@/components/msme-forms/utilization-info';
+import ReviewSubmit from '@/components/msme-forms/review-submit';
 
 
 const MAX_DATES = 5;
