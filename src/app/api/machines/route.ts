@@ -1,6 +1,7 @@
 // app/api/machines/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';  // Add this import
 
 export async function POST(request: NextRequest) {
   try {
