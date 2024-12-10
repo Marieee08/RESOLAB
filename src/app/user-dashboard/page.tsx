@@ -46,7 +46,7 @@ const DashboardUser = () => {
  useEffect(() => {
   const fetchReservations = async () => {
     try {
-      const response = await fetch('/api/fetchReservations');
+      const response = await fetch('/api/user/fetch-reservations');
       if (response.ok) {
         const data = await response.json();
         setReservations(data);

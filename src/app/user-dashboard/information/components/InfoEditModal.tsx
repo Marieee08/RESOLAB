@@ -65,7 +65,7 @@ const InfoEditModal = ({
     setLoading(true);
 
     try {
-      const response = await fetch('/api/update-info', {
+      const response = await fetch('/api/user/update-info', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
