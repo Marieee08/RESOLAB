@@ -92,7 +92,7 @@ export default function Services() {
     <p className="text-gray-700 mb-8 text-center text-md font-poppins1 mb-5">Check out the latest updates on machine availability and maintenance.</p>
     <div className="text-center">
       <Link 
-        href="/user-services/schedule" 
+        href="/user-services/msme-schedule" 
         className="inline-block transition duration-700 
           animate-[bounce_4s_infinite] hover:animate-none hover:scale-105
           bg-[#193d83] text-white font-qanelas1 text-lg py-1 px-6 rounded-md hover:bg-[#2f61c2]"
