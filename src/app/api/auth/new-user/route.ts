@@ -31,7 +31,6 @@ export async function GET() {
           clerkId: user.id,
           Name: `${user.firstName} ${user.lastName}`, 
           email: user.emailAddresses[0].emailAddress,
-          // Role will default to "USER" as specified in your schema
         },
       });
     }

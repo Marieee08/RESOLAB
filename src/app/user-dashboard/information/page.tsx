@@ -70,7 +70,6 @@ const DashboardUser = () => {
   const today = new Date();
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
-
   useEffect(() => {
     const fetchAllData = async () => {
       if (!user) {
@@ -79,7 +78,6 @@ const DashboardUser = () => {
       }
 
       try {
-        // Fetch AccInfo with related data
         const response = await fetch(`/api/account/${user.id}`);
         if (!response.ok) {
           throw new Error('Failed to fetch account data');
@@ -87,10 +85,12 @@ const DashboardUser = () => {
         const data = await response.json();
         setAccInfo(data);
 
-        // Set user role from Clerk metadata
-        const publicMetadata = user.publicMetadata;
-        const role = publicMetadata.role || "USER";
-        setUserRole(role as string);
+        const roleResponse = await fetch('/api/auth/check-roles');
+        if (!roleResponse.ok) {
+          throw new Error('Failed to fetch role');
+        }
+        const roleData = await roleResponse.json();
+        setUserRole(roleData.role || "No role assigned");
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
         console.error("Error fetching data:", err);
@@ -98,11 +98,11 @@ const DashboardUser = () => {
         setLoading(false);
       }
     };
-
     if (isLoaded) {
       fetchAllData();
     }
   }, [user, isLoaded]);
+
 
   const handleCheckboxChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.checked;
