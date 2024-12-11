@@ -16,6 +16,7 @@ const Navbar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const userRole = user?.publicMetadata?.role || "USER";
+  
   useEffect(() => { 
     const handleScroll = () => { 
       if (window.scrollY > 50) { 
@@ -38,7 +39,7 @@ const Navbar = () => {
           setIconColor('#0e4579');
         } else {
           setBgColor('transparent');
-          setTextColor('');
+          setTextColor('white');
           setIconColor('white');
         }
       }
@@ -90,15 +91,15 @@ const Navbar = () => {
             </Link>
             
             <SignedIn>
-                  <Link href="/user-dashboard" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+                  <Link style={{color: textColor}} href="/user-dashboard" className={linkClassName}>
                     Dashboard
                   </Link>
             </SignedIn>
             
-            <Link href="/user-services" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+            <Link href="/user-services" className={linkClassName} style={{color: textColor}}>
                 Services
               </Link>
-            <Link href="/contact" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+            <Link href="/contact" className={linkClassName}  style={{color: textColor}} >
               Contact
             </Link>
 
@@ -128,7 +129,7 @@ const Navbar = () => {
           <div className="flex items-center gap-3 2xsm:gap-7">
             <SignedOut>
               <SignInButton mode='modal'>
-                <button style={{color: iconColor}} className="font-qanelas1 text-[#0e4579]">Sign In</button>
+                <button style={{color: iconColor}} className={linkClassName} >Sign In</button>
               </SignInButton>
             </SignedOut>
             <SignedIn>
