@@ -47,7 +47,22 @@ interface Reservation {
 const DashboardUser = () => {
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
-
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Approved':
+        return 'bg-blue-100 text-blue-800';
+      case 'Completed':
+        return 'bg-green-100 text-green-800';
+      case 'Cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'Pending payment':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -309,13 +324,7 @@ const handleReviewClick = (reservation: Reservation) => {
                         </td>
 
                         <td className="px-4 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            reservation.Status === 'Pending' 
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : reservation.Status === 'Approved'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(reservation.Status)}`}>
                             {reservation.Status}
                           </span>
                         </td>
@@ -375,13 +384,7 @@ const handleReviewClick = (reservation: Reservation) => {
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">Status</h3>
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      selectedReservation.Status === 'Pending' 
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : selectedReservation.Status === 'Approved'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(selectedReservation.Status)}`}>
                       {selectedReservation.Status}
                     </span>
                   </div>
