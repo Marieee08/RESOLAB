@@ -14,25 +14,28 @@ const DashboardAdmin = () => {
   const [userRole, setUserRole] = useState<string>("Loading...");
   const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
   
-  useEffect(() => {
-    const checkUserRole = async () => {
-      if (!user) {
+   // useEffect to user role
+   useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!isLoaded || !user) {
         setUserRole("Not logged in");
         return;
       }
+  
       try {
-        const publicMetadata = user.publicMetadata;
-        const role = publicMetadata.role || "USER";
-        setUserRole(role as string);
+        const response = await fetch('/api/auth/check-roles');
+        if (!response.ok) {
+          throw new Error('Failed to fetch role');
+        }
+        const data = await response.json();
+        setUserRole(data.role || "No role assigned");
       } catch (error) {
         console.error("Error fetching user role:", error);
         setUserRole("Error fetching role");
       }
     };
   
-    if (isLoaded) {
-      checkUserRole();
-    }
+    fetchUserRole();
   }, [user, isLoaded]);
 
   return (
@@ -153,7 +156,7 @@ const DashboardAdmin = () => {
             <Link href="/" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Home
             </Link>
-            <Link href="/services/user" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+            <Link href="/user-services" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
               Services
             </Link>
             <Link href="/contact" className="font-qanelas1 text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">

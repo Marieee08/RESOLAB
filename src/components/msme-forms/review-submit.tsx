@@ -6,12 +6,6 @@ import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
 
-interface ToolItem {
-  id: string;
-  name: string;
-  quantity: number;
-}
-
 interface ClientInfo {
   ContactNum: string;
   Address: string | null;
@@ -55,21 +49,19 @@ interface FormData {
     startTime: string | null;
     endTime: string | null;
   }[];
-  ProductsManufactured: string;
+  ProductsManufactured: string | string[];
   BulkofCommodity: string;
   Equipment: string;
   Tools: string;
-  ToolsQty: number;
 }
 
 interface ReviewSubmitProps {
   formData: FormData;
   prevStep: () => void;
   updateFormData: (field: keyof FormData, value: FormData[keyof FormData]) => void;
-  nextStep: () => void;
 }
 
-const parseToolString = (toolString: string): Tool[] => {
+const parseToolString = (toolString: string): { Tool: string; Quantity: number }[] => {
   if (!toolString || toolString === 'NOT APPLICABLE') return [];
   try {
     return JSON.parse(toolString);
@@ -99,12 +91,9 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
   useEffect(() => {
     const fetchUserInfo = async () => {
       if (!user) return;
-
       try {
         const response = await fetch(`/api/account/${user.id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch user information');
-        }
+        if (!response.ok) throw new Error('Failed to fetch user information');
         const data = await response.json();
         setAccInfo(data);
       } catch (err) {
@@ -127,6 +116,14 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
 
       const token = await getToken();
       
+      const submissionData = {
+        ...formData,
+        days: formData.days.map(day => ({
+          ...day,
+          date: new Date(day.date)
+        }))
+      };
+
       const response = await fetch('/api/user/create-reservation', {
         method: 'POST',
         headers: {
@@ -134,8 +131,7 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...formData,
-          // Include user information from accInfo
+          ...submissionData,
           userInfo: {
             clientInfo: accInfo?.ClientInfo,
             businessInfo: accInfo?.BusinessInfo
@@ -144,7 +140,8 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
       });
 
       if (!response.ok) {
-        throw new Error('Failed to submit reservation');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit reservation');
       }
 
       router.push('/user-dashboard');
@@ -251,51 +248,51 @@ export default function ReviewSubmit({ formData, prevStep, updateFormData }: Rev
           </div>
         )}
 
-{renderSection('Utilization Information',
-  <div className="grid grid-cols-2 gap-4">
-    <div className="col-span-2">
-      <p className="text-sm text-gray-600">Services Availed</p>
-      {Array.isArray(formData.ProductsManufactured) ? (
-        <div className="mt-1 flex flex-wrap gap-2">
-          {formData.ProductsManufactured.map((service, index) => (
-            <span 
-              key={index} 
-              className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm"
-            >
-              {service}
-            </span>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-1">{formData.ProductsManufactured || 'Not provided'}</p>
-      )}
-    </div>
-    <div className="col-span-2">
-      <p className="text-sm text-gray-600">Bulk of Commodity</p>
-      <p className="mt-1">{formData.BulkofCommodity || 'Not provided'}</p>
-    </div>
-    <div className="col-span-2">
-      <p className="text-sm text-gray-600">Tools</p>
-      {parseToolString(formData.Tools).length > 0 ? (
-        <div className="mt-2 space-y-2">
-          {parseToolString(formData.Tools).map((tool) => (
-            <div 
-              key={tool.id} 
-              className="flex items-center justify-between bg-gray-50 p-2 rounded"
-            >
-              <span className="flex-grow">{tool.Tool}</span>
-              <span className="text-gray-600">
-                Quantity: {tool.Quantity}
-              </span>
+        {renderSection('Utilization Information',
+          <div className="grid grid-cols-2 gap-4">
+            <div className="col-span-2">
+              <p className="text-sm text-gray-600">Services Availed</p>
+              {Array.isArray(formData.ProductsManufactured) ? (
+                <div className="mt-1 flex flex-wrap gap-2">
+                  {formData.ProductsManufactured.map((service, index) => (
+                    <span 
+                      key={index} 
+                      className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm"
+                    >
+                      {service}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-1">{formData.ProductsManufactured || 'Not provided'}</p>
+              )}
             </div>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-1">No tools selected</p>
-      )}
-    </div>
-  </div>
-)}
+            <div className="col-span-2">
+              <p className="text-sm text-gray-600">Bulk of Commodity</p>
+              <p className="mt-1">{formData.BulkofCommodity || 'Not provided'}</p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-sm text-gray-600">Tools</p>
+              {parseToolString(formData.Tools).length > 0 ? (
+                <div className="mt-2 space-y-2">
+                  {parseToolString(formData.Tools).map((tool, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center justify-between bg-gray-50 p-2 rounded"
+                    >
+                      <span className="flex-grow">{tool.Tool}</span>
+                      <span className="text-gray-600">
+                        Quantity: {tool.Quantity}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-1">No tools selected</p>
+              )}
+            </div>
+          </div>
+        )}
 
         {error && (
           <Alert variant="destructive" className="mt-4">
