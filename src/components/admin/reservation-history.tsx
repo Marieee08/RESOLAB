@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -109,18 +110,14 @@ const ReservationHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState<DetailedReservation | null>(null);
-
-  // Generate array of years (current year -10 to +10 years)
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
   
-  // Array of months
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // Fetch reservations
   useEffect(() => {
     const fetchReservations = async () => {
       try {
@@ -176,7 +173,6 @@ const ReservationHistory = () => {
     }
   };
 
-  // Filter reservations
   const filteredReservations = reservations.filter(reservation => {
     const matchesTab = activeTab === 'all' || reservation.role.toLowerCase() === activeTab.toLowerCase();
     
@@ -197,6 +193,38 @@ const ReservationHistory = () => {
   }
 
 
+  const handleStatusUpdate = async (reservationId: number, newStatus: 'Approved' | 'Cancelled') => {
+    try {
+      const response = await fetch(`/api/admin/reservation-status/${reservationId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update status');
+
+      // Update the reservations list with the new status
+      setReservations(prevReservations =>
+        prevReservations.map(res =>
+          res.id === String(reservationId)
+            ? { ...res, status: newStatus }
+            : res
+        )
+      );
+
+      // Update the selected reservation if it's open in the modal
+      if (selectedReservation && selectedReservation.id === reservationId) {
+        setSelectedReservation({ ...selectedReservation, Status: newStatus });
+      }
+
+      // Close the modal
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error updating reservation status:', error);
+    }
+  };
 
 
   return (
@@ -336,7 +364,8 @@ const ReservationHistory = () => {
           </DialogHeader>
           
           {selectedReservation && (
-            <Tabs defaultValue="reservation" className="w-full">
+            <div className="space-y-6">
+               <Tabs defaultValue="reservation" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="reservation">Reservation</TabsTrigger>
                 <TabsTrigger value="personal">Personal Info</TabsTrigger>
@@ -468,10 +497,29 @@ const ReservationHistory = () => {
                 )}
               </TabsContent>
             </Tabs>
+
+              <DialogFooter>
+                <div className="flex w-full justify-end gap-4">
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleStatusUpdate(selectedReservation.id, 'Rejected')}
+                    disabled={selectedReservation.Status !== 'Pending'}
+                  >
+                    Reject Reservation
+                  </Button>
+                  <Button
+                    variant="default"
+                    onClick={() => handleStatusUpdate(selectedReservation.id, 'Approved')}
+                    disabled={selectedReservation.Status !== 'Pending'}
+                  >
+                    Accept Reservation
+                  </Button>
+                </div>
+              </DialogFooter>
+            </div>
           )}
         </DialogContent>
       </Dialog>
-
     </div>
   );
 };
