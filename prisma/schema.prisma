@@ -118,10 +118,17 @@ model UtilReq {
 model ProcessInfo {
   id           Int      @id @default(autoincrement())
   AvailedServices         AvailedService[]        @relation(name: "ProcessInfoToAvailedService") //One-to-many
-  Tools        String?
-  ToolsQty     Int?
-  utilReqId    Int? //Foreign key for one-to-many relationship
+  UserTools             UserTool[]        @relation(name: "ProcessInfoToUserTool") //One-to-many
+  utilReqId             Int? //Foreign key for one-to-many relationship
   utilReq      UtilReq? @relation(name: "UtilReqToProcessInfo", fields: [utilReqId], references: [id])
+}
+
+model UserTool {
+  id          String   @id @default(cuid())
+  ToolUser        String
+  ToolQuantity    Int
+  processInfoId        Int? //Foreign key for one-to-many relationship
+  processInfo          ProcessInfo? @relation(name: "ProcessInfoToUserTool", fields: [processInfoId], references: [id])
 }
 
 model AvailedService {
@@ -133,7 +140,7 @@ model AvailedService {
   processInfo          ProcessInfo? @relation(name: "ProcessInfoToAvailedService", fields: [processInfoId], references: [id])
 }
 
-// Also parrt of Utilization Request
+// Also part of Utilization Request
 
 model UtilTime {
   id        Int       @id @default(autoincrement())

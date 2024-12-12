@@ -261,26 +261,28 @@ export default function AdminServices() {
       }
   
       const machinePayload = {
-        ...(editingMachine ? { id: editingMachine.id } : {}),
         Machine: formData.name,
         Image: imageUrl || '', 
         Desc: formData.description,
         Link: formData.videoUrl || null,
         isAvailable: formData.isAvailable ?? true,
-        Costs: formData.Costs ? parseFloat(formData.Costs) : null,
-        oldImagePath: editingMachine ? editingMachine.Image : undefined // Add this for image deletion
+        Costs: formData.Costs ? parseFloat(formData.Costs.toString()) : null,
       };
+  
+      console.log('Machine Payload:', machinePayload);
   
       let response;
       try {
-        // Use different endpoint for PUT/POST
         if (editingMachine) {
           response = await fetch(`/api/machines/${editingMachine.id}`, {
             method: 'PUT',
             headers: { 
               'Content-Type': 'application/json' 
             },
-            body: JSON.stringify(machinePayload)
+            body: JSON.stringify({
+              ...machinePayload,
+              id: editingMachine.id
+            })
           });
         } else {
           response = await fetch('/api/machines', {
@@ -292,32 +294,27 @@ export default function AdminServices() {
           });
         }
   
-        // More detailed error handling
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('Machine save error:', {
-            status: response.status,
-            statusText: response.statusText,
-            errorBody: errorText
-          });
           throw new Error(`Failed to save machine: ${errorText}`);
         }
   
         const result = await response.json();
         const machineId = result.id;
   
-        // Services handling
+        // Only create services if there are any
         const filteredServices = formData.Services?.filter(
-          service => service.Service.trim() !== ''
+          service => service.Service && service.Service.trim() !== ''
         ) || [];
   
-        // Bulk delete and recreate services
+        // Delete existing services first
         await fetch(`/api/services?machineId=${machineId}`, {
           method: 'DELETE'
         });
   
+        // Create new services
         for (const service of filteredServices) {
-          await fetch('/api/services', {
+          const serviceResponse = await fetch('/api/services', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json' 
@@ -327,6 +324,11 @@ export default function AdminServices() {
               machineId: machineId
             })
           });
+  
+          if (!serviceResponse.ok) {
+            const serviceErrorText = await serviceResponse.text();
+            throw new Error(`Failed to save service: ${serviceErrorText}`);
+          }
         }
   
         // Update local state
@@ -357,7 +359,7 @@ export default function AdminServices() {
       console.error('Main submission error:', mainError);
       alert(`An unexpected error occurred: ${mainError.message}`);
     }
-  };
+  }; 
 
   return (
     <main className="min-h-screen">
