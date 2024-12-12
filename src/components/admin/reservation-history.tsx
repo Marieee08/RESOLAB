@@ -147,7 +147,8 @@ const ReservationHistory = () => {
       Pending: 'bg-yellow-100 text-yellow-800',
       Approved: 'bg-blue-100 text-blue-800',
       Completed: 'bg-green-100 text-green-800',
-      Cancelled: 'bg-red-100 text-red-800'
+      Rejected: 'bg-red-100 text-red-800',
+      'Pending payment': 'bg-orange-100 text-orange-800'
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -498,24 +499,60 @@ const ReservationHistory = () => {
               </TabsContent>
             </Tabs>
 
-              <DialogFooter>
-                <div className="flex w-full justify-end gap-4">
-                  <Button
-                    variant="destructive"
-                    onClick={() => handleStatusUpdate(selectedReservation.id, 'Rejected')}
-                    disabled={selectedReservation.Status !== 'Pending'}
-                  >
-                    Reject Reservation
-                  </Button>
-                  <Button
-                    variant="default"
-                    onClick={() => handleStatusUpdate(selectedReservation.id, 'Approved')}
-                    disabled={selectedReservation.Status !== 'Pending'}
-                  >
-                    Accept Reservation
-                  </Button>
-                </div>
-              </DialogFooter>
+            <DialogFooter className="mt-6">
+              <div className="flex w-full justify-end gap-4">
+                {selectedReservation.Status === 'Pending' && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Cancelled')}
+                    >
+                      Reject Reservation
+                    </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Approved')}
+                    >
+                      Accept Reservation
+                    </Button>
+                  </>
+                )}
+                
+                {selectedReservation.Status === 'Approved' && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Cancelled')}
+                    >
+                      Cancel Reservation
+                    </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Pending payment')}
+                    >
+                      Mark as To Pay
+                    </Button>
+                  </>
+                )}
+
+                {selectedReservation.Status === 'Pending payment' && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Cancelled')}
+                    >
+                      Cancel Reservation
+                    </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Completed')}
+                    >
+                      Mark as Completed
+                    </Button>
+                  </>
+                )}
+              </div>
+            </DialogFooter>
             </div>
           )}
         </DialogContent>

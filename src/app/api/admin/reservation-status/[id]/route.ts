@@ -9,10 +9,31 @@ export async function PUT(
     const id = parseInt(params.id);
     const { status } = await req.json();
 
-    // Validate input
-    if (!['Approved', 'Rejected'].includes(status)) {
+    // Get current reservation to check valid transitions
+    const currentReservation = await prisma.utilReq.findUnique({
+      where: { id },
+      select: { Status: true }
+    });
+
+    if (!currentReservation) {
       return NextResponse.json(
-        { error: 'Invalid status. Must be either Approved or Cancelled' },
+        { error: 'Reservation not found' },
+        { status: 404 }
+      );
+    }
+
+    // Validate status transitions
+    const validTransitions = {
+      'Pending': ['Approved', 'Cancelled'],
+      'Approved': ['Pending payment', 'Cancelled'],
+      'Pending payment': ['Cancelled', 'Completed']
+    };
+
+    const allowedStatuses = validTransitions[currentReservation.Status as keyof typeof validTransitions];
+    
+    if (!allowedStatuses?.includes(status)) {
+      return NextResponse.json(
+        { error: `Invalid status transition from ${currentReservation.Status} to ${status}` },
         { status: 400 }
       );
     }
@@ -24,7 +45,7 @@ export async function PUT(
       },
       data: {
         Status: status,
-        DateofProcessing: new Date(), // Record when the status was updated
+        DateofProcessing: new Date(),
       },
       include: {
         accInfo: {
