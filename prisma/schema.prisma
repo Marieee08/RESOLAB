@@ -158,48 +158,61 @@ model BlockedDate {
 
 model EVCReservation {
   id              Int              @id @default(autoincrement())
-  // ControlNo       Int?
+  EVCStatus       String               @default("Pending")
+
+  // Lab Reservation
+  ControlNo       Int?
   LvlSec          String?
   NoofStudents    Int?
   Subject         String?
-  Topic           String?
   Teacher         String?
-  LabDate      DateTime?       // Make new model for multiple dates
-  TimeofUse    DateTime?       //connect ^^
-  NeededMaterials NeededMaterial[] @relation(name: "EVCReservationtoNeededMaterial") //One-to-many
-  ReceivedBy      String?
-  ReceivedDate    DateTime?
+  Topic           String?
+  LabDates        LabDate[]       @relation(name: "EVCReservationtoLabDate") //One-to-many
+  DateRequested   DateTime?        @default(now())
   EVCStudents     EVCStudent[]     @relation(name: "EVCReservationtoEVCStudent") //One-to-many
-  InspectedBy     String?
-  InspectedDate   DateTime?
-  StudentSig      Bytes?
-  DateRequested   DateTime?
-  TeacherSig      Bytes?
-  EVCApproval     Boolean?
-  accInfoId       Int? //Foreign key for one-to-many relationship
+  // UserSig         Bytes?           // NOT SURE
+  // TeacherSig      Bytes?           // NOT SURE
+  ApprovedBy      String?
+  
+  // Lab Request
+  SchoolYear      Int?
+  NeededMaterials NeededMaterial[] @relation(name: "EVCReservationtoNeededMaterial") //One-to-many
+  ReceivedBy      String?           // Filled by Admin after operations
+  ReceivedDate    DateTime?         // Filled by Admin after operations
+  InspectedBy     String?           // Filled by Admin after operations
+  InspectedDate   DateTime?         // Filled by Admin after operations
+  
+  accInfoId       Int?              //Foreign key for one-to-many relationship
   accInfo         AccInfo?         @relation(name: "AccInfoToEVCReservation", fields: [accInfoId], references: [id])
 }
 
-// Part of EVC Reservation
+// Next 3 are part of EVC Reservation
 
-model NeededMaterial {
-  id          Int             @id @default(autoincrement())
-  Item        String?
-  ItemQty     Int?
-  Description String?
-  Issued      String? //CHECK
-  Returned    String? //CHECK
-  evcId       Int? //Foreign key for one-to-many relationship
-  evc         EVCReservation? @relation(name: "EVCReservationtoNeededMaterial", fields: [evcId], references: [id])
+model LabDate {
+  id        Int       @id @default(autoincrement())
+  LabDay    Int?
+  LabStart DateTime?
+  LabEnd   DateTime?
+  evcId       Int?            //Foreign key for one-to-many relationship
+  evc         EVCReservation? @relation(name: "EVCReservationtoLabDate", fields: [evcId], references: [id])
 }
-
-// Also part of EVC Reservation
 
 model EVCStudent {
   id       Int             @id @default(autoincrement())
   Students String?
   evcId    Int? //Foreign key for one-to-many relationship
   evc      EVCReservation? @relation(name: "EVCReservationtoEVCStudent", fields: [evcId], references: [id])
+}
+
+model NeededMaterial {
+  id          Int             @id @default(autoincrement())
+  Item        String?
+  ItemQty     Int?
+  Description String?
+  Issued      String?         // Filled by Admin after operations
+  Returned    String?         // Filled by Admin after operations
+  evcId       Int? //Foreign key for one-to-many relationship
+  evc         EVCReservation? @relation(name: "EVCReservationtoNeededMaterial", fields: [evcId], references: [id])
 }
 
 // To be filled by Admin per machine used
