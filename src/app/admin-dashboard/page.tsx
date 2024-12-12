@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useUser } from "@clerk/nextjs";
-import ReservationManagement from '@/components/admin/reservation-table';
+import ReservationHistory from '@/components/admin/reservation-history';
 import TestCalendar from '@/components/admin-functions/admin-calendar';
 import { format } from 'date-fns';
 import RoleGuard from '@/components/auth/role-guard';
@@ -59,7 +59,7 @@ const DashboardAdmin = () => {
   
     fetchUserRole();
   }, [user, isLoaded]);
-  
+
   return (
     <RoleGuard allowedRoles={['ADMIN']}>
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
@@ -224,7 +224,7 @@ const DashboardAdmin = () => {
           <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Dashboard</h2>
           <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
           <TestCalendar />
-          <ReservationManagement/>
+          <ReservationHistory/>
             
           </div>
         </main>
