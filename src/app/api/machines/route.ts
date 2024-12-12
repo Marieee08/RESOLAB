@@ -1,39 +1,48 @@
 // app/api/machines/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';  
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    console.log('Received service POST request:', body);
+    console.log('Received machine POST request:', body);
 
-    if (!body.Service || !body.machineId) {
+    // Validate required fields
+    if (!body.Machine || !body.Desc) {
       return NextResponse.json(
-        { error: 'Service name and machineId are required' }, 
+        { error: 'Machine name and description are required' }, 
         { status: 400 }
       );
     }
 
-    const newService = await prisma.service.create({
+    const newMachine = await prisma.machine.create({
       data: {
-        Service: body.Service.trim(),
-        machineId: body.machineId
+        Machine: body.Machine,
+        Image: body.Image || '',
+        Desc: body.Desc,
+        Link: body.Link,
+        isAvailable: body.isAvailable ?? true,
+        Costs: body.Costs,
+        Services: body.Services ? {
+          create: body.Services.map((service: any) => ({
+            Service: service.Service.trim()
+          }))
+        } : undefined
       }
     });
 
-    console.log('Created service:', newService);
+    console.log('Created machine:', newMachine);
 
-    return NextResponse.json(newService, { 
+    return NextResponse.json(newMachine, { 
       status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
-    console.error('Service Creation Error:', error);
+    console.error('Machine Creation Error:', error);
     return NextResponse.json(
       { 
-        error: 'Failed to create service',
+        error: 'Failed to create machine',
         details: error instanceof Error ? error.message : 'Unknown error'
       }, 
       { status: 500 }

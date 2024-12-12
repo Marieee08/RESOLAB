@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    console.log('Received service creation request:', body);
+    console.log('Received service POST request:', body);
 
     // Validate required fields
     if (!body.Service || !body.machineId) {
@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create service
     const newService = await prisma.service.create({
       data: {
         Service: body.Service.trim(),
@@ -53,14 +52,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Service Creation Error:', error);
-    
     return NextResponse.json(
       { 
         error: 'Failed to create service',
-        details: error instanceof Error ? {
-          message: error.message,
-          name: error.name
-        } : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error'
       }, 
       { status: 500 }
     );
@@ -68,31 +63,34 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const machineId = searchParams.get('machineId');
-
-  if (!machineId) {
-    return NextResponse.json(
-      { error: 'Machine ID is required' }, 
-      { status: 400 }
-    );
-  }
-
   try {
+    const { searchParams } = new URL(request.url);
+    const machineId = searchParams.get('machineId');
+
+    if (!machineId) {
+      return NextResponse.json(
+        { error: 'Machine ID is required' }, 
+        { status: 400 }
+      );
+    }
+
     const deleteResult = await prisma.service.deleteMany({
-      where: { machineId }
+      where: { machineId: machineId }
     });
 
+    console.log('Deleted services:', deleteResult);
+
+    return NextResponse.json(deleteResult, { 
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    console.error('Service Deletion Error:', error);
     return NextResponse.json(
       { 
-        message: 'Services deleted successfully', 
-        count: deleteResult.count 
+        error: 'Failed to delete services',
+        details: error instanceof Error ? error.message : 'Unknown error'
       }, 
-      { status: 200 }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Unable to delete services', details: error.message }, 
       { status: 500 }
     );
   }
