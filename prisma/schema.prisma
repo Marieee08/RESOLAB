@@ -15,6 +15,7 @@ model Machine {
   Machine     String
   Image       String
   Desc        String
+  Instructions  String?
   Link        String?
   isAvailable Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -173,8 +174,8 @@ model EVCReservation {
   Subject         String?
   Topic           String?
   Teacher         String?
-  EVCLabDate      DateTime?       // Make new model for multiple dates
-  EVCTimeofUse    DateTime?
+  LabDate      DateTime?       // Make new model for multiple dates
+  TimeofUse    DateTime?       //connect ^^
   NeededMaterials NeededMaterial[] @relation(name: "EVCReservationtoNeededMaterial") //One-to-many
   ReceivedBy      String?
   ReceivedDate    DateTime?
