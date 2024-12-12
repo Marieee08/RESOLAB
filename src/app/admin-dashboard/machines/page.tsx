@@ -57,25 +57,28 @@ import RoleGuard from '@/components/auth/role-guard';
     const [userRole, setUserRole] = useState<string>("Loading...");
     const formattedDate = format(today, 'EEEE, dd MMMM yyyy');
 
+      // useEffect to user role
     useEffect(() => {
-      const checkUserRole = async () => {
-        if (!user) {
+      const fetchUserRole = async () => {
+        if (!isLoaded || !user) {
           setUserRole("Not logged in");
           return;
         }
+
         try {
-          const publicMetadata = user.publicMetadata;
-          const role = publicMetadata.role || "USER";
-          setUserRole(role as string);
+          const response = await fetch('/api/auth/check-roles');
+          if (!response.ok) {
+            throw new Error('Failed to fetch role');
+          }
+          const data = await response.json();
+          setUserRole(data.role || "No role assigned");
         } catch (error) {
           console.error("Error fetching user role:", error);
           setUserRole("Error fetching role");
         }
       };
-    
-      if (isLoaded) {
-        checkUserRole();
-      }
+
+      fetchUserRole();
     }, [user, isLoaded]);
 
     const handleEditPermissions = (userId: string) => {

@@ -36,27 +36,30 @@ const DashboardAdmin = () => {
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
 
-  useEffect(() => {
-    const checkUserRole = async () => {
-      if (!user) {
+   // useEffect to user role
+   useEffect(() => {
+    const fetchUserRole = async () => {
+      if (!isLoaded || !user) {
         setUserRole("Not logged in");
         return;
       }
+  
       try {
-        const publicMetadata = user.publicMetadata;
-        const role = publicMetadata.role || "USER";
-        setUserRole(role as string);
+        const response = await fetch('/api/auth/check-roles');
+        if (!response.ok) {
+          throw new Error('Failed to fetch role');
+        }
+        const data = await response.json();
+        setUserRole(data.role || "No role assigned");
       } catch (error) {
         console.error("Error fetching user role:", error);
         setUserRole("Error fetching role");
       }
     };
   
-    if (isLoaded) {
-      checkUserRole();
-    }
+    fetchUserRole();
   }, [user, isLoaded]);
-
+  
   return (
     <RoleGuard allowedRoles={['ADMIN']}>
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
