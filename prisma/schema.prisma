@@ -111,6 +111,8 @@ model UtilReq {
   CitizenSatisfaction  CitizenSatisfaction? @relation(name: "UtilReqToCitizenSatisfaction") //One-to-one
   accInfoId            Int?                 //Foreign key for one-to-many relationship
   accInfo              AccInfo?             @relation(name: "AccInfoToUtilReq", fields: [accInfoId], references: [id])
+  ReceiptNumber       String?
+  PaymentDate        DateTime?
 }
 
 // 3 models below are part of Utilization Request
