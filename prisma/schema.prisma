@@ -83,9 +83,9 @@ model BusinessInfo {
   CompanyZipcode      Int?
   CompanyPhoneNum     String?
   CompanyMobileNum    String?
-  Manufactured        String? //THIS ONE
-  ProductionFrequency String? //THIS ONE
-  Bulk                String? //THIS ONE
+  //Manufactured        String?
+  //ProductionFrequency String?
+  //Bulk                String?
   accInfoId           Int     @unique //Foreign key for one-to-one relationship
   accInfo             AccInfo @relation(name: "AccInfoToBusinessInfo", fields: [accInfoId], references: [id])
 }
@@ -95,53 +95,43 @@ model BusinessInfo {
 model UtilReq {
   id                   Int                  @id @default(autoincrement())
   Status               String               @default("Pending")
-  ProductsManufactured String? //THIS ONE
-  BulkofCommodity      String? //THIS ONE
-  ProcessInfos         ProcessInfo[]        @relation(name: "UtilReqToProcessInfo") //One-to-many
   RequestDate          DateTime?            @default(now())
   UtilTimes            UtilTime[]           @relation(name: "UtilReqToUtilTime") //One-to-many
-  EndDate              DateTime?
+  UserServices         UserService[]        @relation(name: "UtilReqToUserService") //One-to-many
+  TotalAmntDue         Decimal?
+  BulkofCommodity      String?
+  UserTools            UserTool[]           @relation(name: "UtilReqToUserTool") //One-to-many
   DateofProcessing     DateTime?
   Processedby          String?
-  UtilReqApproval      Boolean?
   MachineUtilizations  MachineUtilization[] @relation(name: "UtilReqToMachineUtilization") //One-to-many
   CustomerFeedback     CustomerFeedback?    @relation(name: "UtilReqToCustomerFeedback") //One-to-one
   EmployeeEvaluation   EmployeeEvaluation?  @relation(name: "UtilReqToEmployeeEvaluation") //One-to-one
   JobandPayment        JobandPayment?       @relation(name: "UtilReqToJobandPayment") //One-to-one
   ClientSatisfaction   ClientSatisfaction?  @relation(name: "UtilReqToClientSatisfaction") //One-to-one
   CitizenSatisfaction  CitizenSatisfaction? @relation(name: "UtilReqToCitizenSatisfaction") //One-to-one
-  accInfoId            Int? //Foreign key for one-to-many relationship
+  accInfoId            Int?                 //Foreign key for one-to-many relationship
   accInfo              AccInfo?             @relation(name: "AccInfoToUtilReq", fields: [accInfoId], references: [id])
 }
 
-// Part of Utilization Request
-
-model ProcessInfo {
-  id           Int      @id @default(autoincrement())
-  AvailedServices         AvailedService[]        @relation(name: "ProcessInfoToAvailedService") //One-to-many
-  UserTools             UserTool[]        @relation(name: "ProcessInfoToUserTool") //One-to-many
-  utilReqId             Int? //Foreign key for one-to-many relationship
-  utilReq      UtilReq? @relation(name: "UtilReqToProcessInfo", fields: [utilReqId], references: [id])
-}
+// 3 models below are part of Utilization Request
 
 model UserTool {
   id          String   @id @default(cuid())
   ToolUser        String
   ToolQuantity    Int
-  processInfoId        Int? //Foreign key for one-to-many relationship
-  processInfo          ProcessInfo? @relation(name: "ProcessInfoToUserTool", fields: [processInfoId], references: [id])
+  utilReqId             Int? //Foreign key for one-to-many relationship
+  utilReq      UtilReq? @relation(name: "UtilReqToUserTool", fields: [utilReqId], references: [id])
 }
 
-model AvailedService {
+model UserService {
   id              String   @id @default(cuid())
   ServiceAvail         String
   EquipmentAvail       String
   CostsAvail           Decimal?
-  processInfoId        Int? //Foreign key for one-to-many relationship
-  processInfo          ProcessInfo? @relation(name: "ProcessInfoToAvailedService", fields: [processInfoId], references: [id])
+  MinsAvail            Decimal? 
+  utilReqId             Int? //Foreign key for one-to-many relationship
+  utilReq      UtilReq? @relation(name: "UtilReqToUserService", fields: [utilReqId], references: [id])
 }
-
-// Also part of Utilization Request
 
 model UtilTime {
   id        Int       @id @default(autoincrement())
@@ -351,11 +341,6 @@ model JobandPayment {
   Date           DateTime?
   ClientProfile  String?
   ProjDesc       String?
-  Services       String?
-  Minutes        Decimal?
-  Costpermin     Decimal?
-  TotalCost      Decimal?
-  TotalAmntDue   Decimal?
   CompletionDate DateTime? @default(now())
   utilReqId      Int?      @unique //Foreign key for one-to-one relationship
   utilReq        UtilReq?  @relation(name: "UtilReqToJobandPayment", fields: [utilReqId], references: [id])
