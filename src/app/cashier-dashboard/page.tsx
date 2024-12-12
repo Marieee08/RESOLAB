@@ -56,8 +56,6 @@ interface DetailedReservation {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'Pending':
-      return 'bg-yellow-100 text-yellow-800';
     case 'Approved':
       return 'bg-blue-100 text-blue-800';
     case 'Completed':
@@ -185,7 +183,7 @@ const DashboardCashier = () => {
               <Link href="/" className="font-medium text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
                 Home
               </Link>
-              <Link href="/services" className="font-medium text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
+              <Link href="/user-services" className="font-medium text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
                 Services
               </Link>
               <Link href="/contact" className="font-medium text-black px-4 py-2 rounded-full hover:bg-[#d5d7e2] transition duration-300">
