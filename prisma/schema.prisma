@@ -160,13 +160,13 @@ model BlockedDate {
 
 model EVCReservation {
   id              Int              @id @default(autoincrement())
-  ControlNo       Int?
+  // ControlNo       Int?
   LvlSec          String?
   NoofStudents    Int?
   Subject         String?
   Topic           String?
   Teacher         String?
-  EVCLabDate      DateTime?
+  EVCLabDate      DateTime?       // Make new model for multiple dates
   EVCTimeofUse    DateTime?
   NeededMaterials NeededMaterial[] @relation(name: "EVCReservationtoNeededMaterial") //One-to-many
   ReceivedBy      String?
