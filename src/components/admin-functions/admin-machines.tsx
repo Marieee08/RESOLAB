@@ -24,7 +24,6 @@ export default function AdminServices() {
   const [editingMachine, setEditingMachine] = useState<Machine | null>(null);
   const [formData, setFormData] = useState<Partial<Machine>>({
     isAvailable: true,
-    Costs: 0,
     Services: [{ Service: '' }]
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -250,6 +249,8 @@ export default function AdminServices() {
     try {
       // Image upload logic
       let imageUrl = imagePreview; // Use existing image if no new upload
+      
+      // If a new file is selected, upload it
       if (imageFile) {
         imageUrl = await handleImageUpload();
         
@@ -257,6 +258,18 @@ export default function AdminServices() {
         if (!imageUrl) {
           alert('Image upload failed. Please try again.');
           return;
+        }
+      }
+  
+      // If editing an existing machine and the image has changed
+      if (editingMachine && editingMachine.Image !== imageUrl) {
+        try {
+          // Delete the old image
+          await fetch(`/api/machines/upload?imagePath=${encodeURIComponent(editingMachine.Image)}`, {
+            method: 'DELETE'
+          });
+        } catch (deleteError) {
+          console.warn('Failed to delete old image:', deleteError);
         }
       }
   
@@ -359,7 +372,7 @@ export default function AdminServices() {
       console.error('Main submission error:', mainError);
       alert(`An unexpected error occurred: ${mainError.message}`);
     }
-  }; 
+  };
 
   return (
     <main className="min-h-screen">
@@ -523,20 +536,21 @@ export default function AdminServices() {
 
         {/* Costs Input */}
         <div>
-          <label htmlFor="Costs" className="block text-sm font-medium text-gray-700">
-            Cost (PHP)
-          </label>
-          <input
-            type="number"
-            id="Costs"
-            name="Costs"
-            step="0.01"
-            min="0"
-            value={formData.Costs || 0}
-            onChange={handleInputChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-        </div>
+        <label htmlFor="Costs" className="block text-sm font-medium text-gray-700">
+          Cost (PHP)
+        </label>
+        <input
+          type="number"
+          id="Costs"
+          name="Costs"
+          step="0.01"
+          min="0"
+          value={formData.Costs || ''} // Changed to empty string when undefined
+          onChange={handleInputChange}
+          placeholder="Enter cost"
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        />
+      </div>
 
         {/* Services Input */}
         <div>
