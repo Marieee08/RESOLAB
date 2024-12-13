@@ -26,7 +26,7 @@ export default function Home() {
         </p>
         <h1 className="text-5xl md:text-7xl font-qanelas2">Innovate to</h1>
         <h2 className="block text-5xl md:text-7xl font-qanelas3 text-[#f5a237] mb-5">ELEVATE</h2>
-        <p className="text-md font-poppins1 mb-5">
+        <p className="text-md font-poppins1 mb-5"> 
           The PSHS-EVC fab lab is a small-scale workshop offering digital fabrication. A fab lab is typically equipped with an array of flexible
           computer-controlled tools that cover several different length scales and various materials with the aim to <span className="font-poppins2">make "almost anything".</span>
         </p>
@@ -126,7 +126,7 @@ export default function Home() {
     </div>
 
     <section id="machines" className="p-10 pt-20 pl-20 pr-20 pb-auto">
-        <p className="inline-block text-[#193d83] font-medium text-md ml-auto mb-2">
+        <p className="inline-block text-[#193d83] font-poppins1 text-md ml-auto mb-2">
           Here's what we can offer!</p>
           <h2 className="text-3xl font-bold mb-2 text-left font-qanelas2">Machines and Services</h2>
         <p className="text-lg mb-8 text-left font-poppins1 text-[#605e63]">Our FabLab is equipped with state-of-the-art tools and resources to support a wide range of projects and initiatives.</p>
@@ -178,7 +178,7 @@ export default function Home() {
           </div>
 
           <div className=" p-6 rounded-lg text-center align-middle pt-28">
-            <p className="inline-block text-[#193d83] font-medium text-md ml-auto mb-2">Don't worry, there's more!</p>
+            <p className="inline-block text-[#193d83] font-poppins1 text-md ml-auto mb-2">Don't worry, there's more!</p>
             <h3 className="text-3xl font-qanelas3 mb-1 text-[#0e4579]">Lorem Ipsum</h3>
             <p className="text-lg mb-4 font-figtree4">Visit our Machines and Services Page</p>
             <p className="text-md mb-10 font-poppins1 px-10">Our FabLab is equipped with state-of-the-art tools and resources to support a wide range of projects and initiatives. Whether you are an entrepreneur, student, or hobbyist, we provide the support and expertise to bring your ideas to life.</p>
@@ -187,13 +187,13 @@ export default function Home() {
         </div>
     </section>
 
-    <section id="about" className="bg-white py-20">
+    <section id="about" className="bg-[#f4f8fc] py-20">
         <div className="container mx-auto px-6 md:px-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left Column - Content */}
             <div className="space-y-8">
               <div>
-                <p className="text-[#f5a237] font-patrick text-xl mb-2">Who We Are</p>
+                <p className="text-[#f5a237] font-poppins1 text-lg mb-2">Who We Are</p>
                 <h2 className="text-4xl md:text-3xl font-qanelas3 mb-6">About Our Lab</h2>
                 <div className="w-20 h-1 bg-[#0e4579] rounded-full mb-8"></div>
               </div>
@@ -206,14 +206,14 @@ export default function Home() {
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-[#f1f1f8] p-6 rounded-xl">
+                <div className="bg-white p-6 rounded-xl shadow-lg">
                   <h3 className="font-qanelas2 text-xl mb-3">Our Mission</h3>
                   <p className="font-poppins1 text-gray-600">
                     To democratize access to digital fabrication tools and empower innovation 
                     in our community.
                   </p>
                 </div>
-                <div className="bg-[#f1f1f8] p-6 rounded-xl">
+                <div className="bg-white p-6 rounded-xl shadow-lg">
                   <h3 className="font-qanelas2 text-xl mb-3">Our Vision</h3>
                   <p className="font-poppins1 text-gray-600">
                     To be the premier hub for digital fabrication and technological innovation 
@@ -229,19 +229,19 @@ export default function Home() {
 
             {/* Right Column - Stats Grid */}
             <div className="grid grid-cols-2 gap-6">
-              <div className="bg-[#f1f1f8] p-8 rounded-xl text-center">
-                <span className="text-4xl font-qanelas3 text-[#0e4579] block mb-2">500+</span>
+              <div className="bg-white p-8 rounded-xl text-center shadow-lg">
+                <span className="text-4xl font-qanelas3 text-[#0e4579] block mb-2">100+</span>
                 <p className="font-poppins1 text-gray-600">Projects Completed</p>
               </div>
-              <div className="bg-[#f1f1f8] p-8 rounded-xl text-center">
-                <span className="text-4xl font-qanelas3 text-[#0e4579] block mb-2">1000+</span>
+              <div className="bg-white p-8 rounded-xl text-center shadow-lg">
+                <span className="text-4xl font-qanelas3 text-[#0e4579] block mb-2">500+</span>
                 <p className="font-poppins1 text-gray-600">Students Trained</p>
               </div>
-              <div className="bg-[#f1f1f8] p-8 rounded-xl text-center">
-                <span className="text-4xl font-qanelas3 text-[#0e4579] block mb-2">50+</span>
-                <p className="font-poppins1 text-gray-600">Partner Organizations</p>
+              <div className="bg-white p-8 rounded-xl text-center shadow-lg">
+                <span className="text-4xl font-qanelas3 text-[#0e4579] block mb-2">DTI</span>
+                <p className="font-poppins1 text-gray-600">Partnered with DTI</p>
               </div>
-              <div className="bg-[#f1f1f8] p-8 rounded-xl text-center">
+              <div className="bg-white p-8 rounded-xl text-center shadow-lg">
                 <span className="text-4xl font-qanelas3 text-[#0e4579] block mb-2">24/7</span>
                 <p className="font-poppins1 text-gray-600">Technical Support</p>
               </div>

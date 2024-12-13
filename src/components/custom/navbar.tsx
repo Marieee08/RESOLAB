@@ -133,7 +133,7 @@ const Navbar = () => {
               </SignInButton>
             </SignedOut>
             <SignedIn>
-              <UserButton showName />
+              <UserButton showName> </UserButton>
             </SignedIn>
           </div>
         </div>

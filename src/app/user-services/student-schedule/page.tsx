@@ -1,12 +1,13 @@
 'use client';
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import ProgressBar from '@/components/msme-forms/progress-bar';
 import Navbar from '@/components/custom/navbar';
 import ProcessInformation from '@/components/msme-forms/utilization-info';
 import ReviewSubmit from '@/components/msme-forms/review-submit';
+import { toast } from "@/components/ui/use-toast"
 
 
 const MAX_DATES = 5;
@@ -43,7 +44,34 @@ interface FormData {
  Tools: string;
  ToolsQty: number;
 
+ ControlNo?: number;
+ LvlSec: string;
+ NoofStudents: number;
+ Subject: string;
+ Teacher: string;
+ Topic: string;
+ SchoolYear: number;
  
+ // Needed Materials array
+ NeededMaterials: {
+   Item: string;
+   ItemQty: number;
+   Description: string;
+ }[];
+}
+
+interface Material {
+  Item: string;
+  ItemQty: number;
+  Description: string;
+}
+
+// Props interface for EVCInformation component
+interface EVCInformationProps {
+  formData: FormData;
+  updateFormData: (field: keyof FormData, value: any) => void;
+  nextStep: () => void;
+  prevStep: () => void;
 }
 
 
@@ -65,8 +93,55 @@ export default function Schedule() {
    Equipment: '',
    Tools: '',
    ToolsQty: 0,
- });
 
+   LvlSec: '',
+   NoofStudents: 0,
+   Subject: '',
+   Teacher: '',
+   Topic: '',
+   SchoolYear: new Date().getFullYear(),
+   NeededMaterials: []
+ });
+ 
+ interface BlockedDate {
+  id: string;
+  date: string;
+}
+
+interface CalendarDate extends Date {}
+
+const [blockedDates, setBlockedDates] = useState<CalendarDate[]>([]);
+
+ const fetchBlockedDates = async () => {
+  try {
+    const response = await fetch('/api/blocked-dates');
+    const data = await response.json();
+    const dates = data.map((item: BlockedDate) => {
+      // Create date at noon to avoid timezone issues
+      const date = new Date(item.date);
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+    });
+    setBlockedDates(dates);
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Failed to fetch blocked dates",
+      variant: "destructive",
+    });
+  }
+};
+
+useEffect(() => {
+  fetchBlockedDates();
+}, []);
+
+const isDateBlocked = (date: Date) => {
+  return blockedDates.some(blockedDate => 
+    date.getFullYear() === blockedDate.getFullYear() &&
+    date.getMonth() === blockedDate.getMonth() &&
+    date.getDate() === blockedDate.getDate()
+  );
+};
 
  const updateFormData: UpdateFormData = (field, value) => {
    setFormData(prevData => ({ ...prevData, [field]: value }));
@@ -74,54 +149,180 @@ export default function Schedule() {
   const nextStep = () => setStep(prevStep => prevStep + 1);
  const prevStep = () => setStep(prevStep => prevStep - 1);
 
+ function EVCInformation({ formData, updateFormData, nextStep, prevStep }: EVCInformationProps) {
+  const [materials, setMaterials] = useState<Material[]>(formData.NeededMaterials || []);
 
- const renderStep = () => {
-   switch(step) {
-     case 1:
-       return (
-         <DateTimeSelection
-           formData={formData}
-           setFormData={setFormData}
-           nextStep={nextStep}
-         />
-       );
-       case 2:
-         return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
-       case 3:
-         return <ReviewSubmit formData={formData} prevStep={prevStep} updateFormData={function (field: keyof FormData, value: string | number | { date: Date; startTime: string | null; endTime: string | null; }[]): void {
-           throw new Error('Function not implemented.');
-         } } nextStep={function (): void {
-           throw new Error('Function not implemented.');
-         } } />;
-       default:
-         return (
-           <DateTimeSelection
-             formData={formData}
-             setFormData={setFormData}
-             nextStep={nextStep}
-           />
-       );
-   }
- };
+  const addMaterial = () => {
+    setMaterials([...materials, { Item: '', ItemQty: 0, Description: '' }]);
+    updateFormData('NeededMaterials', [...materials, { Item: '', ItemQty: 0, Description: '' }]);
+  };
+
+  const updateMaterial = (index: number, field: keyof Material, value: string | number) => {
+    const updatedMaterials = materials.map((material, i) => {
+      if (i === index) {
+        return { ...material, [field]: value };
+      }
+      return material;
+    });
+    setMaterials(updatedMaterials);
+    updateFormData('NeededMaterials', updatedMaterials);
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto mt-8">
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium mb-1">Level/Section</label>
+            <input
+              type="text"
+              className="w-full border rounded-md p-2"
+              value={formData.LvlSec}
+              onChange={(e) => updateFormData('LvlSec', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Number of Students</label>
+            <input
+              type="number"
+              className="w-full border rounded-md p-2"
+              value={formData.NoofStudents}
+              onChange={(e) => updateFormData('NoofStudents', parseInt(e.target.value))}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium mb-1">Subject</label>
+            <input
+              type="text"
+              className="w-full border rounded-md p-2"
+              value={formData.Subject}
+              onChange={(e) => updateFormData('Subject', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Teacher</label>
+            <input
+              type="text"
+              className="w-full border rounded-md p-2"
+              value={formData.Teacher}
+              onChange={(e) => updateFormData('Teacher', e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium mb-1">Topic</label>
+            <input
+              type="text"
+              className="w-full border rounded-md p-2"
+              value={formData.Topic}
+              onChange={(e) => updateFormData('Topic', e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">School Year</label>
+            <input
+              type="number"
+              className="w-full border rounded-md p-2"
+              value={formData.SchoolYear}
+              onChange={(e) => updateFormData('SchoolYear', parseInt(e.target.value))}
+            />
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Equipment and Materials</h3>
+          {materials.map((material, index) => (
+            <div key={index} className="grid grid-cols-3 gap-4 mb-4">
+              <input
+                type="text"
+                placeholder="Item"
+                className="border rounded-md p-2"
+                value={material.Item}
+                onChange={(e) => updateMaterial(index, 'Item', e.target.value)}
+              />
+              <input
+                type="number"
+                placeholder="Quantity"
+                className="border rounded-md p-2"
+                value={material.ItemQty}
+                onChange={(e) => updateMaterial(index, 'ItemQty', parseInt(e.target.value))}
+              />
+              <input
+                type="text"
+                placeholder="Description"
+                className="border rounded-md p-2"
+                value={material.Description}
+                onChange={(e) => updateMaterial(index, 'Description', e.target.value)}
+              />
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addMaterial}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Add Material
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-8 flex justify-between">
+        <button
+          onClick={prevStep}
+          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+        >
+          Previous
+        </button>
+        <button
+          onClick={nextStep}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const renderStep = () => {
+  switch(step) {
+    case 1:
+      return <DateTimeSelection formData={formData} setFormData={setFormData} nextStep={nextStep} isDateBlocked={isDateBlocked} />;
+    case 2:
+      return <ProcessInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
+    case 3:
+      return <EVCInformation formData={formData} updateFormData={updateFormData} nextStep={nextStep} prevStep={prevStep} />;
+    case 4:
+      return <ReviewSubmit formData={formData} prevStep={prevStep} updateFormData={updateFormData} nextStep={nextStep} />;
+    default:
+      return <DateTimeSelection formData={formData} setFormData={setFormData} nextStep={nextStep} isDateBlocked={isDateBlocked} />;
+  }
+};
 
 
- return (
-   <>
-     <Navbar />
-     <div className="container mx-auto p-4 mt-16">
-       <h1 className="text-2xl font-bold mb-4">Schedule a Service</h1>
-       <ProgressBar currentStep={step} totalSteps={3} />
-       {renderStep()}
-     </div>
-   </>
- );
+return (
+  <>
+    <Navbar />
+    <div className="container mx-auto p-4 mt-16">
+      <h1 className="text-2xl font-bold mb-4">Schedule a Service</h1>
+      <ProgressBar currentStep={step} totalSteps={4} />
+      {renderStep()}
+    </div>
+  </>
+);
 }
 
 
 interface DateTimeSelectionProps {
- formData: FormData;
- setFormData: React.Dispatch<React.SetStateAction<FormData>>;
- nextStep: () => void;
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  nextStep: () => void;
+  isDateBlocked: (date: Date) => boolean;  // Add this line
 }
 
 
@@ -132,13 +333,28 @@ function formatTime(hour: string, minute: string): string {
 }
 
 
-function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectionProps) {
- const [syncTimes, setSyncTimes] = useState(false);
- const [unifiedStartTime, setUnifiedStartTime] = useState<string | null>(null);
- const [unifiedEndTime, setUnifiedEndTime] = useState<string | null>(null);
- const [errors, setErrors] = useState<string[]>([]);
+function DateTimeSelection({ formData, setFormData, nextStep, isDateBlocked }: DateTimeSelectionProps) {
+  const [syncTimes, setSyncTimes] = useState(false);
+  const [unifiedStartTime, setUnifiedStartTime] = useState<string | null>(null);
+  const [unifiedEndTime, setUnifiedEndTime] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
 
+  const isRegularDisabled = (date: Date) => {
+    const today = new Date();
+    const oneMonthLater = new Date();
+    oneMonthLater.setMonth(today.getMonth() + 1);
+    today.setHours(0, 0, 0, 0);
+    oneMonthLater.setHours(0, 0, 0, 0);
 
+    if (date < today || date > oneMonthLater || date.getDay() === 0 || date.getDay() === 6) {
+      return true;
+    }
+
+    const dateString = date.toDateString();
+    const isAlreadySelected = formData.days.some(day => new Date(day.date).toDateString() === dateString);
+    return !isAlreadySelected && formData.days.length >= MAX_DATES;
+  };
+  
  const validateTimes = () => {
    const newErrors: string[] = [];
 
@@ -357,7 +573,6 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
 
 
  return (
-  
    <div className="max-w-6xl mx-auto">
      <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
      <div className="grid grid-cols-2 gap-6 mt-6">
@@ -377,7 +592,7 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
                addNewDay(selectedDay);
              }
            }}
-           disabled={isDateDisabled}
+           disabled={(date) => isDateDisabled(date) || isDateBlocked(date)}
            className="w-full h-full"
          />
        </div>
