@@ -1,12 +1,13 @@
 'use client';
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import ProgressBar from '@/components/msme-forms/progress-bar';
 import Navbar from '@/components/custom/navbar';
 import ProcessInformation from '@/components/msme-forms/utilization-info';
 import ReviewSubmit from '@/components/msme-forms/review-submit';
+import { toast } from "@/components/ui/use-toast"
 
 
 const MAX_DATES = 5;
@@ -64,7 +65,46 @@ export default function Schedule() {
    Tools: '',
    ToolsQty: 0,
  });
+ 
+ interface BlockedDate {
+  id: string;
+  date: string;
+}
 
+interface CalendarDate extends Date {}
+
+const [blockedDates, setBlockedDates] = useState<CalendarDate[]>([]);
+
+ const fetchBlockedDates = async () => {
+  try {
+    const response = await fetch('/api/blocked-dates');
+    const data = await response.json();
+    const dates = data.map((item: BlockedDate) => {
+      // Create date at noon to avoid timezone issues
+      const date = new Date(item.date);
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+    });
+    setBlockedDates(dates);
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Failed to fetch blocked dates",
+      variant: "destructive",
+    });
+  }
+};
+
+useEffect(() => {
+  fetchBlockedDates();
+}, []);
+
+const isDateBlocked = (date: Date) => {
+  return blockedDates.some(blockedDate => 
+    date.getFullYear() === blockedDate.getFullYear() &&
+    date.getMonth() === blockedDate.getMonth() &&
+    date.getDate() === blockedDate.getDate()
+  );
+};
 
  const updateFormData: UpdateFormData = (field, value) => {
    setFormData(prevData => ({ ...prevData, [field]: value }));
@@ -81,6 +121,7 @@ export default function Schedule() {
            formData={formData}
            setFormData={setFormData}
            nextStep={nextStep}
+           isDateBlocked={isDateBlocked}
          />
        );
        case 2:
@@ -97,6 +138,7 @@ export default function Schedule() {
              formData={formData}
              setFormData={setFormData}
              nextStep={nextStep}
+             isDateBlocked={isDateBlocked}
            />
        );
    }
@@ -117,9 +159,10 @@ export default function Schedule() {
 
 
 interface DateTimeSelectionProps {
- formData: FormData;
- setFormData: React.Dispatch<React.SetStateAction<FormData>>;
- nextStep: () => void;
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  nextStep: () => void;
+  isDateBlocked: (date: Date) => boolean; // Add this line
 }
 
 
@@ -130,13 +173,28 @@ function formatTime(hour: string, minute: string): string {
 }
 
 
-function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectionProps) {
- const [syncTimes, setSyncTimes] = useState(false);
- const [unifiedStartTime, setUnifiedStartTime] = useState<string | null>(null);
- const [unifiedEndTime, setUnifiedEndTime] = useState<string | null>(null);
- const [errors, setErrors] = useState<string[]>([]);
+function DateTimeSelection({ formData, setFormData, nextStep, isDateBlocked }: DateTimeSelectionProps) {
+  const [syncTimes, setSyncTimes] = useState(false);
+  const [unifiedStartTime, setUnifiedStartTime] = useState<string | null>(null);
+  const [unifiedEndTime, setUnifiedEndTime] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
 
+  const isRegularDisabled = (date: Date) => {
+    const today = new Date();
+    const oneMonthLater = new Date();
+    oneMonthLater.setMonth(today.getMonth() + 1);
+    today.setHours(0, 0, 0, 0);
+    oneMonthLater.setHours(0, 0, 0, 0);
 
+    if (date < today || date > oneMonthLater || date.getDay() === 0 || date.getDay() === 6) {
+      return true;
+    }
+
+    const dateString = date.toDateString();
+    const isAlreadySelected = formData.days.some(day => new Date(day.date).toDateString() === dateString);
+    return !isAlreadySelected && formData.days.length >= MAX_DATES;
+  };
+  
  const validateTimes = () => {
    const newErrors: string[] = [];
 
@@ -374,7 +432,7 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
                addNewDay(selectedDay);
              }
            }}
-           disabled={isDateDisabled}
+           disabled={(date) => isDateDisabled(date) || isDateBlocked(date)}
            className="w-full h-full"
          />
        </div>
