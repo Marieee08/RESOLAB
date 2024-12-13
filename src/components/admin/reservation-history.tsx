@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, MoreHorizontal as MoreHorizontalIcon } from 'lucide-react';
 import {
   Table,
@@ -16,23 +16,88 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+
+interface UserService {
+  id: string;
+  ServiceAvail: string;
+  EquipmentAvail: string;
+  CostsAvail: number | null;
+  MinsAvail: number | null;
+}
+
+interface UserTool {
+  id: string;
+  ToolUser: string;
+  ToolQuantity: number;
+}
+
+interface UtilTime {
+  id: number;
+  DayNum: number | null;
+  StartTime: string | null;
+  EndTime: string | null;
+}
+
+interface DetailedReservation {
+  id: number;
+  Status: string;
+  RequestDate: string;
+  TotalAmntDue: number | null;
+  BulkofCommodity: string | null;
+  UserServices: UserService[];
+  UserTools: UserTool[];
+  UtilTimes: UtilTime[];
+  accInfo: {
+    Name: string;
+    email: string;
+    Role: string;
+    ClientInfo?: {
+      ContactNum: string;
+      Address: string;
+      City: string;
+      Province: string;
+      Zipcode: number;
+    };
+    BusinessInfo?: {
+      CompanyName: string;
+      BusinessOwner: string;
+      BusinessPermitNum: string;
+      TINNum: string;
+      CompanyIDNum: string;
+      CompanyEmail: string;
+      ContactPerson: string;
+      Designation: string;
+      CompanyAddress: string;
+      CompanyCity: string;
+      CompanyProvince: string;
+      CompanyZipcode: number;
+      CompanyPhoneNum: string;
+      CompanyMobileNum: string;
+      Manufactured: string;
+      ProductionFrequency: string;
+      Bulk: string;
+    };
+  };
+}
 
 type Reservation = {
   id: string;
   date: string;
   name: string;
   email: string;
-  status: 'Pending' | 'Approved' | 'Completed' | 'Cancelled';
+  status: string;
   role: string;
   service: string;
+  totalAmount: number;
 };
 
 const ReservationHistory = () => {
@@ -41,38 +106,34 @@ const ReservationHistory = () => {
   const [isCustomSelectOpen, setIsCustomSelectOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth());
-
-  // Generate array of years (current year -10 to +10 years)
+  const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<DetailedReservation | null>(null);
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
   
-  // Array of months
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  // Mock data
-  const reservations: Reservation[] = [
-    {
-      id: '1',
-      date: '2024-12-01',
-      name: 'John Doe',
-      email: 'john@example.com',
-      status: 'Completed',
-      role: 'MSME',
-      service: 'Laser Cutter'
-    },
-    {
-      id: '2',
-      date: '2024-12-02',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      status: 'Pending',
-      role: 'Student',
-      service: '3D Print'
-    }
-  ];
+  useEffect(() => {
+    const fetchReservations = async () => {
+      try {
+        const response = await fetch('/api/admin/reservation-history');
+        if (!response.ok) throw new Error('Failed to fetch reservations');
+        const data = await response.json();
+        setReservations(data);
+      } catch (error) {
+        console.error('Error fetching reservations:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReservations();
+  }, []);
 
   const handleDateSelect = (year: number, month: number) => {
     setSelectedYear(year);
@@ -86,7 +147,8 @@ const ReservationHistory = () => {
       Pending: 'bg-yellow-100 text-yellow-800',
       Approved: 'bg-blue-100 text-blue-800',
       Completed: 'bg-green-100 text-green-800',
-      Cancelled: 'bg-red-100 text-red-800'
+      Rejected: 'bg-red-100 text-red-800',
+      'Pending payment': 'bg-orange-100 text-orange-800'
     };
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
@@ -100,7 +162,18 @@ const ReservationHistory = () => {
     });
   };
 
-  // Filter reservations
+  const handleReviewClick = async (reservation: Reservation) => {
+    try {
+      const response = await fetch(`/api/admin/reservation-review/${reservation.id}`);
+      if (!response.ok) throw new Error('Failed to fetch details');
+      const detailedData = await response.json();
+      setSelectedReservation(detailedData);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching reservation details:', error);
+    }
+  };
+
   const filteredReservations = reservations.filter(reservation => {
     const matchesTab = activeTab === 'all' || reservation.role.toLowerCase() === activeTab.toLowerCase();
     
@@ -115,6 +188,45 @@ const ReservationHistory = () => {
            reservationDate.getFullYear() === filterYear &&
            reservationDate.getMonth() === filterMonth - 1;
   });
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center p-12">Loading...</div>;
+  }
+
+
+  const handleStatusUpdate = async (reservationId: number, newStatus: 'Approved' | 'Cancelled') => {
+    try {
+      const response = await fetch(`/api/admin/reservation-status/${reservationId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update status');
+
+      // Update the reservations list with the new status
+      setReservations(prevReservations =>
+        prevReservations.map(res =>
+          res.id === String(reservationId)
+            ? { ...res, status: newStatus }
+            : res
+        )
+      );
+
+      // Update the selected reservation if it's open in the modal
+      if (selectedReservation && selectedReservation.id === reservationId) {
+        setSelectedReservation({ ...selectedReservation, Status: newStatus });
+      }
+
+      // Close the modal
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error updating reservation status:', error);
+    }
+  };
+
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -204,6 +316,7 @@ const ReservationHistory = () => {
             <TableHead>Status</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Service</TableHead>
+            <TableHead>Amount</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -222,25 +335,228 @@ const ReservationHistory = () => {
               </TableCell>
               <TableCell>{reservation.role}</TableCell>
               <TableCell>{reservation.service}</TableCell>
+              <TableCell>₱{reservation.totalAmount.toFixed(2)}</TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontalIcon className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem>Review</DropdownMenuItem>
-                      <DropdownMenuItem>Generate PDF</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onSelect={() => handleReviewClick(reservation)}>
+                      Review
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      Generate PDF
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-semibold">Reservation Details</DialogTitle>
+          </DialogHeader>
+          
+          {selectedReservation && (
+            <div className="space-y-6">
+               <Tabs defaultValue="reservation" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="reservation">Reservation</TabsTrigger>
+                <TabsTrigger value="personal">Personal Info</TabsTrigger>
+                <TabsTrigger value="business">Business Info</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="reservation" className="mt-4 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-medium text-gray-900">Request Date</h3>
+                    <p>{new Date(selectedReservation.RequestDate).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Status</h3>
+                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      getStatusColor(selectedReservation.Status)
+                    }`}>
+                      {selectedReservation.Status}
+                    </span>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-2">Services Information</h3>
+                  <div className="space-y-2">
+                    {selectedReservation.UserServices.map((service, index) => (
+                      <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                        <p><span className="text-gray-600">Service:</span> {service.ServiceAvail}</p>
+                        <p><span className="text-gray-600">Equipment:</span> {service.EquipmentAvail}</p>
+                        <p><span className="text-gray-600">Duration:</span> {service.MinsAvail} minutes</p>
+                        <p><span className="text-gray-600">Cost:</span> ₱{service.CostsAvail?.toFixed(2) || '0.00'}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h3 className="font-medium text-gray-900 mb-2">Schedule</h3>
+                  <div className="space-y-2">
+                    {selectedReservation.UtilTimes.map((time, index) => (
+                      <div key={index} className="bg-gray-50 p-3 rounded-lg">
+                        <p><span className="text-gray-600">Day {time.DayNum}:</span></p>
+                        <p className="ml-4">Start: {time.StartTime ? new Date(time.StartTime).toLocaleString() : 'Not set'}</p>
+                        <p className="ml-4">End: {time.EndTime ? new Date(time.EndTime).toLocaleString() : 'Not set'}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="personal" className="mt-4">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="font-medium text-gray-900">Name</h3>
+                      <p>{selectedReservation.accInfo.Name}</p>
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">Email</h3>
+                      <p>{selectedReservation.accInfo.email}</p>
+                    </div>
+                  </div>
+
+                  {selectedReservation.accInfo.ClientInfo && (
+                    <>
+                      <Separator />
+                      <div className="space-y-2">
+                        <h3 className="font-medium text-gray-900">Contact Information</h3>
+                        <p><span className="text-gray-600">Phone:</span> {selectedReservation.accInfo.ClientInfo.ContactNum}</p>
+                        <p><span className="text-gray-600">Address:</span> {selectedReservation.accInfo.ClientInfo.Address}</p>
+                        <p><span className="text-gray-600">City:</span> {selectedReservation.accInfo.ClientInfo.City}</p>
+                        <p><span className="text-gray-600">Province:</span> {selectedReservation.accInfo.ClientInfo.Province}</p>
+                        <p><span className="text-gray-600">Zipcode:</span> {selectedReservation.accInfo.ClientInfo.Zipcode}</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="business" className="mt-4">
+                {selectedReservation.accInfo.BusinessInfo ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="font-medium text-gray-900">Company Name</h3>
+                        <p>{selectedReservation.accInfo.BusinessInfo.CompanyName}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-gray-900">Business Owner</h3>
+                        <p>{selectedReservation.accInfo.BusinessInfo.BusinessOwner}</p>
+                      </div>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-gray-900">Business Details</h3>
+                      <p><span className="text-gray-600">Permit Number:</span> {selectedReservation.accInfo.BusinessInfo.BusinessPermitNum}</p>
+                      <p><span className="text-gray-600">TIN:</span> {selectedReservation.accInfo.BusinessInfo.TINNum}</p>
+                      <p><span className="text-gray-600">Company ID:</span> {selectedReservation.accInfo.BusinessInfo.CompanyIDNum}</p>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-gray-900">Company Contact</h3>
+                      <p><span className="text-gray-600">Email:</span> {selectedReservation.accInfo.BusinessInfo.CompanyEmail}</p>
+                      <p><span className="text-gray-600">Phone:</span> {selectedReservation.accInfo.BusinessInfo.CompanyPhoneNum}</p>
+                      <p><span className="text-gray-600">Mobile:</span> {selectedReservation.accInfo.BusinessInfo.CompanyMobileNum}</p>
+                      <p><span className="text-gray-600">Contact Person:</span> {selectedReservation.accInfo.BusinessInfo.ContactPerson}</p>
+                      <p><span className="text-gray-600">Designation:</span> {selectedReservation.accInfo.BusinessInfo.Designation}</p>
+                    </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <h3 className="font-medium text-gray-900">Production Information</h3>
+                      <p><span className="text-gray-600">Products Manufactured:</span> {selectedReservation.accInfo.BusinessInfo.Manufactured}</p>
+                      <p><span className="text-gray-600">Production Frequency:</span> {selectedReservation.accInfo.BusinessInfo.ProductionFrequency}</p>
+                      <p><span className="text-gray-600">Bulk Production:</span> {selectedReservation.accInfo.BusinessInfo.Bulk}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic">No business information available</p>
+                )}
+              </TabsContent>
+            </Tabs>
+
+            <DialogFooter className="mt-6">
+              <div className="flex w-full justify-end gap-4">
+                {selectedReservation.Status === 'Pending' && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Cancelled')}
+                    >
+                      Reject Reservation
+                    </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Approved')}
+                    >
+                      Accept Reservation
+                    </Button>
+                  </>
+                )}
+                
+                {selectedReservation.Status === 'Approved' && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Cancelled')}
+                    >
+                      Cancel Reservation
+                    </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Pending payment')}
+                    >
+                      Mark as To Pay
+                    </Button>
+                  </>
+                )}
+
+                {selectedReservation.Status === 'Pending payment' && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Cancelled')}
+                    >
+                      Cancel Reservation
+                    </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => handleStatusUpdate(selectedReservation.id, 'Completed')}
+                    >
+                      Mark as Completed
+                    </Button>
+                  </>
+                )}
+              </div>
+            </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -9,32 +9,60 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import RoleGuard from '@/components/auth/role-guard';
 
 
-interface Reservation {
-  id: number;
-  RequestDate: Date;
-  UtilReqApproval: boolean | null;
-  ProductsManufactured: string;
-  BulkofCommodity: string;
-  accInfo: {
-    name: string;
-    email: string;
-  };
-  ProcessInfos: Array<{
-    Equipment: string;
-    Tools: string;
-    ToolsQty: number;
-  }>;
-  UtilTimes: Array<{
-    StartTime: Date;
-    EndTime: Date;
-  }>;
+interface UserService {
+  id: string;
+  ServiceAvail: string;
+  EquipmentAvail: string;
+  CostsAvail: number | null;
+  MinsAvail: number | null;
 }
 
+interface UserTool {
+  id: string;
+  ToolUser: string;
+  ToolQuantity: number;
+}
+
+interface UtilTime {
+  id: number;
+  DayNum: number | null;
+  StartTime: Date | null;
+  EndTime: Date | null;
+}
+
+interface Reservation {
+  id: number;
+  Status: string;
+  RequestDate: Date;
+  BulkofCommodity: string | null;
+  UserServices: UserService[];
+  UserTools: UserTool[];
+  UtilTimes: UtilTime[];
+  accInfo: {
+    Name: string;
+    email: string;
+  };
+}
 
 const DashboardUser = () => {
   const { user, isLoaded } = useUser();
   const [userRole, setUserRole] = useState<string>("Loading...");
-
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Approved':
+        return 'bg-blue-100 text-blue-800';
+      case 'Completed':
+        return 'bg-green-100 text-green-800';
+      case 'Cancelled':
+        return 'bg-red-100 text-red-800';
+      case 'Pending payment':
+        return 'bg-orange-100 text-orange-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [orderDropdownOpen, setOrderDropdownOpen] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -99,8 +127,13 @@ const renderSection = (title: string, fields: { label: string, value: any }[]) =
 );
 
 
+const handleReviewClick = (reservation: Reservation) => {
+  setSelectedReservation(reservation);
+  setIsModalOpen(true);
+};
+
   return (
-    <RoleGuard allowedRoles={['MSME', 'STUDENT']}>
+    <RoleGuard allowedRoles={['MSME']}>
     <div className="flex h-screen overflow-hidden bg-[#f1f5f9]">
       <aside className={`absolute left-0 top-0 z-50 flex h-screen w-72 flex-col overflow-y-hidden bg-white duration-300 ease-linear lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
@@ -265,146 +298,141 @@ const renderSection = (title: string, fields: { label: string, value: any }[]) =
               <p className="text-xl font-bold text-[#143370]">Pending Orders</p>
               <p className="text-sm text-[#143370] mb-4">Here are your pending orders!</p>
               <div className="overflow-x-auto rounded-lg bg-blue-100 shadow-ld">
-              <table className="min-w-full divide-y divide-gray-200 rounded-xl">
-      <thead className="bg-gray-50">
-        <tr>
-          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200">
+                
+                <table className="min-w-full divide-y divide-gray-200 rounded-xl">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equipment</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {reservations.map((reservation) => (
+                      <tr key={reservation.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div>
+                              <div className="text-sm font-medium text-gray-500">
+                                {new Date(reservation.RequestDate).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(reservation.Status)}`}>
+                            {reservation.Status}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {reservation.UserServices.map(service => service.ServiceAvail).join(', ')}
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {reservation.UserServices.map(service => service.EquipmentAvail).join(', ')}
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-500">
+                          {reservation.accInfo.email}
+                        </td>
+
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <a
+                            href="#"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleReviewClick(reservation);
+                            }}
+                            className="ml-2 text-blue-600 hover:text-blue-900"
+                          >
+                            Review
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
 
 
-        {reservations.map((reservation) => (
-          <tr key={reservation.id}>
-            {/*Date*/}
-            <td className="px-6 py-4 whitespace-nowrap">
-              <div className="flex items-center">
-                <div>
-                  <div className="text-sm font-medium text-gray-500">
-                    {new Date(reservation.RequestDate).toLocaleDateString()}
-                  </div>
-                </div>
-              </div>
-            </td>
+            </div>
+            </div>
 
-            {/*Status*/}
-            <td className="px-4 py-4 whitespace-nowrap">
-              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                Pending
-              </span>
-            </td>
-
-            {/*Product*/}
-            <td className="px-4 py-4 whitespace-nowrap">
-              <div className="text-sm text-gray-900">
-                {reservation.ProductsManufactured}
-              </div>
-            </td>
-
+      
+        {/* Update the Review Modal content */}
+                
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-semibold">Review Reservation</DialogTitle>
+            </DialogHeader>
             
-            {/*Service*/}
-            <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">
-                  Machine
-              </div>
-            </td>
-
-
-
-            {/*Email*/}
-            <div className="px-6 py-4 whitespace-nowrap font-medium text-sm text-gray-500">
-                {reservation.accInfo.email}
-            </div>
-
-
-            {/*Review*/}
-
-            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <a href="#" 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleReviewClick(reservation);
-                }} 
-                className="ml-2 text-red-600 hover:text-red-900"
-              >
-                Review
-              </a>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-            </div>
-            </div>
-
-       {/* Review Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold">Review Reservation</DialogTitle>
-        </DialogHeader>
-          
-          {selectedReservation && (
-            <div className="mt-4 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-medium text-gray-900">Request Date</h3>
-                  <p>{new Date(selectedReservation.RequestDate).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Status</h3>
-                  <p>{selectedReservation.UtilReqApproval === true
-                      ? 'Approved'
-                      : selectedReservation.UtilReqApproval === false
-                      ? 'Rejected'
-                      : 'Pending'}</p>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-gray-900">Products Information</h3>
-                <div className="mt-2">
-                  <p><span className="text-gray-600">Products Manufactured:</span> {selectedReservation.ProductsManufactured}</p>
-                  <p><span className="text-gray-600">Bulk of Commodity:</span> {selectedReservation.BulkofCommodity}</p>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-gray-900">Schedule</h3>
-                <div className="mt-2">
-                  {selectedReservation.UtilTimes.map((time, index) => (
-                    <div key={index}>
-                      <p><span className="text-gray-600">Start:</span> {new Date(time.StartTime).toLocaleString()}</p>
-                      <p><span className="text-gray-600">End:</span> {new Date(time.EndTime).toLocaleString()}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-medium text-gray-900">Process Information</h3>
-                {selectedReservation.ProcessInfos.map((process, index) => (
-                  <div key={index} className="mt-2 space-y-2">
-                    <div>
-                      <p className="text-gray-600">Equipment</p>
-                      <p>{process.Equipment}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Tools</p>
-                      <p>{process.Tools}</p>
-                    </div>
+            {selectedReservation && (
+              <div className="mt-4 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-medium text-gray-900">Request Date</h3>
+                    <p>{new Date(selectedReservation.RequestDate).toLocaleDateString()}</p>
                   </div>
-                ))}
+                  <div>
+                    <h3 className="font-medium text-gray-900">Status</h3>
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(selectedReservation.Status)}`}>
+                      {selectedReservation.Status}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-medium text-gray-900">Services Information</h3>
+                  <div className="mt-2">
+                    <p><span className="text-gray-600">Services:</span> {selectedReservation.UserServices.map(service => service.ServiceAvail).join(', ')}</p>
+                    <p><span className="text-gray-600">Equipment:</span> {selectedReservation.UserServices.map(service => service.EquipmentAvail).join(', ')}</p>
+                    <p><span className="text-gray-600">Bulk of Commodity:</span> {selectedReservation.BulkofCommodity || 'Not specified'}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-medium text-gray-900">Schedule</h3>
+                  <div className="mt-2">
+                    {selectedReservation.UtilTimes.map((time, index) => (
+                      <div key={index} className="mb-2 p-2 bg-gray-50 rounded">
+                        <p><span className="text-gray-600">Day {time.DayNum}:</span></p>
+                        <p className="ml-4">Start: {time.StartTime ? new Date(time.StartTime).toLocaleString() : 'Not set'}</p>
+                        <p className="ml-4">End: {time.EndTime ? new Date(time.EndTime).toLocaleString() : 'Not set'}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-medium text-gray-900">Tools</h3>
+                  <div className="mt-2">
+                    {selectedReservation.UserTools.length > 0 ? (
+                      <div className="space-y-2">
+                        {selectedReservation.UserTools.map((tool, index) => (
+                          <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            <span className="text-gray-600">{tool.ToolUser}</span>
+                            <span className="font-medium">{tool.ToolQuantity} units</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No tools specified</p>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+            )}
+          </DialogContent>
+        </Dialog>
 
 
             <div className="bg-white rounded-lg text-blue-800 pl-4 py-4 mt-4 shadow-md border border-[#5e86ca]">
@@ -412,6 +440,8 @@ const renderSection = (title: string, fields: { label: string, value: any }[]) =
               <p className="text-sm text-[#143370] mb-4">Here's a summary of your previous transactions!</p>
             </div>
           </div>
+
+          
         </main>
       </div>
     </div>

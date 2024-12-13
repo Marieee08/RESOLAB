@@ -1,4 +1,3 @@
-// app/api/user/reservations/route.ts
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
@@ -30,8 +29,9 @@ export async function GET() {
         accInfoId: userAccount.id,
       },
       include: {
-        ProcessInfos: true,
+        UserServices: true,
         UtilTimes: true,
+        UserTools: true,
         accInfo: {
           select: {
             Name: true,
