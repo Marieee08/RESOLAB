@@ -42,6 +42,8 @@ interface FormData {
  Equipment: string;
  Tools: string;
  ToolsQty: number;
+
+ 
 }
 
 
@@ -355,6 +357,7 @@ function DateTimeSelection({ formData, setFormData, nextStep }: DateTimeSelectio
 
 
  return (
+  
    <div className="max-w-6xl mx-auto">
      <h2 className="text-xl font-semibold mb-4 mt-8">Select Dates and Times</h2>
      <div className="grid grid-cols-2 gap-6 mt-6">

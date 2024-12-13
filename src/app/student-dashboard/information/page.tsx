@@ -212,7 +212,7 @@ const DashboardUser = () => {
               </div>
             </div>
             <div className="bg-white p-4 rounded-xl border border-[#5e86ca]">
-              <h3 className="text-sm text-gray-500 mb-1">Grade Level</h3>
+              <h3 className="text-sm text-gray-500 mb-1">Grade Level and Section</h3>
               <div className="text-lg font-qanelas1 text-gray-800">
                 {loading ? (
                   <div className="animate-pulse bg-gray-200 h-7 w-3/4 rounded"/>
