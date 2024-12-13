@@ -253,7 +253,7 @@ import RoleGuard from '@/components/auth/role-guard';
             <main>
             <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
               <h2 className="text-[#143370] text-3xl font-bold font-qanelas3">Machine Management</h2>
-              <p className="text-sm text-[#143370] mb-4 font-poppins1">{formattedDate}</p>
+              <p className="text-sm text-[#143370] font-poppins1">{formattedDate}</p>
             </div>
             <div className="p-4 bg-white rounded-lg shadow-sm mx-auto max-w-[1200px] w-[95%]">
           <Tabs defaultValue="machines" className="w-full">

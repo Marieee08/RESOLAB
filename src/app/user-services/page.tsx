@@ -99,10 +99,17 @@ export default function Services() {
       >
         Schedule Service
       </Link>
-    </div>
-  </div>
-</div>
-
+          </div>
+        </div>
+      </div>
+      <Link 
+        href="/user-services/student-schedule" 
+        className="inline-block transition duration-700 
+          animate-[bounce_4s_infinite] hover:animate-none hover:scale-105
+          bg-[#193d83] text-white font-qanelas1 text-lg py-1 px-6 rounded-md hover:bg-[#2f61c2]"
+      >
+        Student Schedule
+      </Link>
       <div className="pt-40">
         <section className="container mx-auto px-10 pb-10 pt-4">
           <div className="flex justify-between items-center mb-4">
@@ -156,20 +163,20 @@ export default function Services() {
                     className="h-80 w-full object-cover rounded-lg mb-4" 
                   />
                   {machine.isAvailable && (
-                    <div className="absolute top-2 right-2 bg-[#1c62b5] text-white px-3 py-1 rounded-full text-sm font-medium">
+                    <div className="absolute top-2 right-2 mt-2 mr-1 bg-[#1c62b5] text-white px-3 py-1 rounded-full text-sm font-poppins1 shadow-lg ">
                       Available
                     </div>
                   )}
                 </div>
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-2xl font-bold">{machine.Machine}</h3>
+                  <h3 className="text-xl font-qanelas2">{machine.Machine}</h3>
                 </div>
-                <p className="text-gray-600 mb-4 line-clamp-3">
+                <p className="text-gray-600 mb-4 line-clamp-3 font-poppins1 text-md">
                   {machine.Desc}
                 </p>
                 <button
                   onClick={() => openModal(machine)}
-                  className={`w-full py-3 px-6 rounded-xl transition duration-300 flex items-center justify-center gap-2 ${
+                  className={`w-full py-3 px-6 rounded-full transition duration-300 flex items-center justify-center gap-2 font-poppins1 ${
                     !machine.isAvailable 
                       ? 'bg-gray-400 text-white opacity-50 cursor-not-allowed' 
                       : 'bg-[#1c62b5] text-white hover:bg-[#154c8f] hover:shadow-lg'
@@ -177,7 +184,7 @@ export default function Services() {
                   disabled={!machine.isAvailable}
                 >
                   {machine.isAvailable ? (
-                    <>Learn More</>
+                    < >Learn More</>
                   ) : (
                     <><AlertCircle size={20} /> Unavailable</>
                   )}
@@ -189,19 +196,42 @@ export default function Services() {
 
         {selectedMachine && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={closeModal}>
-            <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg relative" onClick={(e) => e.stopPropagation()}>
-              <img src={selectedMachine.Image} alt={selectedMachine.Machine} className="h-60 w-60 object-cover rounded-lg mb-4" />
-              <h3 className="text-2xl font-bold mb-4">{selectedMachine.Machine}</h3>
-              <p className="text-gray-700 mb-4">{selectedMachine.Desc}</p>
-              <a
-                href={selectedMachine.Link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline mb-4 block"
-              >
-                Watch Video
-              </a>
-              <button onClick={closeModal} className="bg-red-500 text-white py-2 px-4 rounded-full hover:bg-red-600 transition duration-300">Close</button>
+            <div 
+              className="bg-white rounded-lg shadow-lg w-full max-w-4xl relative flex overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Left column - Image */}
+              <div className="w-1/2 p-8 flex items-center justify-center bg-gray-50">
+                <img 
+                  src={selectedMachine.Image} 
+                  alt={selectedMachine.Machine} 
+                  className="h-80 w-full object-cover rounded-lg"
+                />
+              </div>
+
+              {/* Right column - Content */}
+              <div className="w-1/2 p-8 flex flex-col">
+              <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold mr-4 font-qanelas2">{selectedMachine.Machine}</h2>
+                  <button
+                    onClick={closeModal}
+                    className="text-gray-500 hover:text-gray-700 transition duration-300"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                <a
+                    href={selectedMachine.Link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline block mb-4"
+                  >
+                    Watch Video
+                  </a>
+                <p className="text-gray-700 mb-4 flex-grow font-poppins1">{selectedMachine.Desc}</p>
+                <div className="space-y-4">
+                </div>
+              </div>
             </div>
           </div>
         )}
