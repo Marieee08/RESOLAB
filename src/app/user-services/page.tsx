@@ -110,6 +110,15 @@ export default function Services() {
       >
         Student Schedule
       </Link>*/}
+
+      <Link 
+        href="/user-services/student-schedule" 
+        className="inline-block transition duration-700 
+          animate-[bounce_4s_infinite] hover:animate-none hover:scale-105
+          bg-[#193d83] text-white font-qanelas1 text-lg py-1 px-6 rounded-md hover:bg-[#2f61c2]"
+      >
+        Student Schedule
+      </Link>
       <div className="pt-40">
         <section className="container mx-auto px-10 pb-10 pt-4">
           <div className="flex justify-between items-center mb-4">
